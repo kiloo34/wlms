@@ -1,0 +1,58 @@
+import { Workspace } from '../types';
+import { WorkspaceCard } from './WorkspaceCard';
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface WorkspaceListProps {
+    workspaces: Workspace[];
+    isLoading: boolean;
+    onSelectWorkspace?: (id: string) => void;
+    onUpdateWorkspace?: (id: string, name: string) => Promise<void>;
+    onArchiveWorkspace?: (id: string) => Promise<void>;
+    canManage?: boolean;
+}
+
+export function WorkspaceList({ 
+    workspaces, 
+    isLoading, 
+    onSelectWorkspace,
+    onUpdateWorkspace,
+    onArchiveWorkspace,
+    canManage = false
+}: WorkspaceListProps) {
+    if (isLoading) {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-48 w-full rounded-xl" />
+                ))}
+            </div>
+        );
+    }
+
+    if (workspaces.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center p-12 text-center border rounded-xl bg-muted/20">
+                <h3 className="text-lg font-medium">No Workspaces Found</h3>
+                <p className="text-muted-foreground mt-2">
+                    You don't have any workspaces yet. Create one to get started.
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {workspaces.map((workspace) => (
+                <WorkspaceCard 
+                    key={workspace.id} 
+                    workspace={workspace} 
+                    onSelect={onSelectWorkspace}
+                    onUpdate={onUpdateWorkspace}
+                    onArchive={onArchiveWorkspace}
+                    canManage={canManage}
+                />
+            ))}
+        </div>
+    );
+}
+

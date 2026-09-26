@@ -1,0 +1,86 @@
+import { useUsers, useCreateUser, useAssignRole, useUpdateUser } from '../../hooks/use-users';
+import { useRoles } from '../../hooks/use-roles';
+import { useOrgUnits } from '../../hooks/use-org-units';
+import { Users, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { UserList } from './UserList';
+import { UserCreateDialog } from './UserCreateDialog';
+
+// This is a Smart Component
+// It handles Server State (React Query) and API interaction.
+export function UserManager() {
+    const { data: users, isLoading: isLoadingUsers } = useUsers();
+    const { data: roles, isLoading: isLoadingRoles } = useRoles();
+    const { data: orgUnits, isLoading: isLoadingOrgUnits } = useOrgUnits();
+    
+    const createUser = useCreateUser();
+    const assignRole = useAssignRole();
+    const updateUser = useUpdateUser();
+
+    if (isLoadingUsers || isLoadingRoles || isLoadingOrgUnits) {
+        return (
+            <div className="flex justify-center p-8">
+                <Loader2 className="animate-spin text-muted-foreground w-8 h-8" />
+            </div>
+        );
+    }
+
+    const handleCreate = async (payload: { name: string; email: string; password?: string }) => {
+        try {
+            await createUser.mutateAsync(payload);
+            toast.success('User created successfully');
+        } catch (error) {
+            toast.error('Failed to create user');
+            throw error;
+        }
+    };
+
+    const handleAssignRole = async (payload: { user_id: string; role_id: string }) => {
+        try {
+            await assignRole.mutateAsync(payload);
+            toast.success('Role assigned to user successfully');
+        } catch (error) {
+            toast.error('Failed to assign role');
+            throw error;
+        }
+    };
+
+    const handleUpdateUser = async (payload: { id: string; org_unit_id: string | null }) => {
+        try {
+            await updateUser.mutateAsync(payload);
+            toast.success('User updated successfully');
+        } catch (error) {
+            toast.error('Failed to update user');
+            throw error;
+        }
+    };
+
+    // Flatten orgUnits tree for the dropdown
+    const flattenUnits = (units: any[]): { id: string; name: string }[] => {
+        let result: { id: string; name: string }[] = [];
+        units.forEach(u => {
+            result.push({ id: u.id, name: u.name });
+            if (u.children?.length) {
+                result = [...result, ...flattenUnits(u.children)];
+            }
+        });
+        return result;
+    };
+    
+    const flatOrgUnits = flattenUnits(orgUnits || []);
+
+    return (
+        <div className="space-y-4">
+            <UserList 
+                users={users || []} 
+                roles={roles || []}
+                orgUnits={flatOrgUnits}
+                isAssigning={assignRole.isPending}
+                isUpdating={updateUser.isPending}
+                onAssignRole={handleAssignRole}
+                onUpdateUser={handleUpdateUser}
+            />
+        </div>
+    );
+}
+

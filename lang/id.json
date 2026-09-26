@@ -1,0 +1,21 @@
+{
+    "Welcome back": "Selamat datang kembali",
+    "Settings": "Pengaturan",
+    "Logout": "Keluar",
+    "Language": "Bahasa",
+    "Notifications": "Notifikasi",
+    "Mark all as read": "Tandai semua sudah dibaca",
+    "No notifications yet": "Belum ada notifikasi",
+    "Dashboard": "Beranda",
+    "Repository": "Repositori",
+    "Documentation": "Dokumentasi",
+    "You were assigned to issue :number": "Anda ditugaskan ke tiket #:number",
+    "New comment: :preview": "Komentar baru: :preview",
+    "Issue status changed": "Status tiket berubah",
+    "Sprint :name is now :state": "Sprint :name sekarang menjadi :state",
+    "New notification": "Notifikasi baru",
+    "Workspaces": "Ruang Kerja",
+    "Projects": "Proyek",
+    "Issues": "Tiket",
+    "Users": "Pengguna"
+}

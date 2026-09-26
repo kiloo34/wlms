@@ -1,0 +1,21 @@
+{
+    "Welcome back": "Welcome back",
+    "Settings": "Settings",
+    "Logout": "Logout",
+    "Language": "Language",
+    "Notifications": "Notifications",
+    "Mark all as read": "Mark all as read",
+    "No notifications yet": "No notifications yet",
+    "Dashboard": "Dashboard",
+    "Repository": "Repository",
+    "Documentation": "Documentation",
+    "You were assigned to issue :number": "You were assigned to issue #:number",
+    "New comment: :preview": "New comment: :preview",
+    "Issue status changed": "Issue status changed",
+    "Sprint :name is now :state": "Sprint :name is now :state",
+    "New notification": "New notification",
+    "Workspaces": "Workspaces",
+    "Projects": "Projects",
+    "Issues": "Issues",
+    "Users": "Users"
+}

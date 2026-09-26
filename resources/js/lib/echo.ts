@@ -1,0 +1,51 @@
+import axios from 'axios';
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+
+if (typeof window !== 'undefined') {
+    window.Pusher = Pusher;
+}
+
+export const initEcho = () => {
+    if (typeof window === 'undefined') return null;
+    
+    if (!window.Echo) {
+        window.Echo = new Echo({
+            broadcaster: 'reverb',
+            key: import.meta.env.VITE_REVERB_APP_KEY,
+            wsHost: import.meta.env.VITE_REVERB_HOST,
+            wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
+            wssPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
+            forceTLS: false,
+            enabledTransports: ['ws', 'wss'],
+            // Enable sanctum authorizer for private channels
+            authorizer: (channel: any, options: any) => {
+                return {
+                    authorize: (socketId: any, callback: any) => {
+                        axios.post('/broadcasting/auth', {
+                            socket_id: socketId,
+                            channel_name: channel.name
+                        })
+                        .then((response: any) => {
+                            callback(false, response.data);
+                        })
+                        .catch((error: any) => {
+                            callback(true, error);
+                        });
+                    }
+                };
+            }
+        });
+    }
+    
+    return window.Echo;
+};
+
+// Types for window
+declare global {
+    interface Window {
+        Pusher: any;
+        Echo: any;
+        axios: any;
+    }
+}

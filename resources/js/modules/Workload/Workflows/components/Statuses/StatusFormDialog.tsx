@@ -1,0 +1,80 @@
+import React, { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import type { Status, CreateStatusDto, UpdateStatusDto } from '../../types';
+
+interface StatusFormDialogProps {
+    status?: Status | null;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onSubmit: (payload: CreateStatusDto | UpdateStatusDto) => void;
+    isLoading?: boolean;
+}
+
+export function StatusFormDialog({ status, open, onOpenChange, onSubmit, isLoading }: StatusFormDialogProps) {
+    const [name, setName] = useState('');
+    const [category, setCategory] = useState('TODO');
+
+    useEffect(() => {
+        if (open) {
+            setName(status?.name || '');
+            setCategory(status?.category || 'TODO');
+        }
+    }, [open, status]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit({ name, slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, ""), category });
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{status ? 'Edit Status' : 'Create Status'}</DialogTitle>
+                    <DialogDescription>
+                        {status ? 'Make changes to the status here.' : 'Add a new status to your workspace.'}
+                    </DialogDescription>
+                </DialogHeader>
+                
+                <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input 
+                            id="name" 
+                            value={name} 
+                            onChange={(e) => setName(e.target.value)} 
+                            placeholder="e.g. In Progress"
+                            required
+                        />
+                    </div>
+                                        <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <select
+                            id="category"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <option value="TODO">To Do</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="DONE">Done</option>
+                        </select>
+                    </div>
+                    
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={isLoading || !name.trim()}>
+                            {isLoading ? 'Saving...' : 'Save'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}

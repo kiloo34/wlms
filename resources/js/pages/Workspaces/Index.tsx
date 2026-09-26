@@ -1,0 +1,79 @@
+import { Head, usePage, router } from '@inertiajs/react';
+import { useGetWorkspaces, useUpdateWorkspace, useArchiveWorkspace } from '@/modules/Workload/Workspaces/hooks/useWorkspaces';
+import { WorkspaceList } from '@/modules/Workload/Workspaces/components/WorkspaceList';
+import { CreateWorkspaceModal } from '@/modules/Workload/Workspaces/components/CreateWorkspaceModal';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { index as projectsIndex } from '@/routes/projects';
+import { toast } from 'sonner';
+
+export default function WorkspacesIndex() {
+    const { data: workspaces = [], isLoading, error } = useGetWorkspaces();
+    const { mutateAsync: updateWorkspace } = useUpdateWorkspace();
+    const { mutateAsync: archiveWorkspace } = useArchiveWorkspace();
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    
+    const hasManagePermission = auth.user.permissions.includes('workspaces:manage') || auth.user.permissions.includes('*');
+
+    const handleUpdate = async (id: string, name: string) => {
+        try {
+            await updateWorkspace({ id, payload: { name } });
+            toast.success('Workspace updated successfully');
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Failed to update workspace');
+            throw err;
+        }
+    };
+
+    const handleArchive = async (id: string) => {
+        try {
+            await archiveWorkspace(id);
+            toast.success('Workspace archived successfully');
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Failed to archive workspace');
+            throw err;
+        }
+    };
+
+    return (
+        <>
+            <Head title="Workspaces" />
+            
+            <div className="flex h-full w-full flex-col gap-6 p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">Workspaces</h1>
+                        <p className="text-muted-foreground mt-1">
+                            Manage your team's work environments and projects.
+                        </p>
+                    </div>
+                    
+                    {hasManagePermission && (
+                        <CreateWorkspaceModal>
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                New Workspace
+                            </Button>
+                        </CreateWorkspaceModal>
+                    )}
+                </div>
+
+                {error ? (
+                    <div className="p-4 border border-destructive/50 bg-destructive/10 text-destructive rounded-lg">
+                        Failed to load workspaces. Please try again later.
+                    </div>
+                ) : (
+                    <WorkspaceList 
+                        workspaces={workspaces} 
+                        isLoading={isLoading} 
+                        onSelectWorkspace={(id) => router.visit(projectsIndex({ query: { workspace_id: id } }).url)}
+                        onUpdateWorkspace={handleUpdate}
+                        onArchiveWorkspace={handleArchive}
+                        canManage={hasManagePermission}
+                    />
+                )}
+            </div>
+        </>
+    );
+}
+
