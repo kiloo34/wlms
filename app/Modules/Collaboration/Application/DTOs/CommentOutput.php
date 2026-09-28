@@ -9,7 +9,7 @@ final class CommentOutput
     public function __construct(
         public readonly string $id,
         public readonly string $issueId,
-        public readonly string $authorId,
+        public readonly int|string $authorId,
         public readonly ?string $parentId,
         public readonly string $body,
         public readonly bool $isEdited,

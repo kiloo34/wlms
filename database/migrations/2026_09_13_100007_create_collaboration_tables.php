@@ -24,7 +24,7 @@ return new class extends Migration
 
             // SOFT REFERENCE ke Identity Module (users.uuid)
             // Nullable: aksi sistem/otomatis tidak punya actor (e.g., scheduled jobs)
-            $table->uuid('actor_id')->nullable();
+            $table->unsignedBigInteger('actor_id')->nullable();
 
             // Nama class entitas yang dikenai aksi (Polymorphic).
             // Contoh: 'App\Modules\Workload\Domain\Entities\Workspace'
@@ -77,7 +77,7 @@ return new class extends Migration
             $table->uuid('parent_id')->nullable(); // Untuk threaded/reply comments
 
             // SOFT REFERENCE ke Identity Module (users.uuid)
-            $table->uuid('author_id');
+            $table->unsignedBigInteger('author_id');
 
             $table->longText('body'); // Mendukung Markdown & @mentions
             $table->boolean('is_edited')->default(false);
@@ -89,12 +89,14 @@ return new class extends Migration
                 ->references('id')->on('issues')
                 ->onDelete('cascade');
 
+            $table->index(['issue_id', 'parent_id'], 'comment_issue_thread_idx');
+            $table->index('author_id');
+        });
+
+        Schema::table('comments', function (Blueprint $table) {
             $table->foreign('parent_id')
                 ->references('id')->on('comments')
                 ->onDelete('cascade');
-
-            $table->index(['issue_id', 'parent_id'], 'comment_issue_thread_idx');
-            $table->index('author_id');
         });
     }
 

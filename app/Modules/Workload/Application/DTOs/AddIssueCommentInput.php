@@ -8,7 +8,7 @@ final readonly class AddIssueCommentInput
 {
     public function __construct(
         public string $issueId,
-        public string $authorId,
+        public int|string $authorId,
         public string $body,
     ) {
     }

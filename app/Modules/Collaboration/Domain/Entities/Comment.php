@@ -15,7 +15,7 @@ final class Comment
     private function __construct(
         public readonly CommentId $id,
         public readonly string $issueId,
-        public readonly string $authorId,
+        public readonly int $authorId,
         public readonly ?string $parentId,
         public CommentBody $body,
         public bool $isEdited,
@@ -26,7 +26,7 @@ final class Comment
     public static function create(
         CommentId $id,
         string $issueId,
-        string $authorId,
+        int $authorId,
         ?string $parentId,
         CommentBody $body
     ): self {
@@ -48,7 +48,7 @@ final class Comment
     public static function reconstruct(
         string $id,
         string $issueId,
-        string $authorId,
+        int $authorId,
         ?string $parentId,
         string $body,
         bool $isEdited,

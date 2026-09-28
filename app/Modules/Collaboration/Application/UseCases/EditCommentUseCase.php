@@ -26,7 +26,7 @@ final class EditCommentUseCase
         }
 
         // Anti-IDOR: Only author can edit
-        if ($comment->authorId !== $input->authorId) {
+        if ((int) $comment->authorId !== (int) $input->authorId) {
             throw new RuntimeException("Unauthorized to edit this comment.");
         }
 

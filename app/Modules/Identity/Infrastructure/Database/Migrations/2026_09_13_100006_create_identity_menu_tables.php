@@ -45,13 +45,15 @@ return new class extends Migration
 
             $table->timestamps();
 
+            $table->index('parent_id');
+            $table->index(['is_active', 'sort_order'], 'menu_active_order_idx');
+        });
+
+        Schema::table('menus', function (Blueprint $table) {
             $table->foreign('parent_id')
                 ->references('id')
                 ->on('menus')
                 ->onDelete('restrict');
-
-            $table->index('parent_id');
-            $table->index(['is_active', 'sort_order'], 'menu_active_order_idx');
         });
 
         // ================================================================

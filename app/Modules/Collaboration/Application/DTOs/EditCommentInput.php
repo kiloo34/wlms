@@ -6,7 +6,7 @@ final class EditCommentInput
 {
     public function __construct(
         public readonly string $commentId,
-        public readonly string $authorId,
+        public readonly int|string $authorId,
         public readonly string $body
     ) {}
 }
