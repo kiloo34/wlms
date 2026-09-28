@@ -85,15 +85,18 @@ return new class extends Migration
                 ->on('org_levels')
                 ->onDelete('restrict'); // Jangan hapus level jika masih ada unit yang menggunakannya
 
-            // FK Self-referential (Adjacency List)
+            $table->index('parent_id');
+            $table->index('org_level_id');    // Untuk query: "Tampilkan semua unit level VP"
+            $table->index(['is_active', 'org_level_id'], 'org_unit_active_level_idx');
+        });
+
+        // FK Self-referential (Adjacency List) dipisah agar PostgreSQL bisa mengenali
+        // Primary Key org_units.id sebelum mendefinisikan FK ke dirinya sendiri.
+        Schema::table('org_units', function (Blueprint $table) {
             $table->foreign('parent_id')
                 ->references('id')
                 ->on('org_units')
                 ->onDelete('restrict');
-
-            $table->index('parent_id');
-            $table->index('org_level_id');    // Untuk query: "Tampilkan semua unit level VP"
-            $table->index(['is_active', 'org_level_id'], 'org_unit_active_level_idx');
         });
 
         // ================================================================

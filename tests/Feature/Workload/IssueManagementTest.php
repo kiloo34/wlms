@@ -160,14 +160,12 @@ it('can assign an issue to a user', function () {
     $assignee = UserModel::factory()->create();
 
     $response = actingAs($this->user)->postJson("/api/issues/{$issueId}/assign", [
-        'assignee_id' => (string) $assignee->uuid,
         'assignee_id' => (string) $assignee->id,
     ]);
     $response->assertStatus(200);
 
     $this->assertDatabaseHas('issues', [
         'id' => $issueId,
-        'assignee_id' => (string) $assignee->uuid,
         'assignee_id' => (string) $assignee->id,
     ]);
 });
