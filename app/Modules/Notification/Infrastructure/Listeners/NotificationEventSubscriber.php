@@ -28,6 +28,7 @@ final class NotificationEventSubscriber
         if (!$userId) return;
 
         $this->createAndBroadcast(
+            userId: (int) $event->assigneeId,
             userId: $userId,
             type: 'issue.assigned',
             data: [
@@ -55,6 +56,7 @@ final class NotificationEventSubscriber
         if (!$userId) return;
 
         $this->createAndBroadcast(
+            userId: (int) $issue->reporter_id,
             userId: $userId,
             type: 'comment.added',
             data: [
@@ -83,6 +85,7 @@ final class NotificationEventSubscriber
         if (!$userId) return;
 
         $this->createAndBroadcast(
+            userId: (int) $issue->assignee_id,
             userId: $userId,
             type: 'issue.transitioned',
             data: [
@@ -115,6 +118,7 @@ final class NotificationEventSubscriber
             if (!$resolvedUserId) continue;
 
             $this->createAndBroadcast(
+                userId: (int) $userId,
                 userId: $resolvedUserId,
                 type: 'sprint.state_changed',
                 data: [
