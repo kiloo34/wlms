@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('issue_comments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('issue_id'); // varchar
-            $table->string('author_id'); // varchar (users ID or UUID)
+            $table->uuid('issue_id'); // must match issues.id which is uuid
+            $table->unsignedBigInteger('author_id'); // must match users.id
             $table->text('body');
             $table->timestamps();
             $table->softDeletes();

@@ -31,9 +31,9 @@ return new class extends Migration
             // BigInt memberikan INSERT performa paling cepat untuk volume besar.
             $table->id();
 
-            // SOFT REFERENCE ke users.uuid (public identifier, bukan BigInt id)
+            // SOFT REFERENCE ke users.id (bukan BigInt id)
             // Nullable: juga bisa merekam percobaan akses dari request yang belum terautentikasi
-            $table->uuid('user_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
 
             // Metode HTTP Request
             $table->string('method', 10); // GET, POST, PUT, DELETE, PATCH
