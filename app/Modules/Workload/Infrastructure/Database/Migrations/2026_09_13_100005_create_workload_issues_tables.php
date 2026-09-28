@@ -45,8 +45,8 @@ return new class extends Migration
             // Fibonacci sequence lazim: 1, 2, 3, 5, 8, 13, 21. Null = belum di-estimate.
             $table->unsignedSmallInteger('story_points')->nullable();
 
-            $table->uuid('reporter_id');
-            $table->uuid('assignee_id')->nullable();
+            $table->unsignedBigInteger('reporter_id');
+            $table->unsignedBigInteger('assignee_id')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
@@ -103,7 +103,7 @@ return new class extends Migration
                 'CLONES',        // Source adalah clone dari target
             ]);
 
-            $table->uuid('created_by'); // SOFT REF (Who created this link)
+            $table->unsignedBigInteger('created_by'); // SOFT REF (Who created this link)
             $table->timestamps();
 
             $table->foreign('source_issue_id')
@@ -134,7 +134,7 @@ return new class extends Migration
             $table->uuid('issue_id');
 
             // SOFT REFERENCE ke Identity Module (users.id)
-            $table->uuid('author_id'); // Siapa yang mencatat waktu kerja ini
+            $table->unsignedBigInteger('author_id'); // Siapa yang mencatat waktu kerja ini
 
             // Durasi dalam satuan DETIK. 3600 = 1 jam. Wajib Integer untuk SUM() cepat.
             $table->unsignedInteger('time_spent_seconds');
@@ -162,7 +162,7 @@ return new class extends Migration
             $table->uuid('issue_id');
 
             // SOFT REFERENCE ke Identity Module (users.id)
-            $table->uuid('actor_id'); // Siapa yang melakukan perubahan
+            $table->unsignedBigInteger('actor_id'); // Siapa yang melakukan perubahan
 
             $table->string('field_changed', 50); // Nama field yang berubah, e.g., 'status_id'
             $table->text('old_value')->nullable(); // Nilai sebelumnya

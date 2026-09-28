@@ -13,7 +13,7 @@ final class SprintStateChanged
         public readonly string $projectId,
         public readonly string $sprintName,
         public readonly string $newState,
-        public readonly string $actorId,
+        public readonly int|string $actorId,
         public readonly DateTimeImmutable $occurredAt,
     ) {}
 }

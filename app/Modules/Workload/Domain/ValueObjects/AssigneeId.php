@@ -4,14 +4,14 @@ namespace App\Modules\Workload\Domain\ValueObjects;
 use InvalidArgumentException;
 final class AssigneeId
 {
-    public function __construct(public readonly string $value)
+    public readonly int $value;
+
+    public function __construct(int|string $value)
     {
-        if (empty($value)) throw new InvalidArgumentException("AssigneeId cannot be empty.");
-        if (empty($value)) {
-            throw new InvalidArgumentException("AssigneeId cannot be empty.");
+        $intValue = (int) $value;
+        if ($intValue <= 0) {
+            throw new InvalidArgumentException("AssigneeId must be a positive integer.");
         }
-        if (!ctype_digit($value)) {
-            throw new InvalidArgumentException("AssigneeId must be a valid numeric user ID, got: '{$value}'.");
-        }
+        $this->value = $intValue;
     }
 }

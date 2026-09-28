@@ -6,7 +6,7 @@ final class IssueTransitioned
 {
     public function __construct(
         public readonly string $issueId,
-        public readonly string $actorId,
+        public readonly int|string $actorId,
         public readonly ?string $fromStatusId,
         public readonly string $toStatusId,
         public readonly DateTimeImmutable $occurredAt

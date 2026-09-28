@@ -9,7 +9,7 @@ final class IssueCreated
         public readonly string $projectId,
         public readonly string $issueNumber,
         public readonly string $title,
-        public readonly string $reporterId,
+        public readonly int|string $reporterId,
         public readonly DateTimeImmutable $createdAt
     ) {}
 }
