@@ -216,6 +216,6 @@ export const BoardFilterBar: React.FC<BoardFilterBarProps> = ({
     );
 };
 
-Jprime butuh data dari fact segment daily 
-fact segment daily butuh data dari LLOAN jtm dan jas 
-jika salah 1 LLOAN blm keload maka data yang kerluar tidak valid 
+// Jprime butuh data dari fact segment daily 
+// fact segment daily butuh data dari LLOAN jtm dan jas 
+// jika salah 1 LLOAN blm keload maka data yang kerluar tidak valid 
