@@ -4,16 +4,17 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class FixMigrationsTableSequence extends Command
 {
     protected $signature = 'db:fix-migrations';
 
-    protected $description = 'Fix missing sequence on migrations table ID column for PostgreSQL';
+    protected $description = 'Fix missing/out-of-sync sequences on PostgreSQL tables';
 
     public function handle(): int
     {
-        $this->info('Fixing migrations table sequence...');
+        $this->info('Fixing sequences...');
 
         try {
             $connection = DB::connection();
@@ -24,16 +25,27 @@ class FixMigrationsTableSequence extends Command
                 return 0;
             }
 
-            // 1. Buat sequence jika belum ada
+            // Fix Migrations specifically (in case sequence is missing)
             $connection->statement("CREATE SEQUENCE IF NOT EXISTS migrations_id_seq;");
-
-            // 2. Pasang sequence sebagai default value pada kolom id
             $connection->statement("ALTER TABLE migrations ALTER COLUMN id SET DEFAULT nextval('migrations_id_seq');");
 
-            // 3. Sinkronisasi nilai sequence ke MAX(id) yang ada agar tidak bentrok
-            $connection->statement("SELECT setval('migrations_id_seq', COALESCE((SELECT MAX(id) FROM migrations), 1));");
+            // Tables to sync
+            $tables = ['migrations', 'users', 'workspace_members', 'jobs', 'failed_jobs'];
 
-            $this->info('Successfully fixed migrations table sequence!');
+            foreach ($tables as $t) {
+                if (Schema::hasTable($t)) {
+                    $this->info("Syncing sequence for {$t}...");
+                    // Safely get max ID and sync
+                    $connection->statement("
+                        SELECT setval(
+                            COALESCE(pg_get_serial_sequence('{$t}', 'id'), '{$t}_id_seq'),
+                            COALESCE((SELECT MAX(id) FROM {$t}), 1)
+                        );
+                    ");
+                }
+            }
+
+            $this->info('Successfully fixed sequences!');
             return 0;
         } catch (\Throwable $e) {
             $this->error('Failed: ' . $e->getMessage());
