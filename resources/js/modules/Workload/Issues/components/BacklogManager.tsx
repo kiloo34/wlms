@@ -9,7 +9,7 @@ import { Sprint } from '@/types/sprint';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DndContext, DragEndEvent, useDraggable, useDroppable, PointerSensor, useSensor, useSensors, closestCorners, DragStartEvent, DragOverlay } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, useDraggable, useDroppable, PointerSensor, MouseSensor, TouchSensor, useSensor, useSensors, closestCorners, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { useIssues } from '../hooks/useIssues';
 import { ChevronDown, ChevronRight, MoreHorizontal, SlidersHorizontal, LineChart, Plus, Pencil, Bookmark, CheckSquare } from 'lucide-react';
 import { format } from 'date-fns';
@@ -396,9 +396,15 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issue
     const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, {
+        useSensor(MouseSensor, {
             activationConstraint: {
                 distance: 5,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 5,
             },
         })
     );
