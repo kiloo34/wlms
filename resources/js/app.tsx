@@ -7,6 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { configureEcho } from '@laravel/echo-react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 configureEcho({
     broadcaster: 'reverb',
@@ -45,12 +46,12 @@ void createInertiaApp({
     strictMode: true,
     withApp(app) {
         return (
-            <QueryClientProvider client={queryClient}>
+            <QueryClientProvider client={queryClient}><ErrorBoundary>
                 <TooltipProvider delayDuration={0}>
                     {app}
                     <Toaster />
                 </TooltipProvider>
-            </QueryClientProvider>
+            </ErrorBoundary></QueryClientProvider>
         );
     },
     progress: {

@@ -29,12 +29,12 @@ export default function ComingSoon({ title }: { title?: string }) {
     );
 }
 
-ComingSoon.layout = () => ({
+ComingSoon.layout = {
     breadcrumbs: [
         {
             title: 'Dalam Pengembangan',
             href: '#',
         },
     ],
-});
+};
 

@@ -9,10 +9,19 @@ if (typeof window !== 'undefined') {
 export const initEcho = () => {
     if (typeof window === 'undefined') return null;
     
+    // Check if the Reverb or Pusher key is provided in the environment
+    const appKey = import.meta.env.VITE_REVERB_APP_KEY || import.meta.env.VITE_PUSHER_APP_KEY;
+    
+    // If no key is provided, gracefully disable websockets instead of crashing
+    if (!appKey) {
+        console.warn('WebSocket disabled: VITE_REVERB_APP_KEY or VITE_PUSHER_APP_KEY is missing.');
+        return null;
+    }
+    
     if (!window.Echo) {
         window.Echo = new Echo({
             broadcaster: 'reverb',
-            key: import.meta.env.VITE_REVERB_APP_KEY,
+            key: appKey,
             wsHost: import.meta.env.VITE_REVERB_HOST,
             wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
             wssPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
