@@ -182,12 +182,12 @@ const DraggableIssue = ({ issue, lookups, updateIssue, assignIssue, isOwner, onI
             className="group flex items-center justify-between py-2 px-3 bg-card hover:bg-muted/50 border-b border-border/50 cursor-grab active:cursor-grabbing transition-colors"
         >
             <div className="flex items-center gap-3 overflow-hidden">
-                <input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-muted-foreground/30 text-primary focus:ring-primary opacity-50 group-hover:opacity-100 transition-opacity" />
+                <input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-muted-foreground/30 text-primary focus:ring-primary opacity-100 [@media(hover:hover)]:opacity-50 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity" />
                 {getTypeIcon(typeName)}
                 <span onClick={() => onIssueClick?.(issue)} className="text-xs font-medium text-muted-foreground w-16 truncate hover:underline cursor-pointer" title={issue.id}>TES-{issue.id.substring(0,3)}</span>
                 <span onClick={() => onIssueClick?.(issue)} className="text-sm font-medium text-foreground truncate flex items-center gap-2 cursor-pointer hover:text-primary">
                     {issue.title}
-                    <Pencil className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Pencil className="w-3.5 h-3.5 text-muted-foreground opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity" />
                 </span>
             </div>
             <div className="flex items-center gap-4 flex-shrink-0">
@@ -201,7 +201,7 @@ const DraggableIssue = ({ issue, lookups, updateIssue, assignIssue, isOwner, onI
                 <div onPointerDown={(e) => e.stopPropagation()} className="cursor-default">
                     <AssigneeDropdown issue={issue} lookups={lookups} assignIssue={assignIssue} disabled={!isOwner} />
                 </div>
-                <MoreHorizontal className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 cursor-pointer" />
+                <MoreHorizontal className="w-4 h-4 text-muted-foreground opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 cursor-pointer" />
             </div>
         </div>
     );

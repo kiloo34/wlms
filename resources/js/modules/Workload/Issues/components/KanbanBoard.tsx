@@ -79,7 +79,7 @@ const SortableIssueCard = ({ issue, onEdit, onLogWork, lookups }: { issue: Issue
                 </Avatar>
             </div>
 
-            <div className="absolute top-2 right-2 hidden group-hover:flex space-x-2 bg-card/80 backdrop-blur-sm p-1 rounded-md border shadow-sm">
+            <div className="absolute top-2 right-2 flex opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity space-x-2 bg-card/80 backdrop-blur-sm p-1 rounded-md border shadow-sm">
                 {canLogWork && (
                     <button 
                         className="text-xs text-primary hover:text-primary/80 font-medium px-1"
