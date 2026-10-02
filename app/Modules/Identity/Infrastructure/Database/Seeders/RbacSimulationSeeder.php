@@ -12,7 +12,7 @@ class RbacSimulationSeeder extends Seeder
     public function run()
     {
         // 1. Ensure Org Level and Org Unit exist
-        $orgLevelId = '01923abc-level-1234-1234-123456789abc';
+        $orgLevelId = '01923abc-0000-1234-1234-123456789abc';
         if (DB::table('org_levels')->where('id', $orgLevelId)->count() === 0) {
             DB::table('org_levels')->insert([
                 'id' => $orgLevelId,
@@ -23,7 +23,7 @@ class RbacSimulationSeeder extends Seeder
             ]);
         }
 
-        $orgUnitId = '01923abc-org-1234-1234-123456789abc';
+        $orgUnitId = '01923abc-1111-1234-1234-123456789abc';
         if (DB::table('org_units')->where('id', $orgUnitId)->count() === 0) {
             DB::table('org_units')->insert([
                 'id' => $orgUnitId,

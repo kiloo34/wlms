@@ -13,7 +13,7 @@ class DummySeeder extends Seeder
     {
         if (DB::table('org_levels')->count() === 0) {
             DB::table('org_levels')->insert([
-                'id' => '01923abc-level-1234-1234-123456789abc',
+                'id' => '01923abc-0000-1234-1234-123456789abc',
                 'slug' => 'group',
                 'name' => 'Group',
                 'depth' => 1,
@@ -23,8 +23,8 @@ class DummySeeder extends Seeder
 
         if (DB::table('org_units')->count() === 0) {
             DB::table('org_units')->insert([
-                'id' => '01923abc-org-1234-1234-123456789abc',
-                'org_level_id' => '01923abc-level-1234-1234-123456789abc',
+                'id' => '01923abc-1111-1234-1234-123456789abc',
+                'org_level_id' => '01923abc-0000-1234-1234-123456789abc',
                 'name' => 'IT Group'
             ]);
         }
@@ -33,7 +33,7 @@ class DummySeeder extends Seeder
             UserModel::factory()->create([
                 'email' => 'admin@admin.com',
                 'password' => bcrypt('password'),
-                'org_unit_id' => '01923abc-org-1234-1234-123456789abc',
+                'org_unit_id' => '01923abc-1111-1234-1234-123456789abc',
                 'uuid' => Str::uuid()->toString()
             ]);
         }
