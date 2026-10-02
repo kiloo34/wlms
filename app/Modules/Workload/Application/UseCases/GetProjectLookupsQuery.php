@@ -19,8 +19,8 @@ final class GetProjectLookupsQuery
 {
     public function getLookupsForProject(string $workspaceId, ?string $workflowId): array
     {
-        $issueTypes = IssueTypeModel::select('id', 'name', 'category')->get();
-        $priorities = PriorityModel::select('id', 'name', 'category')->get();
+        $issueTypes = IssueTypeModel::select('id', 'name', 'slug', 'icon', 'color')->get();
+        $priorities = PriorityModel::select('id', 'name', 'slug', 'level', 'icon', 'color')->get();
         
         if (!$workflowId) {
             $defaultWorkflow = WorkflowModel::where('is_default', true)->first();
@@ -42,9 +42,9 @@ final class GetProjectLookupsQuery
         }
         
         if (!empty($statusIds)) {
-            $statuses = StatusModel::select('id', 'name', 'category')->whereIn('id', $statusIds)->get();
+            $statuses = StatusModel::select('id', 'name', 'category', 'slug', 'color')->whereIn('id', $statusIds)->get();
         } else {
-            $statuses = StatusModel::select('id', 'name', 'category')->get();
+            $statuses = StatusModel::select('id', 'name', 'category', 'slug', 'color')->get();
         }
 
         $users = UserModel::select('users.id', 'users.name')
@@ -65,7 +65,7 @@ final class GetProjectLookupsQuery
     public function getPrioritiesOnly(): array
     {
         return [
-            'priorities' => PriorityModel::select('id', 'name', 'category')->get()
+            'priorities' => PriorityModel::select('id', 'name', 'slug', 'level', 'icon', 'color')->get()
         ];
     }
 }
