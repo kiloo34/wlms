@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Application\DTOs;
+
 use App\Modules\Workload\Domain\Entities\Issue;
 
 final class IssueOutput

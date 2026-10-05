@@ -15,6 +15,9 @@ final class NewNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function __construct(
         public readonly string $id,
         public readonly int $userId,
@@ -34,14 +37,16 @@ final class NewNotification implements ShouldBroadcast
         return 'notification.new';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function broadcastWith(): array
     {
         return [
-            'id'         => $this->id,
-            'type'       => $this->type,
-            'data'       => $this->data,
+            'id' => $this->id,
+            'type' => $this->type,
+            'data' => $this->data,
             'created_at' => $this->createdAt,
         ];
     }
 }
-

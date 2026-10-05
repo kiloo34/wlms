@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Modules\Workload\Domain\Entities\Workspace;
-use App\Modules\Workload\Domain\ValueObjects\WorkspaceId;
 use App\Modules\Workload\Domain\Events\WorkspaceCreated;
+use App\Modules\Workload\Domain\ValueObjects\WorkspaceId;
 
 test('can create workspace with active status and record WorkspaceCreated event', function () {
     $id = new WorkspaceId('01923abc-0000-7000-8000-000000000000');

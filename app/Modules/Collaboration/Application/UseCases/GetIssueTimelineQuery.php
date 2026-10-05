@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Application\UseCases;
 
 use App\Modules\Collaboration\Application\DTOs\TimelineItemOutput;
-use App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models\CommentModel;
 use App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models\AuditLogModel;
+use App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models\CommentModel;
 use Illuminate\Support\Collection;
 
 final class GetIssueTimelineQuery
@@ -16,20 +18,20 @@ final class GetIssueTimelineQuery
     {
         // 1. Fetch Comments
         $comments = CommentModel::where('issue_id', $issueId)->get();
-        
+
         // 2. Fetch Audit Logs for this issue
         $auditLogs = AuditLogModel::where('auditable_type', 'issue')
             ->where('auditable_id', $issueId)
             ->get();
-            
+
         // 3. Map to TimelineItemOutput
-        $timeline = new Collection();
-        
+        $timeline = new Collection;
+
         foreach ($comments as $comment) {
             $timeline->push(new TimelineItemOutput(
                 'comment',
                 $comment->id,
-                $comment->author_id,
+                (string) $comment->author_id,
                 $comment->created_at->format('Y-m-d\TH:i:sP'),
                 [
                     'body' => $comment->body,
@@ -38,12 +40,12 @@ final class GetIssueTimelineQuery
                 ]
             ));
         }
-        
+
         foreach ($auditLogs as $log) {
             $timeline->push(new TimelineItemOutput(
                 'audit_log',
                 $log->id,
-                $log->actor_id,
+                $log->actor_id !== null ? (string) $log->actor_id : null,
                 $log->created_at->format('Y-m-d\TH:i:sP'),
                 [
                     'event' => $log->event,
@@ -52,9 +54,8 @@ final class GetIssueTimelineQuery
                 ]
             ));
         }
-        
+
         // 4. Sort by date ascending (oldest first)
         return $timeline->sortBy('createdAt')->values()->all();
     }
 }
-

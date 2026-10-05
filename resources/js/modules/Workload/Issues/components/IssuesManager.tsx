@@ -295,7 +295,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
                         <div className="text-center p-4">Loading board...</div>
                     ) : (
                         <KanbanBoard 
-                            issues={boardFilteredIssues.filter(i => i.sprint_id && sprints.some(s => s.id === i.sprint_id && s.state === 'ACTIVE'))}
+                            issues={sprints.length > 0 ? boardFilteredIssues.filter(i => i.sprint_id && sprints.some(s => s.id === i.sprint_id && s.state === 'ACTIVE')) : boardFilteredIssues}
                             statuses={lookups.statuses}
                             onTransition={handleTransition}
                             onEdit={handleEditClick}

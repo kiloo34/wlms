@@ -20,6 +20,16 @@ final class GetProjectsUseCase
             ->where('workspace_id', $input->workspaceId)
             ->whereNull('deleted_at')
             ->select(['id', 'workspace_id', 'key', 'name', 'status', 'priority_id'])
+            ->addSelect([
+                'total_issues_count' => DB::table('issues')
+                    ->selectRaw('count(*)')
+                    ->whereColumn('issues.project_id', 'projects.id'),
+                'completed_issues_count' => DB::table('issues')
+                    ->join('statuses', 'issues.status_id', '=', 'statuses.id')
+                    ->selectRaw('count(*)')
+                    ->whereColumn('issues.project_id', 'projects.id')
+                    ->where('statuses.category', 'DONE'),
+            ])
             ->orderBy('id', 'asc') // untuk cursor pagination
             ->limit($input->limit);
 
@@ -36,7 +46,9 @@ final class GetProjectsUseCase
                 key: (string) $row->key,
                 name: (string) $row->name,
                 status: (string) $row->status,
-                priorityId: $row->priority_id ? (string) $row->priority_id : null
+                priorityId: $row->priority_id ? (string) $row->priority_id : null,
+                totalIssuesCount: (int) ($row->total_issues_count ?? 0),
+                completedIssuesCount: (int) ($row->completed_issues_count ?? 0)
             );
         })->all();
     }

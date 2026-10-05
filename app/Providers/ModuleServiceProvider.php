@@ -44,7 +44,7 @@ class ModuleServiceProvider extends ServiceProvider
         $modules = File::directories($modulesPath);
 
         foreach ($modules as $modulePath) {
-            $migrationPath = $modulePath . '/Infrastructure/Database/Migrations';
+            $migrationPath = $modulePath.'/Infrastructure/Database/Migrations';
             if (File::exists($migrationPath)) {
                 $this->loadMigrationsFrom($migrationPath);
             }

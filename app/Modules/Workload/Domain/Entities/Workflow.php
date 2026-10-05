@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Workload\Domain\Entities;
@@ -33,9 +34,23 @@ final class Workflow
         $this->isDefault = $isDefault;
     }
 
-    public function getId(): WorkflowId { return $this->id; }
-    public function getName(): string { return $this->name; }
-    public function getDescription(): ?string { return $this->description; }
-    public function isDefault(): bool { return $this->isDefault; }
-}
+    public function getId(): WorkflowId
+    {
+        return $this->id;
+    }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function isDefault(): bool
+    {
+        return $this->isDefault;
+    }
+}

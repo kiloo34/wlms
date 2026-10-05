@@ -40,3 +40,8 @@
 * **Theming Documentation:** Ikuti pedoman resmi Shadcn Theming (https://ui.shadcn.com/docs/theming).
 * **CSS Variables:** Seluruh pewarnaan (warna utama, background, teks, border) WAJIB menggunakan CSS Variables global (seperti `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`) yang diatur di file CSS utama menggunakan format HSL atau OKLCH.
 * **Larangan Hardcode Warna:** DILARANG KERAS menggunakan utility warna statis Tailwind (seperti `bg-blue-500`, `text-gray-700`) untuk elemen UI utama, karena akan merusak fungsionalitas transisi *Dark Mode* bawaan Shadcn UI.
+
+**7. CSS & Markdown Rendering (TipTap/ProseMirror)**
+* **Hati-hati dengan CSS Selectors pada Konten Editor:** Saat memberikan gaya (*styling*) pada kontainer Markdown atau TipTap (seperti `.markdown-body` atau `.prose`), **DILARANG KERAS** menggunakan *pseudo-class* seperti `p:first-of-type` atau `p:last-of-type` secara global tanpa *child combinator* (`>`).
+* **Konteks Masalah:** Mesin TipTap secara otomatis membungkus teks di dalam `<li>` (List) dan `<blockquote>` menggunakan tag `<p>`. Menggunakan `.markdown-body p:first-of-type` akan tanpa sengaja menyembunyikan atau mengubah gaya *semua* teks pertama di dalam daftar dan blockquote.
+* **Solusi Wajib:** Jika niatnya adalah menargetkan paragraf terluar di dokumen, selalu gunakan *Direct Child Selector*: `.markdown-body > p:first-of-type`.

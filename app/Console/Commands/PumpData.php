@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\Schema;
 class PumpData extends Command
 {
     protected $signature = 'db:pump';
+
     protected $description = 'Pump data from local SQLite to remote PostgreSQL';
 
-    public function handle()
+    public function handle(): void
     {
         $this->info('Starting data pump from SQLite to PostgreSQL...');
 
@@ -52,23 +53,25 @@ class PumpData extends Command
                 try {
                     DB::connection('pgsql')->table($table)->delete();
                 } catch (\Exception $e) {
-                    $this->warn("Failed to delete from {$table}: " . $e->getMessage());
+                    $this->warn("Failed to delete from {$table}: ".$e->getMessage());
                 }
             }
         }
 
         foreach ($tables as $table) {
-            if (!Schema::connection('sqlite')->hasTable($table)) {
+            if (! Schema::connection('sqlite')->hasTable($table)) {
                 continue;
             }
 
             $count = DB::connection('sqlite')->table($table)->count();
-            if ($count === 0) continue;
+            if ($count === 0) {
+                continue;
+            }
 
             $this->info("Pumping table: {$table} ({$count} rows)");
-            
+
             $query = DB::connection('sqlite')->table($table);
-            
+
             if (Schema::connection('sqlite')->hasColumn($table, 'parent_id')) {
                 $query->orderBy('parent_id', 'asc');
             } elseif ($table === 'issue_links') {
@@ -79,7 +82,7 @@ class PumpData extends Command
                 $query->orderBy('id', 'asc');
             } else {
                 $columns = Schema::connection('sqlite')->getColumnListing($table);
-                if (!empty($columns)) {
+                if (! empty($columns)) {
                     $query->orderBy($columns[0], 'asc');
                 }
             }
@@ -93,7 +96,7 @@ class PumpData extends Command
                         if (in_array($col, ['is_active', 'is_default', 'is_edited'])) {
                             $rowArray[$col] = $val ? true : false;
                         }
-                        
+
                         // 2. Fix old invalid dummy UUIDs on the fly
                         if (is_string($val)) {
                             if ($val === '01923abc-org-1234-1234-123456789abc') {
@@ -106,19 +109,19 @@ class PumpData extends Command
                     }
                     $insertData[] = $rowArray;
                 }
-                
-                if (!empty($insertData)) {
+
+                if (! empty($insertData)) {
                     try {
                         DB::connection('pgsql')->table($table)->insert($insertData);
                     } catch (\Exception $e) {
-                        $this->error("Error inserting into {$table}: " . $e->getMessage());
+                        $this->error("Error inserting into {$table}: ".$e->getMessage());
                         throw $e;
                     }
                 }
             });
         }
 
-        $this->info("Fixing sequences...");
+        $this->info('Fixing sequences...');
         $tablesWithId = ['users', 'workspace_members', 'jobs', 'failed_jobs', 'migrations'];
         foreach ($tablesWithId as $t) {
             if (Schema::connection('pgsql')->hasTable($t)) {

@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Domain\Entities;
 
 use App\Modules\Collaboration\Domain\ValueObjects\AuditLogId;
@@ -8,6 +10,10 @@ use DateTimeImmutable;
 
 final class AuditLog
 {
+    /**
+     * @param  array<string, mixed>|null  $oldValues
+     * @param  array<string, mixed>|null  $newValues
+     */
     private function __construct(
         public readonly AuditLogId $id,
         public readonly ?string $actorId,
@@ -21,6 +27,10 @@ final class AuditLog
         public readonly DateTimeImmutable $createdAt
     ) {}
 
+    /**
+     * @param  array<string, mixed>|null  $oldValues
+     * @param  array<string, mixed>|null  $newValues
+     */
     public static function create(
         AuditLogId $id,
         ?string $actorId,
@@ -47,6 +57,10 @@ final class AuditLog
         );
     }
 
+    /**
+     * @param  array<string, mixed>|null  $oldValues
+     * @param  array<string, mixed>|null  $newValues
+     */
     public static function reconstruct(
         string $id,
         ?string $actorId,
@@ -74,4 +88,3 @@ final class AuditLog
         );
     }
 }
-

@@ -2,9 +2,9 @@
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
-use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -75,7 +75,7 @@ test('superadmin can create and view org levels', function () {
         'can_own_workspace' => true,
         'is_active' => true,
     ]);
-    
+
     $response->assertStatus(201);
     $response->assertJsonPath('data.name', 'Regional Office');
     $response->assertJsonPath('data.depth', 2);
@@ -96,7 +96,7 @@ test('superadmin can create parent and child org units and verifies closure tabl
         'code' => 'HQ-01',
         'is_active' => true,
     ]);
-    
+
     $parentResponse->assertStatus(201);
     $parentId = $parentResponse->json('data.id');
 
@@ -108,7 +108,7 @@ test('superadmin can create parent and child org units and verifies closure tabl
         'code' => 'IT-01',
         'is_active' => true,
     ]);
-    
+
     $childResponse->assertStatus(201);
     $childId = $childResponse->json('data.id');
 

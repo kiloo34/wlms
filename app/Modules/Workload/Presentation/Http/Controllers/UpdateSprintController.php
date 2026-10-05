@@ -13,7 +13,7 @@ final class UpdateSprintController
     public function __invoke(Request $request, string $id): JsonResponse
     {
         $user = $request->user();
-        if (!$user || ! ($user->hasRole('Workspace Owner') || $user->hasRole('Superadmin'))) {
+        if (! $user || ! ($user->hasRole('Workspace Owner') || $user->hasRole('Superadmin'))) {
             abort(403, 'Unauthorized.');
         }
 

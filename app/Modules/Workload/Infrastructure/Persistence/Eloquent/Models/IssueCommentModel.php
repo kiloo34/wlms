@@ -16,6 +16,7 @@ final class IssueCommentModel extends Model
     protected $table = 'issue_comments';
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -25,11 +26,17 @@ final class IssueCommentModel extends Model
         'body',
     ];
 
+    /**
+     * @return BelongsTo<IssueModel, $this>
+     */
     public function issue(): BelongsTo
     {
         return $this->belongsTo(IssueModel::class, 'issue_id');
     }
 
+    /**
+     * @return BelongsTo<UserModel, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(UserModel::class, 'author_id');

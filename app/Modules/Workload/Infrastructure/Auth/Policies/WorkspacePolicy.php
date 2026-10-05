@@ -87,4 +87,3 @@ final class WorkspacePolicy
         return $user->email === 'superadmin@wlms.com';
     }
 }
-

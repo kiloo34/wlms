@@ -14,7 +14,9 @@ final class WorklogModel extends Model
     use HasUuids;
 
     protected $table = 'worklogs';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -31,11 +33,17 @@ final class WorklogModel extends Model
         'started_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<IssueModel, $this>
+     */
     public function issue(): BelongsTo
     {
         return $this->belongsTo(IssueModel::class, 'issue_id');
     }
 
+    /**
+     * @return BelongsTo<UserModel, $this>
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(UserModel::class, 'author_id');

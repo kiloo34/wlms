@@ -35,7 +35,7 @@ final class StartSprintController
                     sprintName: $sprint->name,
                     newState: 'active',
                     actorId: (string) $request->user()->id,
-                    occurredAt: new DateTimeImmutable(),
+                    occurredAt: new DateTimeImmutable,
                 ));
             }
 
@@ -45,4 +45,3 @@ final class StartSprintController
         }
     }
 }
-

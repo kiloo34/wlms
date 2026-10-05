@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class CommentModel extends Model
 {
@@ -13,6 +15,7 @@ class CommentModel extends Model
     protected $table = 'comments';
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -21,11 +24,10 @@ class CommentModel extends Model
         'parent_id',
         'author_id',
         'body',
-        'is_edited'
+        'is_edited',
     ];
 
     protected $casts = [
         'is_edited' => 'boolean',
     ];
 }
-

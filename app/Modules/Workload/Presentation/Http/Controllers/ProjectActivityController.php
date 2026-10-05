@@ -9,9 +9,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ProjectActivityController
 {
-    public function __construct(private readonly GetProjectActivityQuery $query)
-    {
-    }
+    public function __construct(private readonly GetProjectActivityQuery $query) {}
 
     public function index(Request $request, string $projectId): AnonymousResourceCollection
     {

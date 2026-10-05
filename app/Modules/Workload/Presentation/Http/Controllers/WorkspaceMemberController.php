@@ -7,6 +7,7 @@ namespace App\Modules\Workload\Presentation\Http\Controllers;
 use App\Modules\Workload\Application\Queries\GetWorkspaceMembersQuery;
 use App\Modules\Workload\Application\UseCases\AddWorkspaceMemberUseCase;
 use App\Modules\Workload\Application\UseCases\RemoveWorkspaceMemberUseCase;
+use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -21,7 +22,7 @@ final class WorkspaceMemberController extends Controller
 
     public function index(Request $request, string $workspaceId): JsonResponse
     {
-        $workspace = \App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel::findOrFail($workspaceId);
+        $workspace = WorkspaceModel::findOrFail($workspaceId);
         if ($request->user()->cannot('view', $workspace)) {
             abort(403, 'Unauthorized action.');
         }
@@ -32,7 +33,7 @@ final class WorkspaceMemberController extends Controller
         $members = $this->getWorkspaceMembersQuery->execute($workspaceId, $limit, $offset);
 
         return response()->json([
-            'data' => $members
+            'data' => $members,
         ], 200);
     }
 
@@ -40,10 +41,10 @@ final class WorkspaceMemberController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|integer',
-            'role' => 'nullable|string|in:viewer,member,admin'
+            'role' => 'nullable|string|in:viewer,member,admin',
         ]);
 
-        $workspace = \App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel::findOrFail($workspaceId);
+        $workspace = WorkspaceModel::findOrFail($workspaceId);
         if ($request->user()->cannot('update', $workspace)) {
             abort(403, 'Unauthorized action.');
         }
@@ -55,10 +56,9 @@ final class WorkspaceMemberController extends Controller
         );
 
         return response()->json([
-            'message' => 'Member added successfully'
+            'message' => 'Member added successfully',
         ], 201);
     }
-
 
     public function update(Request $request, string $workspaceId, string $userId): JsonResponse
     {
@@ -67,13 +67,17 @@ final class WorkspaceMemberController extends Controller
             'daily_capacity_hours' => 'sometimes|integer|min:0|max:24',
         ]);
 
-        $workspace = \App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel::findOrFail($workspaceId);
-        
-        $updateData = [];
-        if (isset($validated['role'])) $updateData['role'] = $validated['role'];
-        if (isset($validated['daily_capacity_hours'])) $updateData['daily_capacity_hours'] = $validated['daily_capacity_hours'];
+        $workspace = WorkspaceModel::findOrFail($workspaceId);
 
-        if (!empty($updateData)) {
+        $updateData = [];
+        if (isset($validated['role'])) {
+            $updateData['role'] = $validated['role'];
+        }
+        if (isset($validated['daily_capacity_hours'])) {
+            $updateData['daily_capacity_hours'] = $validated['daily_capacity_hours'];
+        }
+
+        if (! empty($updateData)) {
             $workspace->members()->updateExistingPivot($userId, $updateData);
         }
 
@@ -82,7 +86,7 @@ final class WorkspaceMemberController extends Controller
 
     public function destroy(Request $request, string $workspaceId, int $userId): JsonResponse
     {
-        $workspace = \App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel::findOrFail($workspaceId);
+        $workspace = WorkspaceModel::findOrFail($workspaceId);
         if ($request->user()->cannot('update', $workspace)) {
             abort(403, 'Unauthorized action.');
         }
@@ -90,8 +94,7 @@ final class WorkspaceMemberController extends Controller
         $this->removeWorkspaceMemberUseCase->execute($workspaceId, $userId);
 
         return response()->json([
-            'message' => 'Member removed successfully'
+            'message' => 'Member removed successfully',
         ], 200);
     }
 }
-

@@ -20,7 +20,7 @@ final class GetProjectsController extends Controller
     public function __invoke(GetProjectsHttpRequest $request, string $workspaceId): JsonResponse
     {
         $validated = $request->validated();
-        
+
         $input = new GetProjectsInput(
             workspaceId: $workspaceId,
             limit: (int) ($validated['limit'] ?? 50),

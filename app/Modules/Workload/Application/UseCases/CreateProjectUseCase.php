@@ -8,9 +8,9 @@ use App\Modules\Workload\Application\DTOs\CreateProjectInput;
 use App\Modules\Workload\Application\DTOs\ProjectOutput;
 use App\Modules\Workload\Domain\Entities\Project;
 use App\Modules\Workload\Domain\Repositories\ProjectRepositoryInterface;
+use App\Modules\Workload\Domain\ValueObjects\PriorityId;
 use App\Modules\Workload\Domain\ValueObjects\ProjectId;
 use App\Modules\Workload\Domain\ValueObjects\ProjectKey;
-use App\Modules\Workload\Domain\ValueObjects\PriorityId;
 use App\Modules\Workload\Domain\ValueObjects\WorkspaceId;
 use Exception;
 
@@ -28,7 +28,7 @@ final class CreateProjectUseCase
         $key = new ProjectKey($input->key);
 
         if ($this->repository->existsByKey($key)) {
-            throw new Exception("Project key already exists.");
+            throw new Exception('Project key already exists.');
         }
 
         $project = Project::create(

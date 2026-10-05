@@ -6,6 +6,8 @@ export interface Project {
     name: string;
     description: string | null;
     priority_id?: string | null;
+    total_issues_count?: number;
+    completed_issues_count?: number;
     created_at?: string;
     updated_at?: string;
 }

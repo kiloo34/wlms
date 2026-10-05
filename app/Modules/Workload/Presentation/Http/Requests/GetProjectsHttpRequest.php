@@ -11,13 +11,16 @@ final class GetProjectsHttpRequest extends FormRequest
     public function authorize(): bool
     {
         $user = $this->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         return $user->hasPermission('projects:view') || $user->hasPermission('workspaces:view');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

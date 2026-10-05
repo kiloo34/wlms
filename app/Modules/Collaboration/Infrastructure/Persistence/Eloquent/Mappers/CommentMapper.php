@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Mappers;
 
 use App\Modules\Collaboration\Domain\Entities\Comment;
@@ -25,7 +27,7 @@ final class CommentMapper
     public static function toEloquent(Comment $entity, ?CommentModel $model = null): CommentModel
     {
         if ($model === null) {
-            $model = new CommentModel();
+            $model = new CommentModel;
             $model->id = $entity->id->value;
             $model->created_at = $entity->createdAt->format('Y-m-d H:i:s');
         }
@@ -40,4 +42,3 @@ final class CommentMapper
         return $model;
     }
 }
-

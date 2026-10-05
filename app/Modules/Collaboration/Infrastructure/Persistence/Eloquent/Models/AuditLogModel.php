@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
 
 class AuditLogModel extends Model
 {
@@ -24,7 +26,7 @@ class AuditLogModel extends Model
         'ip_address',
         'user_agent',
         'url',
-        'created_at'
+        'created_at',
     ];
 
     protected $casts = [
@@ -33,4 +35,3 @@ class AuditLogModel extends Model
         'created_at' => 'datetime',
     ];
 }
-

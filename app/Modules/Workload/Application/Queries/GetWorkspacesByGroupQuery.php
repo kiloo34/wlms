@@ -16,14 +16,14 @@ final class GetWorkspacesByGroupQuery
     {
         // Pragmatic CQRS: Query Builder langsung untuk performa maksimal (Prinsip #3)
         $query = DB::table('workspaces')
-            ->where(function($q) use ($groupId, $userId) {
+            ->where(function ($q) use ($groupId, $userId) {
                 $q->where('owner_group_id', $groupId)
-                  ->orWhereExists(function ($q2) use ($userId) {
-                      $q2->select(DB::raw(1))
-                         ->from('workspace_members')
-                         ->whereColumn('workspace_members.workspace_id', 'workspaces.id')
-                         ->where('workspace_members.user_id', $userId);
-                  });
+                    ->orWhereExists(function ($q2) use ($userId) {
+                        $q2->select(DB::raw(1))
+                            ->from('workspace_members')
+                            ->whereColumn('workspace_members.workspace_id', 'workspaces.id')
+                            ->where('workspace_members.user_id', $userId);
+                    });
             })
             ->whereNull('deleted_at')
             ->select(['id', 'name', 'status', 'owner_group_id'])

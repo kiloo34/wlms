@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Notification\Infrastructure\Listeners;
 
 use App\Modules\Collaboration\Domain\Events\CommentAdded;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Notification\Domain\Events\NewNotification;
 use App\Modules\Notification\Infrastructure\Persistence\Eloquent\Models\NotificationModel;
 use App\Modules\Workload\Domain\Events\IssueAssigned;
@@ -25,15 +26,17 @@ final class NotificationEventSubscriber
         }
 
         $userId = $this->resolveUserId($event->assigneeId);
-        if (!$userId) return;
+        if (! $userId) {
+            return;
+        }
 
         $this->createAndBroadcast(
             userId: $userId,
             type: 'issue.assigned',
             data: [
-                'issue_id'     => $event->issueId,
+                'issue_id' => $event->issueId,
                 'issue_number' => $event->issueNumber,
-                'actor_id'     => $event->actorId,
+                'actor_id' => $event->actorId,
             ]
         );
     }
@@ -52,15 +55,17 @@ final class NotificationEventSubscriber
         }
 
         $userId = $this->resolveUserId($issue->reporter_id);
-        if (!$userId) return;
+        if (! $userId) {
+            return;
+        }
 
         $this->createAndBroadcast(
             userId: $userId,
             type: 'comment.added',
             data: [
-                'issue_id'     => $event->issueId,
-                'comment_id'   => $event->commentId,
-                'author_id'    => $event->authorId,
+                'issue_id' => $event->issueId,
+                'comment_id' => $event->commentId,
+                'author_id' => $event->authorId,
                 'body_preview' => mb_substr($event->body, 0, 50),
             ]
         );
@@ -80,16 +85,18 @@ final class NotificationEventSubscriber
         }
 
         $userId = $this->resolveUserId($issue->assignee_id);
-        if (!$userId) return;
+        if (! $userId) {
+            return;
+        }
 
         $this->createAndBroadcast(
             userId: $userId,
             type: 'issue.transitioned',
             data: [
-                'issue_id'       => $event->issueId,
+                'issue_id' => $event->issueId,
                 'from_status_id' => $event->fromStatusId,
-                'to_status_id'   => $event->toStatusId,
-                'actor_id'       => $event->actorId,
+                'to_status_id' => $event->toStatusId,
+                'actor_id' => $event->actorId,
             ]
         );
     }
@@ -112,17 +119,19 @@ final class NotificationEventSubscriber
             }
 
             $resolvedUserId = $this->resolveUserId($userId);
-            if (!$resolvedUserId) continue;
+            if (! $resolvedUserId) {
+                continue;
+            }
 
             $this->createAndBroadcast(
                 userId: $resolvedUserId,
                 type: 'sprint.state_changed',
                 data: [
-                    'sprint_id'   => $event->sprintId,
-                    'project_id'  => $event->projectId,
+                    'sprint_id' => $event->sprintId,
+                    'project_id' => $event->projectId,
                     'sprint_name' => $event->sprintName,
-                    'new_state'   => $event->newState,
-                    'actor_id'    => $event->actorId,
+                    'new_state' => $event->newState,
+                    'actor_id' => $event->actorId,
                 ]
             );
         }
@@ -133,18 +142,22 @@ final class NotificationEventSubscriber
         if (is_numeric($id)) {
             return (int) $id;
         }
-        $user = \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel::where('uuid', $id)->first(['id']);
+        $user = UserModel::where('uuid', $id)->first(['id']);
+
         return $user?->id;
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     private function createAndBroadcast(int $userId, string $type, array $data): void
     {
         DB::transaction(function () use ($userId, $type, $data): void {
             $notification = NotificationModel::create([
-                'id'      => Str::uuid()->toString(),
+                'id' => Str::uuid()->toString(),
                 'user_id' => $userId,
-                'type'    => $type,
-                'data'    => $data,
+                'type' => $type,
+                'data' => $data,
             ]);
 
             broadcast(new NewNotification(
@@ -157,14 +170,16 @@ final class NotificationEventSubscriber
         });
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function subscribe(Dispatcher $events): array
     {
         return [
-            IssueAssigned::class        => 'handleIssueAssigned',
-            CommentAdded::class         => 'handleCommentAdded',
-            IssueTransitioned::class    => 'handleIssueTransitioned',
-            SprintStateChanged::class   => 'handleSprintStateChanged',
+            IssueAssigned::class => 'handleIssueAssigned',
+            CommentAdded::class => 'handleCommentAdded',
+            IssueTransitioned::class => 'handleIssueTransitioned',
+            SprintStateChanged::class => 'handleSprintStateChanged',
         ];
     }
 }
-

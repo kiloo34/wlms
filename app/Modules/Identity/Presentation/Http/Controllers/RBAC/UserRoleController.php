@@ -3,12 +3,14 @@
 namespace App\Modules\Identity\Presentation\Http\Controllers\RBAC;
 
 use App\Modules\Identity\Application\UseCases\RBAC\AssignRoleToUserCommand;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 
 class UserRoleController extends Controller
 {
-    public function assign(Request $request, AssignRoleToUserCommand $command)
+    public function assign(Request $request, AssignRoleToUserCommand $command): JsonResponse
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -27,14 +29,14 @@ class UserRoleController extends Controller
         return response()->json(['message' => 'Role assigned to user successfully']);
     }
 
-    public function revoke(Request $request)
+    public function revoke(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        \Illuminate\Support\Facades\DB::table('user_roles')
+        DB::table('user_roles')
             ->where('user_id', $validated['user_id'])
             ->where('role_id', $validated['role_id'])
             ->delete();
@@ -42,4 +44,3 @@ class UserRoleController extends Controller
         return response()->json(['message' => 'Role revoked successfully'], 204);
     }
 }
-

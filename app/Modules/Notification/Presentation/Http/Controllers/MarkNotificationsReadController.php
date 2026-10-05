@@ -15,16 +15,14 @@ final class MarkNotificationsReadController
     {
         $userId = $request->user()->id;
 
-        $affected = DB::transaction(fn () =>
-            NotificationModel::where('user_id', $userId)
-                ->whereNull('read_at')
-                ->update(['read_at' => now()])
+        $affected = DB::transaction(fn () => NotificationModel::where('user_id', $userId)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()])
         );
 
         return response()->json([
-            'message'  => 'Notifications marked as read.',
+            'message' => 'Notifications marked as read.',
             'affected' => $affected,
         ]);
     }
 }
-

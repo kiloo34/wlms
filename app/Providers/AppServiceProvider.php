@@ -5,6 +5,7 @@ namespace App\Providers;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -47,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
             : null,
         );
 
-        \Illuminate\Support\Facades\Gate::define('manage-rbac', function ($user) {
+        Gate::define('manage-rbac', function ($user) {
             return DB::table('user_roles')
                 ->join('roles', 'user_roles.role_id', '=', 'roles.id')
                 ->where('user_roles.user_id', $user->id)

@@ -15,6 +15,8 @@ final class ProjectOutput
         public readonly string $name,
         public readonly string $status,
         public readonly ?string $priorityId = null,
+        public readonly int $totalIssuesCount = 0,
+        public readonly int $completedIssuesCount = 0,
     ) {}
 
     public static function fromDomain(Project $project): self
@@ -26,6 +28,8 @@ final class ProjectOutput
             $project->getName(),
             $project->getStatus(),
             $project->getPriorityId()?->value,
+            0,
+            0
         );
     }
 }

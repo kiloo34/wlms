@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Infrastructure\Persistence\Repositories;
 
 use App\Modules\Collaboration\Domain\Entities\Comment;
@@ -28,7 +30,7 @@ final class EloquentCommentRepository implements CommentRepositoryInterface
     public function findById(CommentId $id): ?Comment
     {
         $model = CommentModel::find($id->value);
-        if (!$model) {
+        if (! $model) {
             return null;
         }
 
@@ -38,7 +40,7 @@ final class EloquentCommentRepository implements CommentRepositoryInterface
     public function findByIssueId(string $issueId): array
     {
         $models = CommentModel::where('issue_id', $issueId)->orderBy('created_at', 'asc')->get();
-        return $models->map(fn(CommentModel $model) => CommentMapper::toDomain($model))->all();
+
+        return $models->map(fn (CommentModel $model) => CommentMapper::toDomain($model))->all();
     }
 }
-

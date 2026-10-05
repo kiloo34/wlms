@@ -17,7 +17,7 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->foreign('issue_id')->references('id')->on('issues')->cascadeOnDelete();
-            // Not enforcing foreign key on author_id right now if users table uses integer ID and issue uses varchar. 
+            // Not enforcing foreign key on author_id right now if users table uses integer ID and issue uses varchar.
             // In a real strict environment we would, but keeping it flexible as per previous Worklog design.
         });
 

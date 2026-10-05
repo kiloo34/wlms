@@ -11,7 +11,7 @@ final class ProjectId
     public function __construct(public readonly string $value)
     {
         if (empty($value)) {
-            throw new InvalidArgumentException("ProjectId cannot be empty.");
+            throw new InvalidArgumentException('ProjectId cannot be empty.');
         }
     }
 }

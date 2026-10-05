@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 test('Collaboration domain layer does not depend on other layers')
@@ -19,7 +20,7 @@ test('Collaboration application layer does not depend on presentation or infrast
         'Illuminate\Database',
     ])
     ->ignoring([
-        'App\Modules\Collaboration\Application\UseCases\GetIssueTimelineQuery'
+        'App\Modules\Collaboration\Application\UseCases\GetIssueTimelineQuery',
     ]);
 
 test('Collaboration presentation layer only calls application layer (and CQRS queries)')

@@ -1,14 +1,16 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Infrastructure\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use App\Modules\Collaboration\Domain\Repositories\CommentRepositoryInterface;
 use App\Modules\Collaboration\Domain\Repositories\AuditLogRepositoryInterface;
-use App\Modules\Collaboration\Infrastructure\Persistence\Repositories\EloquentCommentRepository;
-use App\Modules\Collaboration\Infrastructure\Persistence\Repositories\EloquentAuditLogRepository;
+use App\Modules\Collaboration\Domain\Repositories\CommentRepositoryInterface;
 use App\Modules\Collaboration\Infrastructure\Listeners\WorkloadEventSubscriber;
+use App\Modules\Collaboration\Infrastructure\Persistence\Repositories\EloquentAuditLogRepository;
+use App\Modules\Collaboration\Infrastructure\Persistence\Repositories\EloquentCommentRepository;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
 
 class CollaborationServiceProvider extends ServiceProvider
 {
@@ -23,4 +25,3 @@ class CollaborationServiceProvider extends ServiceProvider
         Event::subscribe(WorkloadEventSubscriber::class);
     }
 }
-

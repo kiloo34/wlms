@@ -51,6 +51,9 @@ final class SprintMapper
         return $sprint;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function toPersistence(Sprint $sprint): array
     {
         return [

@@ -35,16 +35,18 @@ return new class extends Migration
         Schema::table('user_roles', function (Blueprint $table) {
             try {
                 $table->dropForeign(['user_id']);
-            } catch (\Throwable) {}
+            } catch (Throwable) {
+            }
 
             try {
                 $table->dropIndex(['user_id']);
-            } catch (\Throwable) {}
+            } catch (Throwable) {
+            }
         });
 
         // 2. ALTER kolom dari varchar/uuid ke bigint menggunakan raw SQL
         // USING diperlukan PostgreSQL untuk konversi tipe data eksplisit
-        DB::statement("ALTER TABLE user_roles ALTER COLUMN user_id TYPE bigint USING user_id::bigint;");
+        DB::statement('ALTER TABLE user_roles ALTER COLUMN user_id TYPE bigint USING user_id::bigint;');
 
         // 3. Tambahkan kembali index
         Schema::table('user_roles', function (Blueprint $table) {

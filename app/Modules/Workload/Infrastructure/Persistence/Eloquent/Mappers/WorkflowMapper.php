@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Workload\Infrastructure\Persistence\Eloquent\Mappers;
@@ -19,6 +20,9 @@ final class WorkflowMapper
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function toPersistence(Workflow $workflow): array
     {
         return [
@@ -29,4 +33,3 @@ final class WorkflowMapper
         ];
     }
 }
-

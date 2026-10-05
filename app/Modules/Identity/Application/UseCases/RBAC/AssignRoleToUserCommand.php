@@ -18,7 +18,7 @@ class AssignRoleToUserCommand
                 ->where('context_id', $contextId)
                 ->exists();
 
-            if (!$exists) {
+            if (! $exists) {
                 DB::table('user_roles')->insert([
                     'id' => Str::uuid()->toString(),
                     'user_id' => $userId,
@@ -32,4 +32,3 @@ class AssignRoleToUserCommand
         });
     }
 }
-

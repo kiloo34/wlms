@@ -38,7 +38,7 @@ final class CompleteSprintController
                     sprintName: $sprint->name,
                     newState: 'completed',
                     actorId: $actorId,
-                    occurredAt: new DateTimeImmutable(),
+                    occurredAt: new DateTimeImmutable,
                 ));
             }
 
@@ -48,4 +48,3 @@ final class CompleteSprintController
         }
     }
 }
-

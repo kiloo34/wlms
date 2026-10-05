@@ -8,7 +8,6 @@ use Illuminate\Validation\Rules\Password;
 
 class PasswordUpdateRequest extends FormRequest
 {
-
     /**
      * Get the validation rules that apply to the request.
      *

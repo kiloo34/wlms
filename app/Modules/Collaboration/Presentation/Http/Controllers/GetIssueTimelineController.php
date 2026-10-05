@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Presentation\Http\Controllers;
 
-use Illuminate\Routing\Controller;
-use Illuminate\Http\JsonResponse;
 use App\Modules\Collaboration\Application\UseCases\GetIssueTimelineQuery;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
 
 class GetIssueTimelineController extends Controller
 {
@@ -17,8 +19,7 @@ class GetIssueTimelineController extends Controller
         $timeline = $this->query->execute($issueId);
 
         return response()->json([
-            'data' => $timeline
+            'data' => $timeline,
         ]);
     }
 }
-

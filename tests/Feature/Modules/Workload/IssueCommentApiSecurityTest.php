@@ -14,12 +14,12 @@ beforeEach(function () {
     // 1. Setup basic DB structure
     $this->levelId = Str::uuid()->toString();
     DB::table('org_levels')->insert([
-        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true
+        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
     $this->groupId = Str::uuid()->toString();
     DB::table('org_units')->insert([
-        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group'
+        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group',
     ]);
 
     // 2. Setup Workspace
@@ -56,7 +56,7 @@ beforeEach(function () {
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-    
+
     // 5. Setup IssueType, Priority, Status (Dependencies for Issue)
     $this->issueTypeId = Str::uuid()->toString();
     DB::table('issue_types')->insert([
@@ -70,7 +70,7 @@ beforeEach(function () {
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-    
+
     $this->priorityId = Str::uuid()->toString();
     DB::table('priorities')->insert([
         'id' => $this->priorityId,
@@ -153,7 +153,7 @@ test('anti-idor: normal user cannot manage issue comments (403 Forbidden)', func
 
     // POST /api/issues/{id}/comments
     $this->postJson("/api/issues/{$this->issueId}/comments", [
-        'body' => 'Hacked comment attempt'
+        'body' => 'Hacked comment attempt',
     ])->assertStatus(403);
 });
 
@@ -163,18 +163,18 @@ test('superadmin can get and add comments on an issue', function () {
     // Read Comments (GET /api/issues/{id}/comments)
     $listResponse = $this->getJson("/api/issues/{$this->issueId}/comments");
     $listResponse->assertStatus(200);
-    
+
     $listData = $listResponse->json('data');
     $this->assertIsArray($listData);
     $this->assertGreaterThanOrEqual(1, count($listData));
-    
+
     // Create Comment (POST /api/issues/{id}/comments)
     $createResponse = $this->postJson("/api/issues/{$this->issueId}/comments", [
-        'body' => 'New comment by superadmin'
+        'body' => 'New comment by superadmin',
     ]);
-    
+
     $createResponse->assertStatus(201);
-    
+
     $createdData = $createResponse->json('data');
     $this->assertNotNull($createdData['id'] ?? null);
     $this->assertEquals('New comment by superadmin', $createdData['body']);
@@ -195,7 +195,7 @@ test('validation: missing body returns 422 Unprocessable Entity', function () {
     $response = $this->postJson("/api/issues/{$this->issueId}/comments", []);
 
     $response->assertStatus(422)
-             ->assertJsonValidationErrors(['body']);
+        ->assertJsonValidationErrors(['body']);
 });
 
 test('unauthenticated user cannot access issue comments', function () {
@@ -203,6 +203,6 @@ test('unauthenticated user cannot access issue comments', function () {
         ->assertStatus(401);
 
     $this->postJson("/api/issues/{$this->issueId}/comments", [
-        'body' => 'Anonymous comment'
+        'body' => 'Anonymous comment',
     ])->assertStatus(401);
 });

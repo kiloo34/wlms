@@ -14,7 +14,9 @@ final class IssueLinkModel extends Model
     use HasUuids;
 
     protected $table = 'issue_links';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -25,16 +27,25 @@ final class IssueLinkModel extends Model
         'created_by',
     ];
 
+    /**
+     * @return BelongsTo<IssueModel, $this>
+     */
     public function sourceIssue(): BelongsTo
     {
         return $this->belongsTo(IssueModel::class, 'source_issue_id');
     }
 
+    /**
+     * @return BelongsTo<IssueModel, $this>
+     */
     public function targetIssue(): BelongsTo
     {
         return $this->belongsTo(IssueModel::class, 'target_issue_id');
     }
 
+    /**
+     * @return BelongsTo<UserModel, $this>
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(UserModel::class, 'created_by');

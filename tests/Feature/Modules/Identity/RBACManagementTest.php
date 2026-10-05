@@ -2,8 +2,8 @@
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
-use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -67,7 +67,7 @@ test('superadmin can create and view roles', function () {
         'name' => 'QA Engineer',
         'scope' => 'PROJECT',
     ]);
-    
+
     $response->assertStatus(201);
     $response->assertJsonPath('data.name', 'QA Engineer');
 

@@ -1,13 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Resources;
 
+use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin IssueModel
+ */
 class IssueResource extends JsonResource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [
@@ -26,8 +34,7 @@ class IssueResource extends JsonResource
             'original_estimate_seconds' => $this->original_estimate_seconds,
             'remaining_estimate_seconds' => $this->remaining_estimate_seconds,
             'created_at' => $this->created_at,
-            
-            // Assuming eager loading for relationships
+
             'assignee' => $this->whenLoaded('assignee', function () {
                 return [
                     'id' => $this->assignee->id,
@@ -47,6 +54,35 @@ class IssueResource extends JsonResource
                     'slug' => $this->status->slug,
                     'category' => $this->status->category,
                     'color' => $this->status->color,
+                ];
+            }),
+            'issue_type' => $this->whenLoaded('type', function () {
+                return [
+                    'id' => $this->type->id,
+                    'name' => $this->type->name,
+                    'icon' => $this->type->icon,
+                ];
+            }),
+            'priority' => $this->whenLoaded('priority', function () {
+                return [
+                    'id' => $this->priority->id,
+                    'name' => $this->priority->name,
+                    'icon' => $this->priority->icon,
+                    'color' => $this->priority->color,
+                ];
+            }),
+            'project' => $this->whenLoaded('project', function () {
+                return [
+                    'id' => $this->project->id,
+                    'name' => $this->project->name,
+                    'key' => $this->project->key,
+                ];
+            }),
+            'sprint' => $this->whenLoaded('sprint', function () {
+                return [
+                    'id' => $this->sprint->id,
+                    'name' => $this->sprint->name,
+                    'state' => $this->sprint->state,
                 ];
             }),
         ];

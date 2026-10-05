@@ -1,19 +1,19 @@
 <?php
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
+use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\StatusModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowModel;
-use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowTransitionModel;
-use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
-use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    if (!RoleModel::where('name', 'superadmin')->exists()) {
+    if (! RoleModel::where('name', 'superadmin')->exists()) {
         RoleModel::create(['name' => 'superadmin']);
     }
 });
@@ -44,28 +44,28 @@ it('allows user to manage workflow transitions and update project workflow (Happ
     $statusTodo = StatusModel::create([
         'name' => 'To Do',
         'slug' => 'todo',
-        'category' => 'TODO'
+        'category' => 'TODO',
     ]);
 
     $statusDone = StatusModel::create([
         'name' => 'Done',
         'slug' => 'done',
-        'category' => 'DONE'
+        'category' => 'DONE',
     ]);
 
-    $levelId = (string) \Illuminate\Support\Str::uuid();
-    $levelId = (string) \Illuminate\Support\Str::uuid();
-    \Illuminate\Support\Facades\DB::table('org_levels')->insert([
-        'id' => $levelId, 'name' => 'Department', 'slug' => 'department', 'depth' => 1, 'can_own_workspace' => true
+    $levelId = (string) Str::uuid();
+    $levelId = (string) Str::uuid();
+    DB::table('org_levels')->insert([
+        'id' => $levelId, 'name' => 'Department', 'slug' => 'department', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
-    $groupId = (string) \Illuminate\Support\Str::uuid();
-    \Illuminate\Support\Facades\DB::table('org_units')->insert([
-        'id' => $groupId, 'org_level_id' => $levelId, 'name' => 'IT Group'
+    $groupId = (string) Str::uuid();
+    DB::table('org_units')->insert([
+        'id' => $groupId, 'org_level_id' => $levelId, 'name' => 'IT Group',
     ]);
 
-    $workspaceId = (string) \Illuminate\Support\Str::uuid();
-    \Illuminate\Support\Facades\DB::table('workspaces')->insert([
+    $workspaceId = (string) Str::uuid();
+    DB::table('workspaces')->insert([
         'id' => $workspaceId,
         'owner_group_id' => $groupId,
         'name' => 'My Workspace',
@@ -73,7 +73,7 @@ it('allows user to manage workflow transitions and update project workflow (Happ
     ]);
 
     $project = ProjectModel::create([
-        'id' => (string) \Illuminate\Support\Str::uuid(),
+        'id' => (string) Str::uuid(),
         'workspace_id' => $workspaceId,
         'name' => 'My Project',
         'key' => 'MP',
@@ -110,7 +110,7 @@ it('allows user to manage workflow transitions and update project workflow (Happ
         'name' => 'Updated Project',
         'workflow_id' => $workflow->id,
     ]);
-    
+
     $updateProjectResponse->assertStatus(200);
     $this->assertDatabaseHas('projects', [
         'id' => $project->id,

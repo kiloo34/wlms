@@ -2,9 +2,9 @@
 
 namespace App\Modules\Identity\Presentation\Http\Controllers\Settings;
 
+use App\Modules\Identity\Presentation\Http\Requests\Settings\PasswordUpdateRequest;
+use App\Modules\Identity\Presentation\Http\Requests\Settings\TwoFactorAuthenticationRequest;
 use App\Shared\Presentation\Http\Controllers\Controller;
-use App\Http\Requests\Settings\PasswordUpdateRequest;
-use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;

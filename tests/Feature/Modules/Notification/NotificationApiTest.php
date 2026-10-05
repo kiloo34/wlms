@@ -26,15 +26,15 @@ test('user can get their own notifications and see unread count', function () {
         'id' => Str::uuid(),
         'user_id' => $user->id,
         'type' => 'issue.assigned',
-        'data' => ['issue_number' => 123]
+        'data' => ['issue_number' => 123],
     ]);
     NotificationModel::create([
         'id' => Str::uuid(),
         'user_id' => $user->id,
         'type' => 'comment.added',
-        'data' => ['body_preview' => 'Hello']
+        'data' => ['body_preview' => 'Hello'],
     ]);
-    
+
     // Read notification
     NotificationModel::create([
         'id' => Str::uuid(),
@@ -49,7 +49,7 @@ test('user can get their own notifications and see unread count', function () {
         'id' => Str::uuid(),
         'user_id' => $otherUser->id,
         'type' => 'issue.assigned',
-        'data' => ['issue_number' => 999]
+        'data' => ['issue_number' => 999],
     ]);
 
     $response = $this->actingAs($user)->getJson('/api/notifications');
@@ -75,18 +75,18 @@ test('user can mark all their notifications as read', function () {
         'id' => Str::uuid(),
         'user_id' => $user->id,
         'type' => 'issue.assigned',
-        'data' => ['issue_number' => 123]
+        'data' => ['issue_number' => 123],
     ]);
 
     $response = $this->actingAs($user)->putJson('/api/notifications/read');
 
     $response->assertStatus(200)
         ->assertJson([
-            'message' => 'Notifications marked as read.'
+            'message' => 'Notifications marked as read.',
         ]);
 
     $this->assertDatabaseMissing('notifications', [
         'user_id' => $user->id,
-        'read_at' => null
+        'read_at' => null,
     ]);
 });

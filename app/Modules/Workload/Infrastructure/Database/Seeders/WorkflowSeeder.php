@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Infrastructure\Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -11,10 +13,10 @@ final class WorkflowSeeder extends Seeder
     public function run(): void
     {
         // 1. Statuses
-        $todo       = (string) Str::uuid();
+        $todo = (string) Str::uuid();
         $inProgress = (string) Str::uuid();
-        $inReview   = (string) Str::uuid();
-        $done       = (string) Str::uuid();
+        $inReview = (string) Str::uuid();
+        $done = (string) Str::uuid();
 
         DB::table('statuses')->insert([
             ['id' => $todo,       'name' => 'To Do',       'slug' => 'todo',        'category' => 'TODO',        'color' => '#E2E8F0'],
@@ -48,7 +50,7 @@ final class WorkflowSeeder extends Seeder
         DB::table('issue_types')->insert([
             ['id' => (string) Str::uuid(), 'name' => 'Epic',        'slug' => 'epic',        'icon' => 'layers',      'color' => '#8B5CF6', 'sort_order' => 1, 'is_active' => true],
             ['id' => (string) Str::uuid(), 'name' => 'Story',       'slug' => 'story',       'icon' => 'bookmark',    'color' => '#10B981', 'sort_order' => 2, 'is_active' => true],
-            ['id' => (string) Str::uuid(), 'name' => 'Task',        'slug' => 'task',        'icon' => 'check-square','color' => '#3B82F6', 'sort_order' => 3, 'is_active' => true],
+            ['id' => (string) Str::uuid(), 'name' => 'Task',        'slug' => 'task',        'icon' => 'check-square', 'color' => '#3B82F6', 'sort_order' => 3, 'is_active' => true],
             ['id' => (string) Str::uuid(), 'name' => 'Bug',         'slug' => 'bug',         'icon' => 'bug',         'color' => '#EF4444', 'sort_order' => 4, 'is_active' => true],
             ['id' => (string) Str::uuid(), 'name' => 'Spike',       'slug' => 'spike',       'icon' => 'zap',         'color' => '#F59E0B', 'sort_order' => 5, 'is_active' => true],
         ]);
