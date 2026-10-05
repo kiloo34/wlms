@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Application\UseCases;
 
 use App\Modules\Workload\Application\DTOs\CreateIssueInput;
@@ -16,6 +18,7 @@ use App\Modules\Workload\Domain\ValueObjects\ProjectId;
 use App\Modules\Workload\Domain\ValueObjects\SprintId;
 use App\Modules\Workload\Domain\ValueObjects\StatusId;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 final class CreateIssueUseCase
 {
@@ -27,15 +30,15 @@ final class CreateIssueUseCase
 
     public function execute(CreateIssueInput $input): IssueOutput
     {
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($input) {
+        return DB::transaction(function () use ($input) {
             $projectId = new ProjectId($input->projectId);
 
             $project = $this->projectRepository->findById($projectId);
-            if (!$project) {
-                throw new Exception("Project not found.");
+            if (! $project) {
+                throw new Exception('Project not found.');
             }
             if ($project->getStatus() === 'ARCHIVED') {
-                throw new Exception("Cannot create issue in an archived project.");
+                throw new Exception('Cannot create issue in an archived project.');
             }
 
             // Auto-generate sequential number

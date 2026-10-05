@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 final class GetWorkspaceMembersQuery
 {
+    /**
+     * @return array<int, object>
+     */
     public function execute(string $workspaceId, int $limit = 50, int $offset = 0): array
     {
         $query = DB::table('workspace_members')
@@ -27,4 +30,3 @@ final class GetWorkspaceMembersQuery
         return $query->get()->all();
     }
 }
-

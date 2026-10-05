@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Infrastructure\Listeners;
 
 use App\Modules\Workload\Domain\Events\IssueAssigned;

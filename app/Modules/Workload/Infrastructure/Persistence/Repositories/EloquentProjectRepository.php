@@ -33,6 +33,7 @@ final class EloquentProjectRepository implements ProjectRepositoryInterface
     public function findById(ProjectId $id): ?Project
     {
         $model = ProjectModel::query()->find($id->value);
+
         return $model ? ProjectMapper::toDomain($model) : null;
     }
 

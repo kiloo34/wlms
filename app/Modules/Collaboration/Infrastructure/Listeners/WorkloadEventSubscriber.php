@@ -1,12 +1,14 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Infrastructure\Listeners;
 
 use App\Modules\Collaboration\Application\DTOs\AuditLogInput;
 use App\Modules\Collaboration\Application\UseCases\LogAuditEventUseCase;
+use App\Modules\Workload\Domain\Events\IssueAssigned;
 use App\Modules\Workload\Domain\Events\IssueCreated;
 use App\Modules\Workload\Domain\Events\IssueTransitioned;
-use App\Modules\Workload\Domain\Events\IssueAssigned;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Str;
 
@@ -23,7 +25,7 @@ class WorkloadEventSubscriber
             auditableType: 'issue',
             auditableId: $event->issueId,
             event: 'created',
-            actorId: $event->reporterId,
+            actorId: (string) $event->reporterId,
             oldValues: null,
             newValues: [
                 'title' => $event->title,
@@ -40,7 +42,7 @@ class WorkloadEventSubscriber
             auditableType: 'issue',
             auditableId: $event->issueId,
             event: 'transitioned',
-            actorId: $event->actorId,
+            actorId: (string) $event->actorId,
             oldValues: ['status_id' => $event->fromStatusId],
             newValues: ['status_id' => $event->toStatusId]
         ));
@@ -53,12 +55,15 @@ class WorkloadEventSubscriber
             auditableType: 'issue',
             auditableId: $event->issueId,
             event: 'assigned',
-            actorId: $event->actorId,
+            actorId: (string) $event->actorId,
             oldValues: null,
             newValues: ['assignee_id' => $event->assigneeId]
         ));
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function subscribe(Dispatcher $events): array
     {
         return [

@@ -13,7 +13,7 @@ beforeEach(function () {
     // Setup Org Units
     $this->levelId = Str::uuid()->toString();
     DB::table('org_levels')->insert([
-        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true
+        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
     $this->groupId1 = Str::uuid()->toString();

@@ -1,13 +1,15 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Application\UseCases;
 
 use App\Modules\Workload\Application\DTOs\StatusDTO;
 use App\Modules\Workload\Domain\Entities\Status;
 use App\Modules\Workload\Domain\Repositories\StatusRepositoryInterface;
 use App\Modules\Workload\Domain\ValueObjects\StatusId;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 final class ManageStatusUseCase
 {
@@ -24,6 +26,7 @@ final class ManageStatusUseCase
                 $dto->color
             );
             $this->repository->save($status);
+
             return $status;
         });
     }
@@ -32,10 +35,13 @@ final class ManageStatusUseCase
     {
         return DB::transaction(function () use ($id, $dto) {
             $status = $this->repository->findById(new StatusId($id));
-            if (!$status) throw new \Exception("Status not found");
+            if (! $status) {
+                throw new \Exception('Status not found');
+            }
 
             $status->update($dto->name, $dto->slug, $dto->category, $dto->color);
             $this->repository->save($status);
+
             return $status;
         });
     }
@@ -47,6 +53,9 @@ final class ManageStatusUseCase
         });
     }
 
+    /**
+     * @return Status[]
+     */
     public function getAll(): array
     {
         return $this->repository->findAll();

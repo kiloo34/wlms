@@ -1,15 +1,17 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
-use Illuminate\Routing\Controller;
 use App\Modules\Workload\Application\DTOs\WorkflowDTO;
 use App\Modules\Workload\Application\UseCases\ManageWorkflowUseCase;
+use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowModel;
 use App\Modules\Workload\Presentation\Http\Requests\StoreWorkflowRequest;
 use App\Modules\Workload\Presentation\Http\Resources\WorkflowResource;
-use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 final class WorkflowController extends Controller
 {
@@ -18,6 +20,7 @@ final class WorkflowController extends Controller
     public function index(): JsonResponse
     {
         $workflows = $this->useCase->getAll();
+
         return response()->json(WorkflowResource::collection($workflows));
     }
 
@@ -28,17 +31,27 @@ final class WorkflowController extends Controller
             $request->validated('description'),
             (bool) $request->validated('is_default', false)
         );
-        
+
         $workflow = $this->useCase->create($dto);
+
         return response()->json(new WorkflowResource($workflow), 201);
     }
 
-    public function show(string $id): JsonResponse { if (!request()->user()->can('manage-rbac')) { abort(403); }
+    public function show(string $id): JsonResponse
+    {
+        if (! request()->user()->can('manage-rbac')) {
+            abort(403);
+        }
         $workflow = WorkflowModel::with('transitions')->findOrFail($id);
+
         return response()->json($workflow);
     }
 
-    public function update(Request $request, string $id): JsonResponse { if (!request()->user()->can('manage-rbac')) { abort(403); }
+    public function update(Request $request, string $id): JsonResponse
+    {
+        if (! request()->user()->can('manage-rbac')) {
+            abort(403);
+        }
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -52,11 +65,17 @@ final class WorkflowController extends Controller
         );
 
         $workflow = $this->useCase->update($id, $dto);
+
         return response()->json(new WorkflowResource($workflow));
     }
 
-    public function destroy(string $id): JsonResponse { if (!request()->user()->can('manage-rbac')) { abort(403); }
+    public function destroy(string $id): JsonResponse
+    {
+        if (! request()->user()->can('manage-rbac')) {
+            abort(403);
+        }
         $this->useCase->delete($id);
+
         return response()->json(null, 204);
     }
 }

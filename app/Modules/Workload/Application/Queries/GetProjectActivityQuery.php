@@ -29,7 +29,7 @@ final class GetProjectActivityQuery
                 'issue_histories.field_changed',
                 'issue_histories.old_value',
                 'issue_histories.new_value',
-                'issue_histories.created_at'
+                'issue_histories.created_at',
             ])
             ->orderBy('issue_histories.created_at', 'desc')
             ->orderBy('issue_histories.id', 'desc')
@@ -37,24 +37,23 @@ final class GetProjectActivityQuery
 
         if ($cursor) {
             // Basic cursor pagination using created_at
-            $query->where('issue_histories.created_at', '<', clone $query->raw("'$cursor'"));
+            $query->where('issue_histories.created_at', '<', $cursor);
         }
 
         $results = $query->get();
 
         return $results->map(function ($row) {
             return new ProjectActivityOutput(
-                id: (string)$row->id,
-                issueId: (string)$row->issue_id,
-                issueTitle: (string)$row->issue_title,
-                actorId: (string)$row->actor_id,
-                actorName: (string)$row->actor_name,
-                fieldChanged: (string)$row->field_changed,
-                oldValue: $row->old_value ? (string)$row->old_value : null,
-                newValue: $row->new_value ? (string)$row->new_value : null,
-                createdAt: (string)$row->created_at
+                id: (string) $row->id,
+                issueId: (string) $row->issue_id,
+                issueTitle: (string) $row->issue_title,
+                actorId: (string) $row->actor_id,
+                actorName: (string) $row->actor_name,
+                fieldChanged: (string) $row->field_changed,
+                oldValue: $row->old_value ? (string) $row->old_value : null,
+                newValue: $row->new_value ? (string) $row->new_value : null,
+                createdAt: (string) $row->created_at
             );
         })->all();
     }
 }
-

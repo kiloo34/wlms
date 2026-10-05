@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Application\DTOs;
 
 final class EditCommentInput
@@ -10,4 +12,3 @@ final class EditCommentInput
         public readonly string $body
     ) {}
 }
-

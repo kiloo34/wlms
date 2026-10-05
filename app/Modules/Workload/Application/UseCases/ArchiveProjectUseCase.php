@@ -22,12 +22,12 @@ final class ArchiveProjectUseCase
             $projectId = new ProjectId($input->projectId);
             $project = $this->repository->findById($projectId);
 
-            if (!$project) {
-                throw new InvalidArgumentException("Project not found");
+            if (! $project) {
+                throw new InvalidArgumentException('Project not found');
             }
 
             $project->archive($input->actorUserId);
-            
+
             $this->repository->save($project);
         });
     }

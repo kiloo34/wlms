@@ -14,12 +14,12 @@ beforeEach(function () {
     // Setup basic DB structure
     $this->levelId = Str::uuid()->toString();
     DB::table('org_levels')->insert([
-        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true
+        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
     $this->groupId = Str::uuid()->toString();
     DB::table('org_units')->insert([
-        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group'
+        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group',
     ]);
 
     // Setup Workspace
@@ -102,13 +102,13 @@ test('superadmin can manage projects (CRUD) without leaking sensitive data', fun
         'name' => 'Test Project',
         'description' => 'Test description',
     ]);
-    
+
     $createResponse->assertStatus(201);
-    
+
     $createdData = $createResponse->json('data');
     $newProjectId = $createdData['id'] ?? null;
     $this->assertNotNull($newProjectId);
-    
+
     // Check no sensitive leak on Create
     expect(array_key_exists('deleted_at', $createdData))->toBeFalse();
 
@@ -124,7 +124,7 @@ test('superadmin can manage projects (CRUD) without leaking sensitive data', fun
             'status',
         ],
     ]);
-    
+
     $listData = $listResponse->json();
     $this->assertGreaterThanOrEqual(1, count($listData));
     expect(array_key_exists('deleted_at', $listData[0]))->toBeFalse();

@@ -1,31 +1,37 @@
 <?php
 
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
 use Illuminate\Support\Str;
+
 use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = UserModel::factory()->create();
-    $role = \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => \Illuminate\Support\Str::uuid(), 'scope' => 'GLOBAL']);
-    \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel::create(['id' => \Illuminate\Support\Str::uuid(), 'user_id' => $this->user->id, 'role_id' => $role->id]);
-    if (isset($this->user)) { $this->user->refresh(); } elseif (isset($user)) { $user->refresh(); }
-    if (!Schema::hasTable("notifications")) {
-        Schema::create("notifications", function (Blueprint $table) {
-            $table->uuid("id")->primary();
-            $table->string("type");
-            $table->string("notifiable_type");
-            $table->string("notifiable_id");
-            $table->text("data");
-            $table->timestamp("read_at")->nullable();
+    $role = RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => Str::uuid(), 'scope' => 'GLOBAL']);
+    UserRoleModel::create(['id' => Str::uuid(), 'user_id' => $this->user->id, 'role_id' => $role->id]);
+    if (isset($this->user)) {
+        $this->user->refresh();
+    } elseif (isset($user)) {
+        $user->refresh();
+    }
+    if (! Schema::hasTable('notifications')) {
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->string('notifiable_type');
+            $table->string('notifiable_id');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
     }
@@ -49,7 +55,7 @@ beforeEach(function () {
         'id' => $this->workflowId,
         'name' => 'Default',
         'description' => 'Desc',
-        'is_default' => true
+        'is_default' => true,
     ]);
 
     // Workflow Transitions
@@ -77,7 +83,7 @@ beforeEach(function () {
         'id' => $this->workspaceId,
         'owner_group_id' => (string) Str::uuid(),
         'name' => 'W',
-        'status' => 'ACTIVE'
+        'status' => 'ACTIVE',
     ]);
 
     $this->projectId = (string) Str::uuid();
@@ -214,7 +220,7 @@ it('rejects an invalid workflow transition with 422', function () {
     ]);
 
     $response->assertStatus(422)
-             ->assertJsonPath('code', 'INVALID_TRANSITION');
+        ->assertJsonPath('code', 'INVALID_TRANSITION');
 });
 
 it('does not expose sensitive reporter data in api response', function () {
@@ -227,7 +233,7 @@ it('does not expose sensitive reporter data in api response', function () {
 
     $response = actingAs($this->user)->postJson('/api/issues', $payload);
     $response->assertStatus(201);
-    
+
     // API should not contain email or password of the user
     $response->assertJsonMissing(['email']);
     $response->assertJsonMissing(['password']);

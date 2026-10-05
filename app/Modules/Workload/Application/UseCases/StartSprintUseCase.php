@@ -18,15 +18,15 @@ final class StartSprintUseCase
     public function execute(string $sprintId): void
     {
         $sprint = $this->sprintRepository->findById(new SprintId($sprintId));
-        if (!$sprint) {
-            throw new InvalidArgumentException("Sprint not found");
+        if (! $sprint) {
+            throw new InvalidArgumentException('Sprint not found');
         }
 
         if ($this->sprintRepository->hasActiveSprint($sprint->getProjectId())) {
-            throw new InvalidArgumentException("Another sprint is already active in this project");
+            throw new InvalidArgumentException('Another sprint is already active in this project');
         }
 
-        $sprint->start(new DateTimeImmutable());
+        $sprint->start(new DateTimeImmutable);
         $this->sprintRepository->save($sprint);
     }
 }

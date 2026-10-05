@@ -40,7 +40,7 @@ final class CreateProjectController
                 'name' => $output->name,
                 'status' => $output->status,
                 'priority_id' => $output->priorityId,
-            ]
+            ],
         ], 201);
     }
 }

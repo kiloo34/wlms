@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Application\UseCases;
 
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
@@ -9,6 +11,9 @@ use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
  */
 final class GetBacklogIssuesQuery
 {
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function execute(string $projectId): array
     {
         return IssueModel::query()
@@ -16,7 +21,7 @@ final class GetBacklogIssuesQuery
             ->whereNull('sprint_id')
             ->orderBy('number')
             ->get()
-            ->map(fn($issue) => [
+            ->map(fn (IssueModel $issue) => [
                 'id' => $issue->id,
                 'number' => $issue->number,
                 'title' => $issue->title,

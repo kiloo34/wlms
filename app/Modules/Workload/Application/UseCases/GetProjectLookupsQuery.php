@@ -10,23 +10,27 @@ use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\PriorityMode
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\StatusModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowTransitionModel;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
- * Pragmatic CQRS: Query khusus untuk mengambil master data (lookups) 
+ * Pragmatic CQRS: Query khusus untuk mengambil master data (lookups)
  * yang dibutuhkan oleh halaman Project.
  */
 final class GetProjectLookupsQuery
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function getLookupsForProject(string $workspaceId, ?string $workflowId): array
     {
         $issueTypes = IssueTypeModel::select('id', 'name', 'slug', 'icon', 'color')->get();
         $priorities = PriorityModel::select('id', 'name', 'slug', 'level', 'icon', 'color')->get();
-        
-        if (!$workflowId) {
+
+        if (! $workflowId) {
             $defaultWorkflow = WorkflowModel::where('is_default', true)->first();
             $workflowId = $defaultWorkflow?->id;
         }
-        
+
         $statusIds = [];
         if ($workflowId) {
             $transitions = WorkflowTransitionModel::where('workflow_id', $workflowId)->get();
@@ -40,8 +44,8 @@ final class GetProjectLookupsQuery
             }
             $statusIds = array_unique($statusIds);
         }
-        
-        if (!empty($statusIds)) {
+
+        if (! empty($statusIds)) {
             $statuses = StatusModel::select('id', 'name', 'category', 'slug', 'color')->whereIn('id', $statusIds)->get();
         } else {
             $statuses = StatusModel::select('id', 'name', 'category', 'slug', 'color')->get();
@@ -61,11 +65,14 @@ final class GetProjectLookupsQuery
             'users' => $users,
         ];
     }
-    
+
+    /**
+     * @return array{priorities: Collection<int, PriorityModel>}
+     */
     public function getPrioritiesOnly(): array
     {
         return [
-            'priorities' => PriorityModel::select('id', 'name', 'slug', 'level', 'icon', 'color')->get()
+            'priorities' => PriorityModel::select('id', 'name', 'slug', 'level', 'icon', 'color')->get(),
         ];
     }
 }

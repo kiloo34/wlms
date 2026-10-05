@@ -18,4 +18,3 @@ final class ProjectActivityOutput
         public readonly string $createdAt
     ) {}
 }
-

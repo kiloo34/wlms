@@ -10,6 +10,5 @@ class LogWorkInput
         public readonly int $timeSpentSeconds,
         public readonly string $description,
         public readonly string $startedAt
-    ) {
-    }
+    ) {}
 }

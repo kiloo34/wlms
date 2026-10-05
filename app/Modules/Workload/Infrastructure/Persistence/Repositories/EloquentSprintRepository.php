@@ -6,6 +6,7 @@ namespace App\Modules\Workload\Infrastructure\Persistence\Repositories;
 
 use App\Modules\Workload\Domain\Entities\Sprint;
 use App\Modules\Workload\Domain\Repositories\SprintRepositoryInterface;
+use App\Modules\Workload\Domain\ValueObjects\ProjectId;
 use App\Modules\Workload\Domain\ValueObjects\SprintId;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Mappers\SprintMapper;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\SprintModel;
@@ -32,10 +33,11 @@ final class EloquentSprintRepository implements SprintRepositoryInterface
     public function findById(SprintId $id): ?Sprint
     {
         $model = SprintModel::query()->find($id->value);
+
         return $model ? SprintMapper::toDomain($model) : null;
     }
 
-    public function hasActiveSprint(\App\Modules\Workload\Domain\ValueObjects\ProjectId $projectId): bool
+    public function hasActiveSprint(ProjectId $projectId): bool
     {
         return SprintModel::query()
             ->where('project_id', $projectId->value)

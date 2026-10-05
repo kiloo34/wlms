@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Application\DTOs;
 
 final class AddCommentInput
@@ -12,4 +14,3 @@ final class AddCommentInput
         public readonly ?string $parentId = null
     ) {}
 }
-

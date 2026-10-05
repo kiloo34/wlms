@@ -1,17 +1,23 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Domain\Entities;
 
-use App\Modules\Collaboration\Domain\ValueObjects\CommentId;
-use App\Modules\Collaboration\Domain\ValueObjects\CommentBody;
 use App\Modules\Collaboration\Domain\Events\CommentAdded;
 use App\Modules\Collaboration\Domain\Events\CommentEdited;
+use App\Modules\Collaboration\Domain\ValueObjects\CommentBody;
+use App\Modules\Collaboration\Domain\ValueObjects\CommentId;
 use DateTimeImmutable;
 
 final class Comment
 {
+    /** @var array<int, object> */
     private array $domainEvents = [];
 
+    /**
+     * @param  int<0, max>  $authorId
+     */
     private function __construct(
         public readonly CommentId $id,
         public readonly string $issueId,
@@ -23,6 +29,9 @@ final class Comment
         public DateTimeImmutable $updatedAt
     ) {}
 
+    /**
+     * @param  int<0, max>  $authorId
+     */
     public static function create(
         CommentId $id,
         string $issueId,
@@ -30,7 +39,7 @@ final class Comment
         ?string $parentId,
         CommentBody $body
     ): self {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable;
         $comment = new self($id, $issueId, $authorId, $parentId, $body, false, $now, $now);
 
         $comment->recordEvent(new CommentAdded(
@@ -45,6 +54,9 @@ final class Comment
         return $comment;
     }
 
+    /**
+     * @param  int<0, max>  $authorId
+     */
     public static function reconstruct(
         string $id,
         string $issueId,
@@ -81,6 +93,9 @@ final class Comment
         ));
     }
 
+    /**
+     * @return array<int, object>
+     */
     public function getDomainEvents(): array
     {
         return $this->domainEvents;
@@ -96,4 +111,3 @@ final class Comment
         $this->domainEvents[] = $event;
     }
 }
-

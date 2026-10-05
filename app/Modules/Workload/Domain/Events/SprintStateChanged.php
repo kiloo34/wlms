@@ -17,4 +17,3 @@ final class SprintStateChanged
         public readonly DateTimeImmutable $occurredAt,
     ) {}
 }
-

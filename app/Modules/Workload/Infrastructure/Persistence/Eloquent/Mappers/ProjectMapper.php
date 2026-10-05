@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Workload\Infrastructure\Persistence\Eloquent\Mappers;
 
 use App\Modules\Workload\Domain\Entities\Project;
+use App\Modules\Workload\Domain\ValueObjects\PriorityId;
 use App\Modules\Workload\Domain\ValueObjects\ProjectId;
 use App\Modules\Workload\Domain\ValueObjects\ProjectKey;
-use App\Modules\Workload\Domain\ValueObjects\WorkspaceId;
 use App\Modules\Workload\Domain\ValueObjects\WorkflowId;
-use App\Modules\Workload\Domain\ValueObjects\PriorityId;
+use App\Modules\Workload\Domain\ValueObjects\WorkspaceId;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use DateTimeImmutable;
 use ReflectionClass;
@@ -62,6 +62,9 @@ final class ProjectMapper
         return $project;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function toPersistence(Project $project): array
     {
         return [

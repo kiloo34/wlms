@@ -20,7 +20,7 @@ return new class extends Migration
         // Admin bisa menambah tipe baru (e.g., 'Spike', 'Technical Debt',
         // 'Test Case') tanpa menyentuh kode PHP atau schema database.
         // ================================================================
-        if (!Schema::hasTable('issue_types')) {
+        if (! Schema::hasTable('issue_types')) {
             Schema::create('issue_types', function (Blueprint $table) {
                 $table->uuid('id')->primary();
 
@@ -56,7 +56,7 @@ return new class extends Migration
         // memungkinkan sorting dan perbandingan prioritas secara matematis
         // tanpa switch-case di kode PHP.
         // ================================================================
-        if (!Schema::hasTable('priorities')) {
+        if (! Schema::hasTable('priorities')) {
             Schema::create('priorities', function (Blueprint $table) {
                 $table->uuid('id')->primary();
 
@@ -86,7 +86,7 @@ return new class extends Migration
         // Menambah kanal Slack/Teams cukup dengan INSERT baris baru
         // dan mendaftarkan adapter kelasnya — nol perubahan schema.
         // ================================================================
-        if (!Schema::hasTable('notification_channels')) {
+        if (! Schema::hasTable('notification_channels')) {
             Schema::create('notification_channels', function (Blueprint $table) {
                 $table->uuid('id')->primary();
 

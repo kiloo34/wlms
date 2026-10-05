@@ -19,14 +19,19 @@ class UserRoleModel extends Model
         'context_id',
     ];
 
+    /**
+     * @return BelongsTo<UserModel, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(UserModel::class, 'user_id');
     }
 
+    /**
+     * @return BelongsTo<RoleModel, $this>
+     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(RoleModel::class, 'role_id');
     }
 }
-

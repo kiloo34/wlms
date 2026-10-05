@@ -77,7 +77,7 @@ export function AppSidebar() {
         },
         {
             title: t('Documentation'),
-            href: 'https://laravel.com/docs/starter-kits#react',
+            href: '/docs',
             icon: BookOpen,
         },
     ];

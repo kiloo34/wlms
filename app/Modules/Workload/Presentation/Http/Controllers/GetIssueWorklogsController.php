@@ -17,7 +17,7 @@ final class GetIssueWorklogsController
             ->get();
 
         return response()->json([
-            'data' => $worklogs
+            'data' => $worklogs,
         ]);
     }
 }

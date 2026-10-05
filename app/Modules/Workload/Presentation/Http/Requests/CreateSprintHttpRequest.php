@@ -14,6 +14,9 @@ final class CreateSprintHttpRequest extends FormRequest
         return $this->user()?->hasRole('Workspace Owner') || $this->user()?->hasRole('Superadmin');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

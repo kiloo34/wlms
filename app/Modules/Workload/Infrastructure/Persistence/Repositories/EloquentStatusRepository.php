@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Workload\Infrastructure\Persistence\Repositories;
@@ -25,6 +26,7 @@ final class EloquentStatusRepository implements StatusRepositoryInterface
     public function findById(StatusId $id): ?Status
     {
         $model = StatusModel::query()->find($id->value);
+
         return $model ? StatusMapper::toDomain($model) : null;
     }
 
@@ -38,7 +40,7 @@ final class EloquentStatusRepository implements StatusRepositoryInterface
     public function findAll(): array
     {
         $models = StatusModel::query()->get();
+
         return $models->map(fn (StatusModel $model) => StatusMapper::toDomain($model))->all();
     }
 }
-

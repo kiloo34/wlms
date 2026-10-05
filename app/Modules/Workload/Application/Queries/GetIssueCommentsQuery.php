@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Collection;
 
 final class GetIssueCommentsQuery
 {
+    /**
+     * @return Collection<int, IssueCommentModel>
+     */
     public function execute(string $issueId): Collection
     {
         return IssueCommentModel::with(['author'])

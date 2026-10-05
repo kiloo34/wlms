@@ -13,6 +13,9 @@ final class Workspace
 {
     use HasDomainEvents;
 
+    /**
+     * @param  array<string, mixed>|null  $settings
+     */
     private function __construct(
         private readonly WorkspaceId $id,
         private readonly string $ownerGroupId,
@@ -42,12 +45,12 @@ final class Workspace
         );
 
         // Rekam event bisnis
-        $workspace->recordEvent(new \App\Modules\Workload\Domain\Events\WorkspaceCreated(
+        $workspace->recordEvent(new WorkspaceCreated(
             $id->value,
             $ownerGroupId,
             $actorId,
             $name,
-            new DateTimeImmutable()
+            new DateTimeImmutable
         ));
 
         return $workspace;
@@ -59,6 +62,9 @@ final class Workspace
         // $this->recordEvent(new WorkspaceArchived(...)); // Untuk implementasi selanjutnya
     }
 
+    /**
+     * @param  array<string, mixed>|null  $settings
+     */
     public function updateDetails(string $newName, ?array $settings, string $actorId): void
     {
         $this->name = $newName;
@@ -92,8 +98,16 @@ final class Workspace
         return $this->status;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getSettings(): ?array
     {
         return $this->settings;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
     }
 }

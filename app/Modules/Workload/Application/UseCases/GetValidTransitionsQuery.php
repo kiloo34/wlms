@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Application\UseCases;
 
 use App\Modules\Workload\Domain\Repositories\IssueRepositoryInterface;
@@ -18,15 +20,20 @@ final class GetValidTransitionsQuery
         private readonly WorkflowRepositoryInterface $workflowRepository
     ) {}
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function execute(string $issueId): array
     {
         $issue = $this->issueRepository->findById(new IssueId($issueId));
-        if (!$issue) throw new Exception("Issue not found.");
+        if (! $issue) {
+            throw new Exception('Issue not found.');
+        }
 
         $engine = $this->workflowRepository->getEngineForProject($issue->getProjectId());
         $transitions = $engine->getValidTransitionsFrom($issue->getStatusId()->value);
 
-        return array_map(fn($t) => [
+        return array_map(fn ($t) => [
             'to_status_id' => $t->toStatusId,
             'name' => $t->name,
         ], $transitions);

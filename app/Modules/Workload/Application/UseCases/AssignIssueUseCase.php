@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Application\UseCases;
 
 use App\Modules\Workload\Application\DTOs\AssignIssueInput;
@@ -8,6 +10,7 @@ use App\Modules\Workload\Domain\Repositories\IssueRepositoryInterface;
 use App\Modules\Workload\Domain\ValueObjects\AssigneeId;
 use App\Modules\Workload\Domain\ValueObjects\IssueId;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 final class AssignIssueUseCase
 {
@@ -17,10 +20,10 @@ final class AssignIssueUseCase
 
     public function execute(AssignIssueInput $input): IssueOutput
     {
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($input) {
+        return DB::transaction(function () use ($input) {
             $issue = $this->issueRepository->findById(new IssueId($input->issueId));
-            if (!$issue) {
-                throw new Exception("Issue not found.");
+            if (! $issue) {
+                throw new Exception('Issue not found.');
             }
 
             $issue->assign($input->assigneeId ? new AssigneeId($input->assigneeId) : null, $input->actorUserId);

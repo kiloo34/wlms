@@ -7,7 +7,7 @@ import { index as projectsIndex } from '@/routes/projects';
 import { index as workspacesIndex } from '@/routes/workspaces';
 import { Combobox } from '@/components/ui/combobox';
 import { WorkspaceMembersDialog } from '@/modules/Workload/Workspaces/components/WorkspaceMembersDialog';
-import { Users } from 'lucide-react';
+import { Users, CheckSquare } from 'lucide-react';
 import { useState } from 'react';
 
 export default function ProjectsIndex() {
@@ -56,6 +56,11 @@ export default function ProjectsIndex() {
                                 <Button variant="outline" className="h-9 px-3 shrink-0 flex items-center gap-2" onClick={() => setMembersOpen(true)} title="Manage Workspace Members">
                                     <span className="sr-only sm:not-sr-only sm:text-xs">Members</span>
                                     <Users className="h-4 w-4" />
+                                </Button>
+                                
+                                <Button variant="outline" className="h-9 px-3 shrink-0 flex items-center gap-2" onClick={() => router.visit(`/workspaces/${activeWorkspace.id}/issues`)} title="All Tasks in Workspace">
+                                    <span className="sr-only sm:not-sr-only sm:text-xs">All Tasks</span>
+                                    <CheckSquare className="h-4 w-4" />
                                 </Button>
                                 <WorkspaceMembersDialog
                                     workspaceId={activeWorkspace.id}

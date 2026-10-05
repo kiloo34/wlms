@@ -2,14 +2,14 @@
 
 namespace App\Modules\Identity\Infrastructure\Database\Seeders;
 
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Illuminate\Support\Str;
 
 class DummySeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         if (DB::table('org_levels')->count() === 0) {
             DB::table('org_levels')->insert([
@@ -17,7 +17,7 @@ class DummySeeder extends Seeder
                 'slug' => 'group',
                 'name' => 'Group',
                 'depth' => 1,
-                'can_own_workspace' => true
+                'can_own_workspace' => true,
             ]);
         }
 
@@ -25,7 +25,7 @@ class DummySeeder extends Seeder
             DB::table('org_units')->insert([
                 'id' => '01923abc-1111-1234-1234-123456789abc',
                 'org_level_id' => '01923abc-0000-1234-1234-123456789abc',
-                'name' => 'IT Group'
+                'name' => 'IT Group',
             ]);
         }
 
@@ -34,9 +34,8 @@ class DummySeeder extends Seeder
                 'email' => 'admin@admin.com',
                 'password' => bcrypt('password'),
                 'org_unit_id' => '01923abc-1111-1234-1234-123456789abc',
-                'uuid' => Str::uuid()->toString()
+                'uuid' => Str::uuid()->toString(),
             ]);
         }
     }
 }
-

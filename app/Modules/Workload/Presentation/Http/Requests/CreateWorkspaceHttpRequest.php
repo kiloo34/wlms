@@ -15,6 +15,9 @@ final class CreateWorkspaceHttpRequest extends FormRequest
         return auth()->check() && auth()->user()->hasPermission('workspaces:manage');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

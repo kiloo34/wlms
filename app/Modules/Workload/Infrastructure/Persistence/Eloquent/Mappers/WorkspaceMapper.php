@@ -52,6 +52,9 @@ final class WorkspaceMapper
     /**
      * Serialisasi: mengubah Domain Entity menjadi array untuk di-insert/update ke Database.
      */
+    /**
+     * @return array<string, mixed>
+     */
     public static function toPersistence(Workspace $entity): array
     {
         return [

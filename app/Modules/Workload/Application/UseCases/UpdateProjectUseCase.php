@@ -6,9 +6,9 @@ namespace App\Modules\Workload\Application\UseCases;
 
 use App\Modules\Workload\Application\DTOs\UpdateProjectInput;
 use App\Modules\Workload\Domain\Repositories\ProjectRepositoryInterface;
+use App\Modules\Workload\Domain\ValueObjects\PriorityId;
 use App\Modules\Workload\Domain\ValueObjects\ProjectId;
 use App\Modules\Workload\Domain\ValueObjects\WorkflowId;
-use App\Modules\Workload\Domain\ValueObjects\PriorityId;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -24,8 +24,8 @@ final class UpdateProjectUseCase
             $projectId = new ProjectId($input->projectId);
             $project = $this->repository->findById($projectId);
 
-            if (!$project) {
-                throw new InvalidArgumentException("Project not found");
+            if (! $project) {
+                throw new InvalidArgumentException('Project not found');
             }
 
             $project->update(
@@ -36,7 +36,7 @@ final class UpdateProjectUseCase
                 $input->actorUserId,
                 $input->priorityId ? new PriorityId($input->priorityId) : null
             );
-            
+
             $this->repository->save($project);
         });
     }

@@ -6,14 +6,33 @@ namespace App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property string $id
+ * @property string $workspace_id
+ * @property string|null $workflow_id
+ * @property string $priority_id
+ * @property string $key
+ * @property string $name
+ * @property string|null $description
+ * @property string $status
+ * @property string|null $lead_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ */
 final class ProjectModel extends Model
 {
     use HasUuids, SoftDeletes;
 
     protected $table = 'projects';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -28,17 +47,26 @@ final class ProjectModel extends Model
         'lead_id',
     ];
 
-    public function issues(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /**
+     * @return HasMany<IssueModel, $this>
+     */
+    public function issues(): HasMany
     {
         return $this->hasMany(IssueModel::class, 'project_id');
     }
 
-    public function priority(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return BelongsTo<PriorityModel, $this>
+     */
+    public function priority(): BelongsTo
     {
         return $this->belongsTo(PriorityModel::class, 'priority_id', 'id');
     }
 
-    public function workspace(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return BelongsTo<WorkspaceModel, $this>
+     */
+    public function workspace(): BelongsTo
     {
         return $this->belongsTo(WorkspaceModel::class, 'workspace_id');
     }

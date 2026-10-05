@@ -2,9 +2,9 @@
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
-use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -60,7 +60,7 @@ test('normal user cannot assign or revoke roles (Anti-IDOR 403)', function () {
         'user_id' => $this->normalUser->id,
         'role_id' => $this->normalRole->id,
     ]);
-    
+
     $response->assertStatus(403);
 
     $revokeResponse = $this->postJson('/api/rbac/user-roles/revoke', [
@@ -87,4 +87,3 @@ test('superadmin can assign a role to a user successfully', function () {
         'role_id' => $this->normalRole->id,
     ]);
 });
-

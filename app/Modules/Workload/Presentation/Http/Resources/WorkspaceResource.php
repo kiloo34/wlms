@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Resources;
 
+use App\Modules\Workload\Application\DTOs\WorkspaceOutput;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin WorkspaceOutput
+ */
 final class WorkspaceResource extends JsonResource
 {
     /**

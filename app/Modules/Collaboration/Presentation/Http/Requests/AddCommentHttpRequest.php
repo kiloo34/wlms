@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Presentation\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -11,6 +13,9 @@ class AddCommentHttpRequest extends FormRequest
         return true; // Authorize in controller via Gate or just assume authenticated
     }
 
+    /**
+     * @return array<string, array<int, string>>
+     */
     public function rules(): array
     {
         return [
@@ -19,4 +24,3 @@ class AddCommentHttpRequest extends FormRequest
         ];
     }
 }
-

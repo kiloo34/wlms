@@ -3,10 +3,16 @@
 namespace App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Factories\UserFactory;
+use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -29,6 +35,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property Collection<int, UserRoleModel> $userRoles
  */
 #[Fillable(['name', 'email', 'password', 'uuid', 'org_unit_id', 'locale'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -53,27 +60,31 @@ class UserModel extends Authenticatable implements PasskeyUser
         ];
     }
 
-    protected static function newFactory()
+    /**
+     * @return Factory<UserModel>
+     */
+    protected static function newFactory(): Factory
     {
-        return \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Factories\UserFactory::new();
+        return UserFactory::new();
     }
 
-    public function orgUnit()
+    /**
+     * @return BelongsTo<OrgUnitModel, $this>
+     */
+    public function orgUnit(): BelongsTo
     {
         return $this->belongsTo(OrgUnitModel::class, 'org_unit_id');
     }
 
-    public function passkeys(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(\Laravel\Passkeys\Passkey::class, 'user_id');
-    }
-
-    public function userRoles()
+    /**
+     * @return HasMany<UserRoleModel, $this>
+     */
+    public function userRoles(): HasMany
     {
         return $this->hasMany(UserRoleModel::class, 'user_id');
     }
 
-        public function hasRole(string $roleName): bool
+    public function hasRole(string $roleName): bool
     {
         $this->loadMissing('userRoles.role');
         foreach ($this->userRoles as $userRole) {
@@ -81,6 +92,7 @@ class UserModel extends Authenticatable implements PasskeyUser
                 return true;
             }
         }
+
         return false;
     }
 
@@ -100,13 +112,17 @@ class UserModel extends Authenticatable implements PasskeyUser
                 }
             }
         }
+
         return false;
     }
 
-    public function workspaces(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /**
+     * @return BelongsToMany<WorkspaceModel, $this>
+     */
+    public function workspaces(): BelongsToMany
     {
         return $this->belongsToMany(
-            \App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel::class,
+            WorkspaceModel::class,
             'workspace_members',
             'user_id',
             'workspace_id'

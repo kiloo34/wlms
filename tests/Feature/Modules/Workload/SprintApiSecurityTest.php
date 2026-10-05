@@ -14,12 +14,12 @@ beforeEach(function () {
     // Setup basic DB structure
     $this->levelId = Str::uuid()->toString();
     DB::table('org_levels')->insert([
-        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true
+        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
     $this->groupId = Str::uuid()->toString();
     DB::table('org_units')->insert([
-        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group'
+        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group',
     ]);
 
     // Setup Workspace
@@ -66,9 +66,9 @@ beforeEach(function () {
     // Setup User without access (different org unit, no roles)
     $this->otherGroupId = Str::uuid()->toString();
     DB::table('org_units')->insert([
-        'id' => $this->otherGroupId, 'org_level_id' => $this->levelId, 'name' => 'Other Group'
+        'id' => $this->otherGroupId, 'org_level_id' => $this->levelId, 'name' => 'Other Group',
     ]);
-    
+
     $this->userWithoutAccess = UserModel::factory()->create([
         'org_unit_id' => $this->otherGroupId,
     ]);
@@ -105,7 +105,7 @@ test('Anti-overlap: Gagal start sprint (400) jika ada sprint lain yang ACTIVE di
     $this->actingAs($this->userWithAccess);
 
     $response = $this->putJson("/api/sprints/{$pendingSprintId}/start");
-    
+
     // Harus gagal karena sudah ada sprint active
     $response->assertStatus(400);
 });

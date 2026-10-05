@@ -5,6 +5,7 @@ namespace App\Modules\Identity\Application\UseCases\Auth;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
@@ -33,8 +34,7 @@ class CreateNewUser implements CreatesNewUsers
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
-            'uuid' => \Illuminate\Support\Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
         ]);
     }
 }
-

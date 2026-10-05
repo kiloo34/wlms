@@ -22,6 +22,8 @@ interface IssueFormDialogProps {
     onSubmit: (payload: CreateIssuePayload | UpdateIssuePayload) => void;
     issue?: Issue | null;
     isLoading?: boolean;
+    projectId?: string;
+    projects?: SelectOption[];
     issueTypes: SelectOption[];
     priorities: SelectOption[];
     statuses: SelectOption[];
@@ -34,6 +36,8 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
     onSubmit,
     issue,
     isLoading,
+    projectId,
+    projects = [],
     issueTypes,
     priorities,
     statuses,
@@ -41,6 +45,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
 }) => {
     const isEdit = !!issue;
 
+    const [selectedProjectId, setSelectedProjectId] = useState(projectId || '');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [issueTypeId, setIssueTypeId] = useState('');
@@ -85,7 +90,13 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!isEdit && !projectId && !selectedProjectId) {
+            alert('Please select a project');
+            return;
+        }
+
         const payload: CreateIssuePayload | UpdateIssuePayload = {
+            project_id: !isEdit && !projectId ? selectedProjectId : undefined,
             title,
             description: description || null,
             issue_type_id: issueTypeId,
@@ -113,6 +124,20 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
     
     const formContent = (
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
+            {!isEdit && !projectId && (
+                <div className="space-y-2">
+                    <Label htmlFor="project">Project *</Label>
+                    <Combobox 
+                        id="project"
+                        options={(projects || []).map((p) => ({ value: String(p.id), label: p.name }))}
+                        value={selectedProjectId}
+                        onChange={setSelectedProjectId}
+                        placeholder="Select project..."
+                        emptyText="No project found."
+                    />
+                </div>
+            )}
+            
             <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
                 <Input
@@ -145,7 +170,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                     <Label htmlFor="issue_type">Type</Label>
                     <Combobox 
                         id="issue_type"
-                        options={issueTypes.map((type) => ({ value: String(type.id), label: type.name }))}
+                        options={(issueTypes || []).map((type) => ({ value: String(type.id), label: type.name }))}
                         value={issueTypeId}
                         onChange={setIssueTypeId}
                         placeholder="Search type..."
@@ -157,7 +182,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                     <Label htmlFor="priority">Priority</Label>
                     <Combobox 
                         id="priority"
-                        options={priorities.map((p) => ({ value: String(p.id), label: p.name }))}
+                        options={(priorities || []).map((p) => ({ value: String(p.id), label: p.name }))}
                         value={priorityId}
                         onChange={setPriorityId}
                         placeholder="Search priority..."
@@ -171,7 +196,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                     <Label htmlFor="status">Status {isEdit ? '*' : '(Optional)'}</Label>
                     <Combobox 
                         id="status"
-                        options={statuses.map((s) => ({ value: String(s.id), label: s.name }))}
+                        options={(statuses || []).map((s) => ({ value: String(s.id), label: s.name }))}
                         value={statusId}
                         onChange={setStatusId}
                         placeholder="Search status..."
@@ -185,7 +210,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                         id="assignee"
                         options={[
                             { value: 'unassigned', label: 'Unassigned' },
-                            ...assignees.map((a) => ({ value: String(a.id), label: a.name }))
+                            ...(assignees || []).map((a) => ({ value: String(a.id), label: a.name }))
                         ]}
                         value={assigneeId}
                         onChange={setAssigneeId}

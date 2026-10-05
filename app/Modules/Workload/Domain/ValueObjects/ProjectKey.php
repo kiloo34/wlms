@@ -11,7 +11,7 @@ final class ProjectKey
     public function __construct(public readonly string $value)
     {
         if (empty($value) || strlen($value) > 10) {
-            throw new InvalidArgumentException("ProjectKey must be 1-10 characters long.");
+            throw new InvalidArgumentException('ProjectKey must be 1-10 characters long.');
         }
     }
 }

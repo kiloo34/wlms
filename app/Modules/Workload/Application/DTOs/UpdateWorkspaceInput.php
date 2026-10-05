@@ -6,6 +6,9 @@ namespace App\Modules\Workload\Application\DTOs;
 
 final class UpdateWorkspaceInput
 {
+    /**
+     * @param  array<string, mixed>|null  $settings
+     */
     public function __construct(
         public readonly string $workspaceId,
         public readonly string $name,

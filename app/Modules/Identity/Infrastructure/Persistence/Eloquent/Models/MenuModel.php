@@ -5,6 +5,16 @@ namespace App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string $id
+ * @property string|null $parent_id
+ * @property string $label
+ * @property string $key
+ * @property string|null $route
+ * @property string|null $icon
+ * @property int|null $sort_order
+ * @property bool $is_active
+ */
 class MenuModel extends Model
 {
     use HasUuids;
@@ -25,4 +35,3 @@ class MenuModel extends Model
         'is_active' => 'boolean',
     ];
 }
-

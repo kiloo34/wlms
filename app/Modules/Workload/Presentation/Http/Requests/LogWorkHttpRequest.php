@@ -12,6 +12,9 @@ class LogWorkHttpRequest extends FormRequest
         return Auth::check();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

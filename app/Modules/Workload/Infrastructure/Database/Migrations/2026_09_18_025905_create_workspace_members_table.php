@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('role')->default('viewer');
             $table->timestamps();
-            
+
             $table->foreign('workspace_id')->references('id')->on('workspaces')->onDelete('cascade');
             $table->unique(['workspace_id', 'user_id']);
         });

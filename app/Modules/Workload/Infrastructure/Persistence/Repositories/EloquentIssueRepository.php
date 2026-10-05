@@ -32,10 +32,14 @@ final class EloquentIssueRepository implements IssueRepositoryInterface
     public function findById(IssueId $id): ?Issue
     {
         $model = IssueModel::query()->find($id->value);
-        if (!$model) return null;
+        if (! $model) {
+            return null;
+        }
 
         $project = ProjectModel::query()->find($model->project_id);
-        if (!$project) return null;
+        if (! $project) {
+            return null;
+        }
 
         return IssueMapper::toDomain($model, $project);
     }
@@ -54,4 +58,3 @@ final class EloquentIssueRepository implements IssueRepositoryInterface
         IssueModel::query()->where('id', $id->value)->delete();
     }
 }
-

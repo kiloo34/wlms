@@ -3,6 +3,7 @@
 namespace App\Shared\Presentation\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -36,7 +37,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        
+
         $menus = [];
         $permissions = [];
         $roles = [];
@@ -44,17 +45,15 @@ class HandleInertiaRequests extends Middleware
         if ($user) {
             // Eager load roles, permissions, and menus for the user
             $user->load(['userRoles.role.permissions', 'userRoles.role.menus']);
-            
+
             $uniqueMenus = [];
-            
+
             foreach ($user->userRoles as $userRole) {
                 if ($userRole->role) {
                     foreach ($userRole->role->permissions as $perm) {
                         $permissions[] = $perm->name;
                     }
-                    if ($userRole->role) {
-                        $roles[] = $userRole->role->name; // assuming permission has 'name'
-                    }
+                    $roles[] = $userRole->role->name;
                     foreach ($userRole->role->menus as $menu) {
                         // Hanya tampilkan Top-Level Menu di Sidebar Utama
                         if ($menu->parent_id === null) {
@@ -73,15 +72,15 @@ class HandleInertiaRequests extends Middleware
 
             // Convert to indexed array and optionally sort by order
             $menus = array_values($uniqueMenus);
-            usort($menus, function($a, $b) {
-                return ($a['order'] ?? 0) <=> ($b['order'] ?? 0);
+            usort($menus, function ($a, $b) {
+                return $a['order'] <=> $b['order'];
             });
-            
+
             $permissions = array_unique($permissions);
             $roles = array_unique($roles);
 
             // Cek menggunakan Gate yang sudah didefinisikan
-            $isSuperAdmin = \Illuminate\Support\Facades\Gate::allows('manage-rbac');
+            $isSuperAdmin = Gate::allows('manage-rbac');
 
             if ($isSuperAdmin) {
                 // If superadmin has NO menus explicitly assigned, fallback to default full access
@@ -109,13 +108,16 @@ class HandleInertiaRequests extends Middleware
                     'roles' => array_values($roles),
                 ]) : null,
             ],
-            
+
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => app()->getLocale(),
             'translations' => function () {
-                $path = base_path('lang/' . app()->getLocale() . '.json');
-                return file_exists($path) ? json_decode(file_get_contents($path), true) : [];
-            }
+                $path = base_path('lang/'.app()->getLocale().'.json');
+
+                $json = file_exists($path) ? file_get_contents($path) : false;
+
+                return $json !== false ? json_decode($json, true) : [];
+            },
         ];
 
     }

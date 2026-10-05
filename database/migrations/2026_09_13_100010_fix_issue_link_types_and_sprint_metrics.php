@@ -91,7 +91,7 @@ return new class extends Migration
         Schema::table('issue_links', function (Blueprint $table) {
             // Hapus unique index lama yang bergantung pada link_type
             $table->dropUnique('issue_link_unique');
-            
+
             // Hapus kolom ENUM lama
             $table->dropColumn('link_type');
 
@@ -103,7 +103,7 @@ return new class extends Migration
                 ->onDelete('restrict');
 
             $table->index('link_type_id', 'issue_link_type_idx');
-            
+
             // Re-create unique index dengan kolom baru
             $table->unique(['source_issue_id', 'target_issue_id', 'link_type_id'], 'issue_link_unique_new');
         });

@@ -34,18 +34,17 @@ return [
             ],
         ],
 
-
         'pusher' => [
             'driver' => 'pusher',
-            'key'    => env('PUSHER_APP_KEY'),
+            'key' => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
-                'cluster'   => env('PUSHER_APP_CLUSTER', 'mt1'),
-                'host'      => env('PUSHER_HOST', '127.0.0.1'),
-                'port'      => (int) env('PUSHER_PORT', 6001),
-                'scheme'    => env('PUSHER_SCHEME', 'http'),
-                'useTLS'    => env('PUSHER_SCHEME', 'http') === 'https',
+                'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
+                'host' => env('PUSHER_HOST', '127.0.0.1'),
+                'port' => (int) env('PUSHER_PORT', 6001),
+                'scheme' => env('PUSHER_SCHEME', 'http'),
+                'useTLS' => env('PUSHER_SCHEME', 'http') === 'https',
                 'encrypted' => false,
             ],
             'client_options' => [
@@ -55,7 +54,7 @@ return [
 
         'ably' => [
             'driver' => 'ably',
-            'key'    => env('ABLY_KEY'),
+            'key' => env('ABLY_KEY'),
         ],
 
         'log' => [
@@ -69,4 +68,3 @@ return [
     ],
 
 ];
-
