@@ -14,6 +14,9 @@ final class CreateProjectHttpRequest extends FormRequest
         return $this->user()?->hasPermission('projects:manage') ?? false;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

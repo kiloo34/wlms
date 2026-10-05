@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Infrastructure\Listeners;
 
 use App\Modules\Workload\Domain\Events\IssueAssigned;
@@ -12,17 +14,17 @@ final class WriteInAppNotificationListener
     {
         // Write in-app notification record for real-time bell icon
         DB::table('notifications')->insert([
-            'id'              => (string) Str::uuid(),
-            'type'            => 'issue_assigned',
+            'id' => (string) Str::uuid(),
+            'type' => 'issue_assigned',
             'notifiable_type' => 'user',
-            'notifiable_id'   => $event->assigneeId,
-            'data'            => json_encode([
+            'notifiable_id' => $event->assigneeId,
+            'data' => json_encode([
                 'issue_number' => $event->issueNumber,
-                'issue_id'     => $event->issueId,
-                'actor_id'     => $event->actorId,
+                'issue_id' => $event->issueId,
+                'actor_id' => $event->actorId,
             ]),
-            'created_at'      => now(),
-            'updated_at'      => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }

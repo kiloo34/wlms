@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Modules\Workload\Application\UseCases\CreateWorkspaceUseCase;
 use App\Modules\Workload\Application\DTOs\CreateWorkspaceInput;
 use App\Modules\Workload\Application\DTOs\WorkspaceOutput;
+use App\Modules\Workload\Application\UseCases\CreateWorkspaceUseCase;
+use App\Modules\Workload\Domain\Config\WorkspaceSettingsInterface;
 use App\Modules\Workload\Domain\Exceptions\WorkspaceCreationException;
 use App\Modules\Workload\Domain\Repositories\WorkspaceRepositoryInterface;
-use App\Modules\Workload\Domain\Config\WorkspaceSettingsInterface;
 
 test('throws exception when group has reached max workspaces limit', function () {
     // 1. Arrange: Mocks

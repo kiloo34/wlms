@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateRoleMenusCommand
 {
+    /**
+     * @param  array<int, string>  $menuIds
+     */
     public function execute(string $roleId, array $menuIds): void
     {
         // Pastikan role exist, jika tidak akan throw exception (ModelNotFoundException)
@@ -24,7 +27,7 @@ class UpdateRoleMenusCommand
                 ];
             }, $menuIds);
 
-            if (!empty($insertData)) {
+            if (! empty($insertData)) {
                 DB::table('role_menus')->insert($insertData);
             }
         });

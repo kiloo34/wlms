@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateRolePermissionsCommand
 {
+    /**
+     * @param  array<int, string>  $permissionIds
+     */
     public function execute(string $roleId, array $permissionIds): void
     {
         DB::transaction(function () use ($roleId, $permissionIds) {
@@ -15,4 +18,3 @@ class UpdateRolePermissionsCommand
         });
     }
 }
-

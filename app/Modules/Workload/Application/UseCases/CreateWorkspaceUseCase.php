@@ -6,11 +6,11 @@ namespace App\Modules\Workload\Application\UseCases;
 
 use App\Modules\Workload\Application\DTOs\CreateWorkspaceInput;
 use App\Modules\Workload\Application\DTOs\WorkspaceOutput;
+use App\Modules\Workload\Domain\Config\WorkspaceSettingsInterface;
 use App\Modules\Workload\Domain\Entities\Workspace;
 use App\Modules\Workload\Domain\Exceptions\WorkspaceCreationException;
 use App\Modules\Workload\Domain\Repositories\WorkspaceRepositoryInterface;
 use App\Modules\Workload\Domain\ValueObjects\WorkspaceId;
-use App\Modules\Workload\Domain\Config\WorkspaceSettingsInterface;
 
 final class CreateWorkspaceUseCase
 {

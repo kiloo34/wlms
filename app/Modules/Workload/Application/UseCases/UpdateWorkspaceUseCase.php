@@ -22,12 +22,12 @@ final class UpdateWorkspaceUseCase
             $workspaceId = new WorkspaceId($input->workspaceId);
             $workspace = $this->repository->findById($workspaceId);
 
-            if (!$workspace) {
-                throw new InvalidArgumentException("Workspace not found");
+            if (! $workspace) {
+                throw new InvalidArgumentException('Workspace not found');
             }
 
             $workspace->updateDetails($input->name, $input->settings, $input->actorUserId);
-            
+
             $this->repository->save($workspace);
         });
     }

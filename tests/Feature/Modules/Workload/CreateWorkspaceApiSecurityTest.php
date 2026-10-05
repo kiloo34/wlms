@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -12,7 +14,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     // Setup dependency: Buat org level dan unit agar referensi table valid
     DB::table('org_levels')->insert([
-        'id' => '01923abc-level-1234-1234-123456789abc', 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true
+        'id' => '01923abc-level-1234-1234-123456789abc', 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
     DB::table('org_units')->insert([
@@ -25,9 +27,13 @@ beforeEach(function () {
     $this->user = UserModel::factory()->create([
         'org_unit_id' => '01923abc-org-1234-1234-123456789abc',
     ]);
-    $role = \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => \Illuminate\Support\Str::uuid(), 'scope' => 'GLOBAL']);
-    \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel::create(['id' => \Illuminate\Support\Str::uuid(), 'user_id' => $this->user->id, 'role_id' => $role->id]);
-    if (isset($this->user)) { $this->user->refresh(); } elseif (isset($user)) { $user->refresh(); }
+    $role = RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => Str::uuid(), 'scope' => 'GLOBAL']);
+    UserRoleModel::create(['id' => Str::uuid(), 'user_id' => $this->user->id, 'role_id' => $role->id]);
+    if (isset($this->user)) {
+        $this->user->refresh();
+    } elseif (isset($user)) {
+        $user->refresh();
+    }
 });
 
 test('api rejects unauthenticated request', function () {

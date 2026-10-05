@@ -13,9 +13,8 @@ final class RemoveWorkspaceMemberUseCase
     {
         DB::transaction(function () use ($workspaceId, $userId) {
             $workspace = WorkspaceModel::findOrFail($workspaceId);
-            
+
             $workspace->members()->detach($userId);
         });
     }
 }
-

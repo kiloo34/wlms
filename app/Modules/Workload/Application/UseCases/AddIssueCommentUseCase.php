@@ -8,7 +8,6 @@ use App\Modules\Workload\Application\DTOs\AddIssueCommentInput;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueCommentModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use InvalidArgumentException;
 
 final class AddIssueCommentUseCase
 {

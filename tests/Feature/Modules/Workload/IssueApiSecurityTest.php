@@ -14,12 +14,12 @@ beforeEach(function () {
     // 1. Setup basic DB structure
     $this->levelId = Str::uuid()->toString();
     DB::table('org_levels')->insert([
-        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true
+        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
     $this->groupId = Str::uuid()->toString();
     DB::table('org_units')->insert([
-        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group'
+        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group',
     ]);
 
     // 2. Setup Workspace
@@ -56,7 +56,7 @@ beforeEach(function () {
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-    
+
     // 5. Setup IssueType, Priority, Status (Dependencies for Issue)
     $this->issueTypeId = Str::uuid()->toString();
     DB::table('issue_types')->insert([
@@ -70,7 +70,7 @@ beforeEach(function () {
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-    
+
     $this->priorityId = Str::uuid()->toString();
     DB::table('priorities')->insert([
         'id' => $this->priorityId,
@@ -181,7 +181,7 @@ test('superadmin can manage issues (CRUD) and get 200/201 response', function ()
         'priority_id' => $this->priorityId,
     ]);
     $createResponse->assertStatus(201);
-    
+
     $createdData = $createResponse->json('data');
     $newIssueId = $createdData['id'] ?? null;
     $this->assertNotNull($newIssueId);
@@ -190,7 +190,7 @@ test('superadmin can manage issues (CRUD) and get 200/201 response', function ()
     // Read (GET /api/projects/{project_id}/issues)
     $listResponse = $this->getJson("/api/projects/{$this->projectId}/issues");
     $listResponse->assertStatus(200);
-    
+
     $listData = $listResponse->json('data');
     $this->assertGreaterThanOrEqual(2, count($listData)); // Initial + New
 
@@ -228,7 +228,5 @@ test('validation: missing required fields returns 422 Unprocessable Entity', fun
     ]);
 
     $response->assertStatus(422)
-             ->assertJsonValidationErrors(['title', 'issue_type_id', 'priority_id']);
+        ->assertJsonValidationErrors(['title', 'issue_type_id', 'priority_id']);
 });
-
-

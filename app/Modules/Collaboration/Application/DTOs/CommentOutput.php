@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Application\DTOs;
 
 use App\Modules\Collaboration\Domain\Entities\Comment;
@@ -31,4 +33,3 @@ final class CommentOutput
         );
     }
 }
-

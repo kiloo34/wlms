@@ -7,6 +7,7 @@ namespace App\Modules\Notification\Presentation\Http\Controllers;
 use App\Modules\Notification\Infrastructure\Persistence\Eloquent\Models\NotificationModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 final class GetNotificationsController
 {
@@ -14,7 +15,7 @@ final class GetNotificationsController
     {
         $userId = $request->user()->id;
 
-        /** @var \Illuminate\Pagination\LengthAwarePaginator $paginator */
+        /** @var LengthAwarePaginator<int, NotificationModel> $paginator */
         $paginator = NotificationModel::where('user_id', $userId)
             ->orderByDesc('created_at')
             ->paginate(20);
@@ -24,15 +25,14 @@ final class GetNotificationsController
             ->count();
 
         return response()->json([
-            'data'         => $paginator->items(),
-            'meta'         => [
+            'data' => $paginator->items(),
+            'meta' => [
                 'current_page' => $paginator->currentPage(),
-                'last_page'    => $paginator->lastPage(),
-                'per_page'     => $paginator->perPage(),
-                'total'        => $paginator->total(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
             ],
             'unread_count' => $unreadCount,
         ]);
     }
 }
-

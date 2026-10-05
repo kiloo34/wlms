@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Presentation\Http\Requests;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreStatusRequest extends FormRequest
@@ -10,6 +13,9 @@ class StoreStatusRequest extends FormRequest
         return $this->user()->can('manage-rbac'); // Or a generic admin permission
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

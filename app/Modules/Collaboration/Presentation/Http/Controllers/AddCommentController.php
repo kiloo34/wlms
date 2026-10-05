@@ -1,12 +1,14 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Presentation\Http\Controllers;
 
-use Illuminate\Routing\Controller;
-use Illuminate\Http\JsonResponse;
-use App\Modules\Collaboration\Presentation\Http\Requests\AddCommentHttpRequest;
-use App\Modules\Collaboration\Application\UseCases\AddCommentToIssueUseCase;
 use App\Modules\Collaboration\Application\DTOs\AddCommentInput;
+use App\Modules\Collaboration\Application\UseCases\AddCommentToIssueUseCase;
+use App\Modules\Collaboration\Presentation\Http\Requests\AddCommentHttpRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 
 class AddCommentController extends Controller
@@ -38,7 +40,7 @@ class AddCommentController extends Controller
                 'is_edited' => $output->isEdited,
                 'created_at' => $output->createdAt,
                 'updated_at' => $output->updatedAt,
-            ]
+            ],
         ], 201);
     }
 }

@@ -7,8 +7,8 @@ namespace App\Modules\Workload\Application\UseCases;
 use App\Modules\Workload\Application\DTOs\CreateSprintInput;
 use App\Modules\Workload\Application\DTOs\SprintOutput;
 use App\Modules\Workload\Domain\Entities\Sprint;
-use App\Modules\Workload\Domain\Repositories\SprintRepositoryInterface;
 use App\Modules\Workload\Domain\Repositories\ProjectRepositoryInterface;
+use App\Modules\Workload\Domain\Repositories\SprintRepositoryInterface;
 use App\Modules\Workload\Domain\ValueObjects\ProjectId;
 use App\Modules\Workload\Domain\ValueObjects\SprintId;
 use Exception;
@@ -28,12 +28,12 @@ final class CreateSprintUseCase
         $projectId = new ProjectId($input->projectId);
         $project = $this->projectRepository->findById($projectId);
 
-        if (!$project) {
-            throw new Exception("Project not found.");
+        if (! $project) {
+            throw new Exception('Project not found.');
         }
 
         if ($project->getStatus() === 'ARCHIVED') {
-            throw new Exception("Cannot create sprint in an archived project.");
+            throw new Exception('Cannot create sprint in an archived project.');
         }
 
         $sprint = Sprint::create(

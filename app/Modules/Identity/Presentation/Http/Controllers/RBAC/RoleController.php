@@ -2,23 +2,26 @@
 
 namespace App\Modules\Identity\Presentation\Http\Controllers\RBAC;
 
-use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
-use App\Modules\Identity\Application\UseCases\RBAC\UpdateRolePermissionsCommand;
 use App\Modules\Identity\Application\UseCases\RBAC\UpdateRoleMenusCommand;
+use App\Modules\Identity\Application\UseCases\RBAC\UpdateRolePermissionsCommand;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class RoleController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         $roles = RoleModel::with(['permissions', 'menus'])->get();
+
         return response()->json(['data' => $roles]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:50|unique:roles,name',
@@ -36,18 +39,19 @@ class RoleController extends Controller
         return response()->json(['data' => $role], 201);
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $role = RoleModel::with(['permissions', 'menus'])->findOrFail($id);
+
         return response()->json(['data' => $role]);
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): JsonResponse
     {
         $role = RoleModel::findOrFail($id);
-        
+
         $validated = $request->validate([
-            'name' => 'required|string|max:50|unique:roles,name,' . $role->id,
+            'name' => 'required|string|max:50|unique:roles,name,'.$role->id,
             'scope' => 'required|string|in:GLOBAL,WORKSPACE,PROJECT',
         ]);
 
@@ -58,10 +62,10 @@ class RoleController extends Controller
         return response()->json(['data' => $role]);
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         $role = RoleModel::findOrFail($id);
-        
+
         DB::transaction(function () use ($role) {
             $role->permissions()->detach();
             // User roles might need to be detached as well based on business rules
@@ -72,7 +76,7 @@ class RoleController extends Controller
         return response()->json(null, 204);
     }
 
-    public function syncPermissions(Request $request, string $id, UpdateRolePermissionsCommand $command)
+    public function syncPermissions(Request $request, string $id, UpdateRolePermissionsCommand $command): JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -83,14 +87,14 @@ class RoleController extends Controller
             $command->execute($id, $validated['permission_ids']);
 
             return response()->json(['message' => 'Permissions synced successfully']);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json(['message' => 'Validasi gagal', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Gagal sync permissions', 'error' => $e->getMessage()], 500);
         }
     }
 
-    public function syncMenus(Request $request, string $id, UpdateRoleMenusCommand $command)
+    public function syncMenus(Request $request, string $id, UpdateRoleMenusCommand $command): JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -101,7 +105,7 @@ class RoleController extends Controller
             $command->execute($id, $validated['menu_ids']);
 
             return response()->json(['message' => 'Menus synced successfully']);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json(['message' => 'Validasi gagal', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Gagal sync menus', 'error' => $e->getMessage()], 500);

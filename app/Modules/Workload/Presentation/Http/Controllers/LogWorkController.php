@@ -13,15 +13,14 @@ class LogWorkController
 {
     public function __construct(
         private LogWorkUseCase $useCase
-    ) {
-    }
+    ) {}
 
     public function __invoke(string $id, LogWorkHttpRequest $request): JsonResponse
     {
         // Authorization: only the assignee may log work on the issue.
         $issue = IssueModel::find($id);
 
-        if (!$issue) {
+        if (! $issue) {
             abort(404, 'Issue not found.');
         }
 
@@ -41,7 +40,7 @@ class LogWorkController
         $this->useCase->execute($input);
 
         return response()->json([
-            'message' => 'Work logged successfully'
+            'message' => 'Work logged successfully',
         ], 201);
     }
 }

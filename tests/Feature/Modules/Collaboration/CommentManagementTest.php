@@ -1,14 +1,20 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Tests\Feature\Modules\Collaboration;
 
+use App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models\CommentModel;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
-use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\SprintModel;
-use App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models\CommentModel;
+use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class CommentManagementTest extends TestCase
@@ -16,33 +22,38 @@ class CommentManagementTest extends TestCase
     use RefreshDatabase;
 
     private UserModel $user;
+
     private IssueModel $issue;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->user = UserModel::factory()->create();
-    $role = \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => \Illuminate\Support\Str::uuid(), 'scope' => 'GLOBAL']);
-    \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel::create(['id' => \Illuminate\Support\Str::uuid(), 'user_id' => $this->user->id, 'role_id' => $role->id]);
-    if (isset($this->user)) { $this->user->refresh(); } elseif (isset($user)) { $user->refresh(); }
+        $role = RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => Str::uuid(), 'scope' => 'GLOBAL']);
+        UserRoleModel::create(['id' => Str::uuid(), 'user_id' => $this->user->id, 'role_id' => $role->id]);
+        if (isset($this->user)) {
+            $this->user->refresh();
+        } elseif (isset($user)) {
+            $user->refresh();
+        }
 
         // Create requisite data for issue
         $workspace = WorkspaceModel::create([
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'id' => Str::uuid()->toString(),
             'name' => 'Workspace A',
-            'owner_group_id' => \Illuminate\Support\Str::uuid()->toString(),
+            'owner_group_id' => Str::uuid()->toString(),
             'status' => 'ACTIVE',
         ]);
-        
+
         $project = ProjectModel::create([
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'id' => Str::uuid()->toString(),
             'workspace_id' => $workspace->id,
             'name' => 'Project A',
             'key' => 'PROJ',
         ]);
-        
+
         $sprint = SprintModel::create([
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'id' => Str::uuid()->toString(),
             'project_id' => $project->id,
             'name' => 'Sprint 1',
             'start_date' => now(),
@@ -50,23 +61,23 @@ class CommentManagementTest extends TestCase
             'status' => 'PLANNED',
         ]);
 
-        $typeId = \Illuminate\Support\Str::uuid()->toString();
-        \Illuminate\Support\Facades\DB::table('issue_types')->insert([
-            'id' => $typeId, 'name' => 'Task', 'slug' => 'task', 'icon' => 'task'
+        $typeId = Str::uuid()->toString();
+        DB::table('issue_types')->insert([
+            'id' => $typeId, 'name' => 'Task', 'slug' => 'task', 'icon' => 'task',
         ]);
 
-        $statusId = \Illuminate\Support\Str::uuid()->toString();
-        \Illuminate\Support\Facades\DB::table('statuses')->insert([
-            'id' => $statusId, 'name' => 'To Do', 'slug' => 'todo', 'category' => 'TODO', 'color' => '#E2E8F0'
+        $statusId = Str::uuid()->toString();
+        DB::table('statuses')->insert([
+            'id' => $statusId, 'name' => 'To Do', 'slug' => 'todo', 'category' => 'TODO', 'color' => '#E2E8F0',
         ]);
 
-        $priorityId = \Illuminate\Support\Str::uuid()->toString();
-        \Illuminate\Support\Facades\DB::table('priorities')->insert([
-            'id' => $priorityId, 'name' => 'High', 'slug' => 'high', 'level' => 1, 'color' => '#FF0000'
+        $priorityId = Str::uuid()->toString();
+        DB::table('priorities')->insert([
+            'id' => $priorityId, 'name' => 'High', 'slug' => 'high', 'level' => 1, 'color' => '#FF0000',
         ]);
 
         $this->issue = IssueModel::create([
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'id' => Str::uuid()->toString(),
             'project_id' => $project->id,
             'sprint_id' => $sprint->id,
             'title' => 'Test Issue',
@@ -98,7 +109,7 @@ class CommentManagementTest extends TestCase
     public function test_user_can_edit_own_comment()
     {
         $comment = CommentModel::create([
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'id' => Str::uuid()->toString(),
             'issue_id' => $this->issue->id,
             'author_id' => (string) $this->user->id,
             'body' => 'Original comment',

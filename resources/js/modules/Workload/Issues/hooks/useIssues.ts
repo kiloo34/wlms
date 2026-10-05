@@ -3,6 +3,7 @@ import axios from '@/lib/axios';
 import { Issue } from '@/types/issue';
 
 export interface CreateIssuePayload {
+    project_id?: string;
     title: string;
     description?: string | null;
     issue_type_id: string;
@@ -10,6 +11,7 @@ export interface CreateIssuePayload {
     status_id?: string;
     assignee_id?: string | null;
     original_estimate_seconds?: number | null;
+    remaining_estimate_seconds?: number | null;
 }
 
 export interface UpdateIssuePayload extends Partial<CreateIssuePayload> {

@@ -2,9 +2,9 @@
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -91,14 +91,14 @@ test('normal user cannot access mapping endpoints (Anti-IDOR 403)', function () 
     $response->assertStatus(403);
 
     // PUT /api/rbac/roles/{id}/permissions
-    $response = $this->putJson('/api/rbac/roles/' . $this->targetRole->id . '/permissions', [
-        'permission_ids' => [$this->perm1Id]
+    $response = $this->putJson('/api/rbac/roles/'.$this->targetRole->id.'/permissions', [
+        'permission_ids' => [$this->perm1Id],
     ]);
     $response->assertStatus(403);
 
     // PUT /api/rbac/roles/{id}/menus
-    $response = $this->putJson('/api/rbac/roles/' . $this->targetRole->id . '/menus', [
-        'menu_ids' => [$this->menu1Id]
+    $response = $this->putJson('/api/rbac/roles/'.$this->targetRole->id.'/menus', [
+        'menu_ids' => [$this->menu1Id],
     ]);
     $response->assertStatus(403);
 });
@@ -107,8 +107,8 @@ test('superadmin can map permissions and menus successfully (Normal Case)', func
     $this->actingAs($this->superAdmin);
 
     // Sync Permissions
-    $responsePerm = $this->putJson('/api/rbac/roles/' . $this->targetRole->id . '/permissions', [
-        'permission_ids' => [$this->perm1Id, $this->perm2Id]
+    $responsePerm = $this->putJson('/api/rbac/roles/'.$this->targetRole->id.'/permissions', [
+        'permission_ids' => [$this->perm1Id, $this->perm2Id],
     ]);
     $responsePerm->assertStatus(200);
     $this->assertDatabaseHas('role_permissions', [
@@ -121,8 +121,8 @@ test('superadmin can map permissions and menus successfully (Normal Case)', func
     ]);
 
     // Sync Menus
-    $responseMenu = $this->putJson('/api/rbac/roles/' . $this->targetRole->id . '/menus', [
-        'menu_ids' => [$this->menu1Id, $this->menu2Id]
+    $responseMenu = $this->putJson('/api/rbac/roles/'.$this->targetRole->id.'/menus', [
+        'menu_ids' => [$this->menu1Id, $this->menu2Id],
     ]);
     $responseMenu->assertStatus(200);
     $this->assertDatabaseHas('role_menus', [
@@ -144,8 +144,8 @@ test('syncing with invalid menu_ids returns 422 Error', function () {
     $this->actingAs($this->superAdmin);
 
     $fakeMenuId = Str::uuid()->toString();
-    $response = $this->putJson('/api/rbac/roles/' . $this->targetRole->id . '/menus', [
-        'menu_ids' => [$fakeMenuId]
+    $response = $this->putJson('/api/rbac/roles/'.$this->targetRole->id.'/menus', [
+        'menu_ids' => [$fakeMenuId],
     ]);
     $response->assertStatus(422);
 });

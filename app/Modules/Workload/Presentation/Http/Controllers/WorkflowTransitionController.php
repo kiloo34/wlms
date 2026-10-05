@@ -1,19 +1,24 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
-use Illuminate\Routing\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowTransitionModel;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 final class WorkflowTransitionController extends Controller
 {
-    public function store(Request $request, string $workflowId): JsonResponse { if (!request()->user()->can('manage-rbac')) { abort(403); }
+    public function store(Request $request, string $workflowId): JsonResponse
+    {
+        if (! request()->user()->can('manage-rbac')) {
+            abort(403);
+        }
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'from_status_id' => ['nullable', 'uuid'],
@@ -35,7 +40,11 @@ final class WorkflowTransitionController extends Controller
         return response()->json($transition, 201);
     }
 
-    public function destroy(string $workflowId, string $transitionId): JsonResponse { if (!request()->user()->can('manage-rbac')) { abort(403); }
+    public function destroy(string $workflowId, string $transitionId): JsonResponse
+    {
+        if (! request()->user()->can('manage-rbac')) {
+            abort(403);
+        }
         DB::transaction(function () use ($workflowId, $transitionId) {
             $transition = WorkflowTransitionModel::where('workflow_id', $workflowId)
                 ->where('id', $transitionId)

@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Domain\Repositories;
 
 use App\Modules\Collaboration\Domain\Entities\AuditLog;
@@ -14,4 +16,3 @@ interface AuditLogRepositoryInterface
      */
     public function findByTarget(TargetEntity $target): array;
 }
-

@@ -17,4 +17,3 @@ final class NotificationServiceProvider extends ServiceProvider
         Event::subscribe(NotificationEventSubscriber::class);
     }
 }
-

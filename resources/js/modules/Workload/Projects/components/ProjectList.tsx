@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Combobox } from '@/components/ui/combobox';
 import { PriorityBadge } from '@/components/PriorityBadge';
+import { Progress } from '@/components/ui/progress';
 
 export function ProjectList({
     projects,
@@ -127,6 +128,16 @@ export function ProjectList({
                                 <p className="text-sm text-muted-foreground line-clamp-3" title={project.description || ''}>
                                     {project.description || 'No description provided.'}
                                 </p>
+                            
+                                {project.total_issues_count !== undefined && (
+                                    <div className="mt-4 space-y-1">
+                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                            <span>Progress</span>
+                                            <span>{project.completed_issues_count || 0} / {project.total_issues_count || 0}</span>
+                                        </div>
+                                        <Progress value={project.total_issues_count > 0 ? ((project.completed_issues_count || 0) / project.total_issues_count) * 100 : 0} className="h-1.5" />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     ))}

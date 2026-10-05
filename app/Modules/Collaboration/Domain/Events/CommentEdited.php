@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Domain\Events;
 
 use DateTimeImmutable;
@@ -13,4 +15,3 @@ final class CommentEdited
         public readonly DateTimeImmutable $occurredAt
     ) {}
 }
-

@@ -1,19 +1,26 @@
 <?php
 
-use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
+use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
+use Database\Seeders\WorkloadLookupSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\postJson;
 
 uses(RefreshDatabase::class);
 
 it('can create a project in a workspace', function () {
     $user = UserModel::factory()->create();
-    $role = \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => \Illuminate\Support\Str::uuid(), 'scope' => 'GLOBAL']);
-    \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel::create(['id' => \Illuminate\Support\Str::uuid(), 'user_id' => $user->id, 'role_id' => $role->id]);
-    if (isset($this->user)) { $this->user->refresh(); } elseif (isset($user)) { $user->refresh(); }
+    $role = RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => Str::uuid(), 'scope' => 'GLOBAL']);
+    UserRoleModel::create(['id' => Str::uuid(), 'user_id' => $user->id, 'role_id' => $role->id]);
+    if (isset($this->user)) {
+        $this->user->refresh();
+    } elseif (isset($user)) {
+        $user->refresh();
+    }
     $workspaceId = (string) Str::uuid();
 
     WorkspaceModel::query()->create([
@@ -42,8 +49,8 @@ it('can create a project in a workspace', function () {
 
 it('can create a project with priority and response does not leak internal fields', function () {
     $user = UserModel::factory()->create();
-    $role = \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => \Illuminate\Support\Str::uuid(), 'scope' => 'GLOBAL']);
-    \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel::create(['id' => \Illuminate\Support\Str::uuid(), 'user_id' => $user->id, 'role_id' => $role->id]);
+    $role = RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => Str::uuid(), 'scope' => 'GLOBAL']);
+    UserRoleModel::create(['id' => Str::uuid(), 'user_id' => $user->id, 'role_id' => $role->id]);
     $user->refresh();
 
     $workspaceId = (string) Str::uuid();
@@ -54,7 +61,7 @@ it('can create a project with priority and response does not leak internal field
         'status' => 'ACTIVE',
     ]);
 
-    $this->seed(\Database\Seeders\WorkloadLookupSeeder::class);
+    $this->seed(WorkloadLookupSeeder::class);
 
     $priority = DB::table('priorities')->first();
     expect($priority)->not->toBeNull('Priority lookup table is empty, run seeders.');
@@ -79,8 +86,8 @@ it('can create a project with priority and response does not leak internal field
 
 it('cannot create project with non-existent priority (Anti-IDOR)', function () {
     $user = UserModel::factory()->create();
-    $role = \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => \Illuminate\Support\Str::uuid(), 'scope' => 'GLOBAL']);
-    \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel::create(['id' => \Illuminate\Support\Str::uuid(), 'user_id' => $user->id, 'role_id' => $role->id]);
+    $role = RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => Str::uuid(), 'scope' => 'GLOBAL']);
+    UserRoleModel::create(['id' => Str::uuid(), 'user_id' => $user->id, 'role_id' => $role->id]);
     $user->refresh();
 
     $workspaceId = (string) Str::uuid();

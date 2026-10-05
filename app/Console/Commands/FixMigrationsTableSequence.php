@@ -21,12 +21,13 @@ class FixMigrationsTableSequence extends Command
             $driver = $connection->getDriverName();
 
             if ($driver !== 'pgsql') {
-                $this->warn('This fix is only for PostgreSQL. Current driver: ' . $driver);
+                $this->warn('This fix is only for PostgreSQL. Current driver: '.$driver);
+
                 return 0;
             }
 
             // Fix Migrations specifically (in case sequence is missing)
-            $connection->statement("CREATE SEQUENCE IF NOT EXISTS migrations_id_seq;");
+            $connection->statement('CREATE SEQUENCE IF NOT EXISTS migrations_id_seq;');
             $connection->statement("ALTER TABLE migrations ALTER COLUMN id SET DEFAULT nextval('migrations_id_seq');");
 
             // Tables to sync
@@ -46,9 +47,11 @@ class FixMigrationsTableSequence extends Command
             }
 
             $this->info('Successfully fixed sequences!');
+
             return 0;
         } catch (\Throwable $e) {
-            $this->error('Failed: ' . $e->getMessage());
+            $this->error('Failed: '.$e->getMessage());
+
             return 1;
         }
     }

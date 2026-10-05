@@ -8,4 +8,3 @@ interface WorkspaceSettingsInterface
 {
     public function getMaxWorkspacesPerGroup(): int;
 }
-

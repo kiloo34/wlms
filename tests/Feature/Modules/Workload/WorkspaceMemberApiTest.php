@@ -12,7 +12,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->levelId = Str::uuid()->toString();
     DB::table('org_levels')->insert([
-        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true
+        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
     $this->groupA = Str::uuid()->toString();
@@ -42,22 +42,22 @@ beforeEach(function () {
 test('Scenario 1 (Success): User Owner can invite another user to their workspace', function () {
     $response = $this->actingAs($this->userA)->postJson("/api/workspaces/{$this->workspaceA_id}/members", [
         'user_id' => $this->userB->id,
-        'role' => 'member'
+        'role' => 'member',
     ]);
 
     $response->assertStatus(201);
-    
+
     $this->assertDatabaseHas('workspace_members', [
         'workspace_id' => $this->workspaceA_id,
         'user_id' => $this->userB->id,
-        'role' => 'member'
+        'role' => 'member',
     ]);
 });
 
 test('Scenario 2 (Anti-IDOR): User B (not owner, not member) cannot add themselves to User A workspace', function () {
     $response = $this->actingAs($this->userB)->postJson("/api/workspaces/{$this->workspaceA_id}/members", [
         'user_id' => $this->userB->id,
-        'role' => 'admin'
+        'role' => 'admin',
     ]);
 
     $response->assertStatus(403);
@@ -66,7 +66,7 @@ test('Scenario 2 (Anti-IDOR): User B (not owner, not member) cannot add themselv
 test('Scenario 3 (Visibility): After User C is invited to workspace A, they can see it in GET /api/workspaces', function () {
     $this->actingAs($this->userA)->postJson("/api/workspaces/{$this->workspaceA_id}/members", [
         'user_id' => $this->userC->id,
-        'role' => 'viewer'
+        'role' => 'viewer',
     ])->assertStatus(201);
 
     $response = $this->actingAs($this->userC)->getJson('/api/workspaces');
@@ -74,14 +74,14 @@ test('Scenario 3 (Visibility): After User C is invited to workspace A, they can 
     $response->assertStatus(200);
     $response->assertJsonFragment([
         'id' => $this->workspaceA_id,
-        'name' => 'Workspace A'
+        'name' => 'Workspace A',
     ]);
 });
 
 test('Scenario 4 (Success): User Owner can get members of their workspace', function () {
     $this->actingAs($this->userA)->postJson("/api/workspaces/{$this->workspaceA_id}/members", [
         'user_id' => $this->userB->id,
-        'role' => 'viewer'
+        'role' => 'viewer',
     ]);
 
     $response = $this->actingAs($this->userA)->getJson("/api/workspaces/{$this->workspaceA_id}/members");
@@ -89,30 +89,30 @@ test('Scenario 4 (Success): User Owner can get members of their workspace', func
     $response->assertStatus(200);
     $response->assertJsonFragment([
         'id' => $this->userB->id,
-        'role' => 'viewer'
+        'role' => 'viewer',
     ]);
 });
 
 test('Scenario 5 (Success): User Owner can remove a member from their workspace', function () {
     $this->actingAs($this->userA)->postJson("/api/workspaces/{$this->workspaceA_id}/members", [
         'user_id' => $this->userB->id,
-        'role' => 'viewer'
+        'role' => 'viewer',
     ]);
 
     $response = $this->actingAs($this->userA)->deleteJson("/api/workspaces/{$this->workspaceA_id}/members/{$this->userB->id}");
 
     $response->assertStatus(200);
-    
+
     $this->assertDatabaseMissing('workspace_members', [
         'workspace_id' => $this->workspaceA_id,
-        'user_id' => $this->userB->id
+        'user_id' => $this->userB->id,
     ]);
 });
 
 test('Scenario 6 (Anti-IDOR): User B cannot remove User C from User A workspace', function () {
     $this->actingAs($this->userA)->postJson("/api/workspaces/{$this->workspaceA_id}/members", [
         'user_id' => $this->userC->id,
-        'role' => 'viewer'
+        'role' => 'viewer',
     ]);
 
     $response = $this->actingAs($this->userB)->deleteJson("/api/workspaces/{$this->workspaceA_id}/members/{$this->userC->id}");

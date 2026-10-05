@@ -14,12 +14,12 @@ beforeEach(function () {
     // 1. Setup basic DB structure
     $this->levelId = Str::uuid()->toString();
     DB::table('org_levels')->insert([
-        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true
+        'id' => $this->levelId, 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
     $this->groupId = Str::uuid()->toString();
     DB::table('org_units')->insert([
-        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group'
+        'id' => $this->groupId, 'org_level_id' => $this->levelId, 'name' => 'IT Group',
     ]);
 
     // 2. Setup Workspace
@@ -56,7 +56,7 @@ beforeEach(function () {
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-    
+
     // 5. Setup IssueType, Priority, Status (Dependencies for Issue)
     $this->issueTypeId = Str::uuid()->toString();
     DB::table('issue_types')->insert([
@@ -70,7 +70,7 @@ beforeEach(function () {
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-    
+
     $this->priorityId = Str::uuid()->toString();
     DB::table('priorities')->insert([
         'id' => $this->priorityId,
@@ -182,7 +182,7 @@ test('worklog payload validation requires time_spent_seconds, description, and s
     // Missing all fields
     $response = $this->postJson("/api/issues/{$this->issueId}/worklogs", []);
     $response->assertStatus(422)
-             ->assertJsonValidationErrors(['time_spent_seconds', 'description', 'started_at']);
+        ->assertJsonValidationErrors(['time_spent_seconds', 'description', 'started_at']);
 
     // Invalid types
     $responseInvalid = $this->postJson("/api/issues/{$this->issueId}/worklogs", [
@@ -190,8 +190,7 @@ test('worklog payload validation requires time_spent_seconds, description, and s
         'description' => '', // Empty string is not valid for required
         'started_at' => 'not-a-date',
     ]);
-    
-    $responseInvalid->assertStatus(422)
-             ->assertJsonValidationErrors(['time_spent_seconds', 'description', 'started_at']);
-});
 
+    $responseInvalid->assertStatus(422)
+        ->assertJsonValidationErrors(['time_spent_seconds', 'description', 'started_at']);
+});

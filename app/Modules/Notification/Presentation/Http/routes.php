@@ -10,4 +10,3 @@ Route::middleware(['auth:sanctum'])->prefix('notifications')->group(function () 
     Route::get('/', GetNotificationsController::class);
     Route::put('/read', MarkNotificationsReadController::class);
 });
-

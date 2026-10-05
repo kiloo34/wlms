@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Workload\Domain\Entities;
@@ -37,10 +38,28 @@ final class Status
         $this->color = $color;
     }
 
-    public function getId(): StatusId { return $this->id; }
-    public function getName(): string { return $this->name; }
-    public function getSlug(): string { return $this->slug; }
-    public function getCategory(): string { return $this->category; }
-    public function getColor(): ?string { return $this->color; }
-}
+    public function getId(): StatusId
+    {
+        return $this->id;
+    }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getSlug(): string
+    {
+        return $this->slug;
+    }
+
+    public function getCategory(): string
+    {
+        return $this->category;
+    }
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+}

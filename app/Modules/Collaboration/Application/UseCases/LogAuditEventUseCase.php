@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Application\UseCases;
 
 use App\Modules\Collaboration\Application\DTOs\AuditLogInput;
@@ -27,10 +29,9 @@ final class LogAuditEventUseCase
             $input->ipAddress,
             $input->userAgent,
             $input->url,
-            new DateTimeImmutable()
+            new DateTimeImmutable
         );
 
         $this->repository->save($log);
     }
 }
-

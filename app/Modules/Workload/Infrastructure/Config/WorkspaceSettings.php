@@ -16,12 +16,13 @@ final class WorkspaceSettings implements WorkspaceSettingsInterface
     public function getMaxWorkspacesPerGroup(): int
     {
         $setting = DB::table('settings')->where('key', 'workload.max_workspaces_per_group')->first();
-        
-        if (!$setting) {
+
+        if (! $setting) {
             return 10;
         }
 
         $value = json_decode($setting->value, true);
+
         return is_numeric($value) ? (int) $value : 10;
     }
 }

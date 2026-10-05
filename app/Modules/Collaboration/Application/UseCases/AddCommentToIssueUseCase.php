@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Application\UseCases;
 
 use App\Modules\Collaboration\Application\DTOs\AddCommentInput;
@@ -19,11 +21,11 @@ final class AddCommentToIssueUseCase
     {
         // Pengecekan authorization (ReBAC) idealnya dilakukan di tingkat presentasi
         // atau via interface abstrak jika perlu cross-module checking.
-        
+
         $comment = Comment::create(
             new CommentId($input->commentId),
             $input->issueId,
-            $input->authorId,
+            max(0, (int) $input->authorId),
             $input->parentId,
             new CommentBody($input->body)
         );
@@ -34,4 +36,3 @@ final class AddCommentToIssueUseCase
         return CommentOutput::fromDomain($comment);
     }
 }
-

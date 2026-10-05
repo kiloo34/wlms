@@ -10,6 +10,5 @@ final readonly class AddIssueCommentInput
         public string $issueId,
         public int|string $authorId,
         public string $body,
-    ) {
-    }
+    ) {}
 }

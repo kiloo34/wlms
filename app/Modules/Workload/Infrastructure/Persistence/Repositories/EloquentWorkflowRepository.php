@@ -4,27 +4,35 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Infrastructure\Persistence\Repositories;
 
+use App\Modules\Workload\Domain\Entities\Workflow;
 use App\Modules\Workload\Domain\Repositories\WorkflowRepositoryInterface;
 use App\Modules\Workload\Domain\Services\WorkflowEngine;
 use App\Modules\Workload\Domain\ValueObjects\ProjectId;
+use App\Modules\Workload\Domain\ValueObjects\WorkflowId;
 use App\Modules\Workload\Domain\ValueObjects\WorkflowTransition;
+use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Mappers\WorkflowMapper;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowTransitionModel;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 final class EloquentWorkflowRepository implements WorkflowRepositoryInterface
 {
     public function getEngineForProject(ProjectId $projectId): WorkflowEngine
     {
         $project = ProjectModel::query()->find($projectId->value);
-        if (!$project) throw new Exception("Project not found.");
+        if (! $project) {
+            throw new Exception('Project not found.');
+        }
 
         // Use project's assigned workflow or fall back to the default
         $workflowId = $project->workflow_id;
-        if (!$workflowId) {
+        if (! $workflowId) {
             $defaultWorkflow = WorkflowModel::query()->where('is_default', true)->first();
-            if (!$defaultWorkflow) throw new Exception("No default workflow configured.");
+            if (! $defaultWorkflow) {
+                throw new Exception('No default workflow configured.');
+            }
             $workflowId = $defaultWorkflow->id;
         }
 
@@ -32,7 +40,7 @@ final class EloquentWorkflowRepository implements WorkflowRepositoryInterface
             ->where('workflow_id', $workflowId)
             ->get();
 
-        $transitions = $rawTransitions->map(fn($t) => new WorkflowTransition(
+        $transitions = $rawTransitions->map(fn ($t) => new WorkflowTransition(
             $t->id,
             $t->from_status_id,
             $t->to_status_id,
@@ -47,32 +55,36 @@ final class EloquentWorkflowRepository implements WorkflowRepositoryInterface
         $engine = $this->getEngineForProject($projectId);
         // Initial transitions have from_status_id = NULL
         $initial = $engine->getValidTransitionsFrom(null);
-        if (empty($initial)) throw new Exception("No initial status defined in workflow.");
+        if (empty($initial)) {
+            throw new Exception('No initial status defined in workflow.');
+        }
+
         return $initial[0]->toStatusId;
     }
 
-    public function save(\App\Modules\Workload\Domain\Entities\Workflow $workflow): void
+    public function save(Workflow $workflow): void
     {
-        \Illuminate\Support\Facades\DB::transaction(function () use ($workflow) {
+        DB::transaction(function () use ($workflow) {
             if ($workflow->isDefault()) {
                 WorkflowModel::query()->update(['is_default' => false]);
             }
             WorkflowModel::query()->updateOrCreate(
                 ['id' => $workflow->getId()->value],
-                \App\Modules\Workload\Infrastructure\Persistence\Eloquent\Mappers\WorkflowMapper::toPersistence($workflow)
+                WorkflowMapper::toPersistence($workflow)
             );
         });
     }
 
-    public function findById(\App\Modules\Workload\Domain\ValueObjects\WorkflowId $id): ?\App\Modules\Workload\Domain\Entities\Workflow
+    public function findById(WorkflowId $id): ?Workflow
     {
         $model = WorkflowModel::query()->find($id->value);
-        return $model ? \App\Modules\Workload\Infrastructure\Persistence\Eloquent\Mappers\WorkflowMapper::toDomain($model) : null;
+
+        return $model ? WorkflowMapper::toDomain($model) : null;
     }
 
-    public function delete(\App\Modules\Workload\Domain\ValueObjects\WorkflowId $id): void
+    public function delete(WorkflowId $id): void
     {
-        \Illuminate\Support\Facades\DB::transaction(function () use ($id) {
+        DB::transaction(function () use ($id) {
             $model = WorkflowModel::query()->withCount('transitions')->find($id->value);
             if ($model) {
                 if ($model->transitions_count > 0) {
@@ -87,7 +99,7 @@ final class EloquentWorkflowRepository implements WorkflowRepositoryInterface
     public function findAll(): array
     {
         $models = WorkflowModel::query()->get();
-        return $models->map(fn (WorkflowModel $model) => \App\Modules\Workload\Infrastructure\Persistence\Eloquent\Mappers\WorkflowMapper::toDomain($model))->all();
+
+        return $models->map(fn (WorkflowModel $model) => WorkflowMapper::toDomain($model))->all();
     }
 }
-

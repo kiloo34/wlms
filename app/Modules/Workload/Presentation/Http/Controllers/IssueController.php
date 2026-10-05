@@ -1,34 +1,35 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
-use App\Modules\Workload\Application\UseCases\CreateIssueUseCase;
-use App\Modules\Workload\Application\UseCases\UpdateIssueUseCase;
-use App\Modules\Workload\Application\UseCases\DeleteIssueUseCase;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Workload\Application\DTOs\CreateIssueInput;
-use App\Modules\Workload\Presentation\Http\Requests\CreateIssueHttpRequest;
-use App\Modules\Workload\Presentation\Http\Requests\UpdateIssueHttpRequest;
-use App\Modules\Workload\Presentation\Http\Requests\DeleteIssueHttpRequest;
-use App\Modules\Workload\Presentation\Http\Resources\IssueResource;
+use App\Modules\Workload\Application\UseCases\CreateIssueUseCase;
+use App\Modules\Workload\Application\UseCases\DeleteIssueUseCase;
+use App\Modules\Workload\Application\UseCases\UpdateIssueUseCase;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
+use App\Modules\Workload\Presentation\Http\Requests\CreateIssueHttpRequest;
+use App\Modules\Workload\Presentation\Http\Requests\DeleteIssueHttpRequest;
+use App\Modules\Workload\Presentation\Http\Requests\UpdateIssueHttpRequest;
+use App\Modules\Workload\Presentation\Http\Resources\IssueResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 final class IssueController
 {
     public function __construct(
         private readonly CreateIssueUseCase $createUseCase,
-        private readonly UpdateIssueUseCase $updateUseCase,
+        // private readonly UpdateIssueUseCase $updateUseCase,
         private readonly DeleteIssueUseCase $deleteUseCase,
     ) {}
 
     public function index(Request $request, string $projectId): JsonResponse
     {
-        /** @var \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel $user */
+        /** @var UserModel|null $user */
         $user = $request->user();
-        if (!$user || !$user->hasPermission('issues:view')) {
+        if (! $user || ! $user->hasPermission('issues:view')) {
             abort(403, 'Unauthorized.');
         }
 
@@ -39,7 +40,7 @@ final class IssueController
         if ($request->has('status_id')) {
             $query->where('status_id', $request->query('status_id'));
         }
-        
+
         if ($request->has('assignee_id')) {
             $query->where('assignee_id', $request->query('assignee_id'));
         }
@@ -52,7 +53,7 @@ final class IssueController
     public function store(CreateIssueHttpRequest $request, string $projectId): JsonResponse
     {
         $v = $request->validated();
-        
+
         $output = $this->createUseCase->execute(new CreateIssueInput(
             issueId: $request->getIdempotencyKey(),
             projectId: $projectId,
@@ -73,9 +74,9 @@ final class IssueController
 
     public function show(Request $request, string $id): JsonResponse
     {
-        /** @var \App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel $user */
+        /** @var UserModel|null $user */
         $user = $request->user();
-        if (!$user || !$user->hasPermission('issues:view')) {
+        if (! $user || ! $user->hasPermission('issues:view')) {
             abort(403, 'Unauthorized.');
         }
 

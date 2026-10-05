@@ -2,14 +2,14 @@
 
 namespace App\Modules\Identity\Infrastructure\Database\Seeders;
 
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Illuminate\Support\Str;
 
 class RbacSimulationSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         // 1. Ensure Org Level and Org Unit exist
         $orgLevelId = '01923abc-0000-1234-1234-123456789abc';
@@ -19,7 +19,7 @@ class RbacSimulationSeeder extends Seeder
                 'slug' => 'group',
                 'name' => 'Group',
                 'depth' => 1,
-                'can_own_workspace' => true
+                'can_own_workspace' => true,
             ]);
         }
 
@@ -28,7 +28,7 @@ class RbacSimulationSeeder extends Seeder
             DB::table('org_units')->insert([
                 'id' => $orgUnitId,
                 'org_level_id' => $orgLevelId,
-                'name' => 'Engineering Group'
+                'name' => 'Engineering Group',
             ]);
         }
 
@@ -45,8 +45,8 @@ class RbacSimulationSeeder extends Seeder
         foreach ($roles as $key => $roleData) {
             $roleId = Str::uuid()->toString();
             $existing = DB::table('roles')->where('name', $roleData['name'])->first();
-            
-            if (!$existing) {
+
+            if (! $existing) {
                 DB::table('roles')->insert([
                     'id' => $roleId,
                     'name' => $roleData['name'],
@@ -86,13 +86,13 @@ class RbacSimulationSeeder extends Seeder
                 'name' => 'Emma (Guest)',
                 'email' => 'guest@wlms.com',
                 'role_key' => 'guest',
-            ]
+            ],
         ];
 
         foreach ($usersToSeed as $userData) {
             $user = UserModel::where('email', $userData['email'])->first();
-            
-            if (!$user) {
+
+            if (! $user) {
                 // If the user doesn't exist, create it
                 $user = UserModel::factory()->create([
                     'name' => $userData['name'],
@@ -103,14 +103,14 @@ class RbacSimulationSeeder extends Seeder
                 ]);
             }
 
-            // Assign Role dynamically (For simulation, we assign them globally with null context, 
+            // Assign Role dynamically (For simulation, we assign them globally with null context,
             // except in real scenarios where scope dictates context_type)
             $hasRole = DB::table('user_roles')
                 ->where('user_id', $user->id)
                 ->where('role_id', $roleIds[$userData['role_key']])
                 ->exists();
 
-            if (!$hasRole) {
+            if (! $hasRole) {
                 DB::table('user_roles')->insert([
                     'id' => Str::uuid()->toString(),
                     'user_id' => $user->id,
@@ -132,4 +132,3 @@ class RbacSimulationSeeder extends Seeder
         );
     }
 }
-

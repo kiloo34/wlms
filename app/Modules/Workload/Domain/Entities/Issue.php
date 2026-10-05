@@ -7,7 +7,6 @@ namespace App\Modules\Workload\Domain\Entities;
 use App\Modules\Workload\Domain\Events\IssueAssigned;
 use App\Modules\Workload\Domain\Events\IssueCreated;
 use App\Modules\Workload\Domain\Events\IssueTransitioned;
-use App\Modules\Workload\Domain\Exceptions\InvalidTransitionException;
 use App\Modules\Workload\Domain\Services\WorkflowEngine;
 use App\Modules\Workload\Domain\ValueObjects\AssigneeId;
 use App\Modules\Workload\Domain\ValueObjects\IssueId;
@@ -70,7 +69,7 @@ final class Issue
             null,
             $originalEstimateSeconds,
             $originalEstimateSeconds,
-            new DateTimeImmutable()
+            new DateTimeImmutable
         );
 
         $issue->recordEvent(new IssueCreated(
@@ -79,7 +78,7 @@ final class Issue
             $number->display,
             $title,
             $reporterId,
-            new DateTimeImmutable()
+            new DateTimeImmutable
         ));
 
         return $issue;
@@ -94,7 +93,7 @@ final class Issue
             $this->number->display,
             $newAssigneeId ? $newAssigneeId->value : null,
             $actorId,
-            new DateTimeImmutable()
+            new DateTimeImmutable
         ));
     }
 
@@ -111,7 +110,7 @@ final class Issue
             $actorId,
             $fromStatusId,
             $toStatusId->value,
-            new DateTimeImmutable()
+            new DateTimeImmutable
         ));
     }
 
@@ -135,19 +134,78 @@ final class Issue
     }
 
     // Getters
-    public function getId(): IssueId { return $this->id; }
-    public function getProjectId(): ProjectId { return $this->projectId; }
-    public function getNumber(): IssueNumber { return $this->number; }
-    public function getTitle(): string { return $this->title; }
-    public function getDescription(): ?string { return $this->description; }
-    public function getIssueTypeId(): IssueTypeId { return $this->issueTypeId; }
-    public function getPriorityId(): PriorityId { return $this->priorityId; }
-    public function getStatusId(): StatusId { return $this->statusId; }
-    public function getSprintId(): ?SprintId { return $this->sprintId; }
-    public function getReporterId(): string { return $this->reporterId; }
-    public function getAssigneeId(): ?AssigneeId { return $this->assigneeId; }
-    public function getStoryPoints(): ?int { return $this->storyPoints; }
-    public function getOriginalEstimateSeconds(): ?int { return $this->originalEstimateSeconds; }
-    public function getRemainingEstimateSeconds(): ?int { return $this->remainingEstimateSeconds; }
-}
+    public function getId(): IssueId
+    {
+        return $this->id;
+    }
 
+    public function getProjectId(): ProjectId
+    {
+        return $this->projectId;
+    }
+
+    public function getNumber(): IssueNumber
+    {
+        return $this->number;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getIssueTypeId(): IssueTypeId
+    {
+        return $this->issueTypeId;
+    }
+
+    public function getPriorityId(): PriorityId
+    {
+        return $this->priorityId;
+    }
+
+    public function getStatusId(): StatusId
+    {
+        return $this->statusId;
+    }
+
+    public function getSprintId(): ?SprintId
+    {
+        return $this->sprintId;
+    }
+
+    public function getReporterId(): string
+    {
+        return $this->reporterId;
+    }
+
+    public function getAssigneeId(): ?AssigneeId
+    {
+        return $this->assigneeId;
+    }
+
+    public function getStoryPoints(): ?int
+    {
+        return $this->storyPoints;
+    }
+
+    public function getOriginalEstimateSeconds(): ?int
+    {
+        return $this->originalEstimateSeconds;
+    }
+
+    public function getRemainingEstimateSeconds(): ?int
+    {
+        return $this->remainingEstimateSeconds;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+}

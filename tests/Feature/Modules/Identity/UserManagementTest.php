@@ -21,12 +21,12 @@ beforeEach(function () {
         'uuid' => Str::uuid()->toString(),
         'password' => Hash::make('password123'),
     ]);
-    
+
     $role = RoleModel::create([
         'name' => 'Superadmin',
         'scope' => 'GLOBAL',
     ]);
-    
+
     UserRoleModel::create([
         'user_id' => $this->superAdminUser->id,
         'role_id' => $role->id,
@@ -62,8 +62,8 @@ it('allows superadmin to view user list (Normal Case)', function () {
                     'email',
                     'created_at',
                     'updated_at',
-                ]
-            ]
+                ],
+            ],
         ]);
 });
 
@@ -80,13 +80,13 @@ it('allows superadmin to create a new user and ensures password is not exposed i
     $response->assertStatus(201)
         ->assertJsonPath('data.name', 'New User')
         ->assertJsonPath('data.email', 'newuser@example.com');
-        
+
     $this->assertDatabaseHas('users', [
         'email' => 'newuser@example.com',
     ]);
-    
+
     $createdUser = UserModel::where('email', 'newuser@example.com')->first();
-    
+
     expect($createdUser->password)->not->toBe('SecretPassword123!');
     expect(Hash::check('SecretPassword123!', $createdUser->password))->toBeTrue();
 });

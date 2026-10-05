@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 final class GetProjectSprintsQuery
 {
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function execute(string $projectId): array
     {
         return DB::table('sprints')

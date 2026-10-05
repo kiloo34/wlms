@@ -36,6 +36,7 @@ final class EloquentWorkspaceRepository implements WorkspaceRepositoryInterface
     public function findById(WorkspaceId $id): ?Workspace
     {
         $model = WorkspaceModel::query()->find($id->value);
+
         return $model ? WorkspaceMapper::toDomain($model) : null;
     }
 

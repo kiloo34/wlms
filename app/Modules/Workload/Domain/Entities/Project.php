@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Workload\Domain\Entities;
 
 use App\Modules\Workload\Domain\Events\ProjectCreated;
+use App\Modules\Workload\Domain\ValueObjects\PriorityId;
 use App\Modules\Workload\Domain\ValueObjects\ProjectId;
 use App\Modules\Workload\Domain\ValueObjects\ProjectKey;
-use App\Modules\Workload\Domain\ValueObjects\PriorityId;
-use App\Modules\Workload\Domain\ValueObjects\WorkspaceId;
 use App\Modules\Workload\Domain\ValueObjects\WorkflowId;
+use App\Modules\Workload\Domain\ValueObjects\WorkspaceId;
 use App\Shared\Domain\Traits\HasDomainEvents;
 use DateTimeImmutable;
 
@@ -48,7 +48,7 @@ final class Project
             $description,
             'ACTIVE',
             $leadId,
-            new DateTimeImmutable(),
+            new DateTimeImmutable,
             null,
             $priorityId
         );
@@ -59,7 +59,7 @@ final class Project
             $actorId,
             $key->value,
             $name,
-            new DateTimeImmutable()
+            new DateTimeImmutable
         ));
 
         return $project;
@@ -82,13 +82,53 @@ final class Project
     }
 
     // Getters
-    public function getId(): ProjectId { return $this->id; }
-    public function getWorkspaceId(): WorkspaceId { return $this->workspaceId; }
-    public function getKey(): ProjectKey { return $this->key; }
-    public function getName(): string { return $this->name; }
-    public function getDescription(): ?string { return $this->description; }
-    public function getStatus(): string { return $this->status; }
-    public function getLeadId(): ?string { return $this->leadId; }
-    public function getWorkflowId(): ?WorkflowId { return $this->workflowId; }
-    public function getPriorityId(): ?PriorityId { return $this->priorityId; }
+    public function getId(): ProjectId
+    {
+        return $this->id;
+    }
+
+    public function getWorkspaceId(): WorkspaceId
+    {
+        return $this->workspaceId;
+    }
+
+    public function getKey(): ProjectKey
+    {
+        return $this->key;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function getLeadId(): ?string
+    {
+        return $this->leadId;
+    }
+
+    public function getWorkflowId(): ?WorkflowId
+    {
+        return $this->workflowId;
+    }
+
+    public function getPriorityId(): ?PriorityId
+    {
+        return $this->priorityId;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
 }

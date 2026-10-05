@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\SprintModel;
 use Carbon\Carbon;
@@ -14,7 +15,7 @@ final class GetSprintWorkloadController
     public function __invoke(string $sprintId): JsonResponse
     {
         $sprint = SprintModel::with(['project.workspace.members'])->findOrFail($sprintId);
-        
+
         $start = $sprint->start_date ? Carbon::parse($sprint->start_date) : Carbon::now();
         $end = $sprint->end_date ? Carbon::parse($sprint->end_date) : $start->copy()->addDays(14);
 
@@ -35,6 +36,7 @@ final class GetSprintWorkloadController
         $data = [];
 
         foreach ($members as $member) {
+            /** @var UserModel $member */
             $dailyCapacity = (int) ($member->pivot->daily_capacity_hours ?? 8);
             $capacitySeconds = $weekdays * $dailyCapacity * 3600;
             $allocatedSeconds = $issues->where('assignee_id', $member->id)->sum('original_estimate_seconds');
@@ -51,4 +53,3 @@ final class GetSprintWorkloadController
         return response()->json(['data' => $data]);
     }
 }
-

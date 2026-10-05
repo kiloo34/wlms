@@ -35,7 +35,7 @@ final class CreateSprintController
                 'project_id' => $output->projectId,
                 'name' => $output->name,
                 'state' => $output->state,
-            ]
+            ],
         ], 201);
     }
 }

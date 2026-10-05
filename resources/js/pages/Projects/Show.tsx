@@ -48,7 +48,7 @@ export default function ProjectShow({ project, lookups }: ProjectShowProps) {
                             {project.priority_id && lookups.priorities && (
                                 <PriorityBadge 
                                     name={lookups.priorities.find(p => p.id === project.priority_id)?.name || 'Unknown'} 
-                                    category={lookups.priorities.find(p => p.id === project.priority_id)?.category} 
+                                    category={undefined} 
                                 />
                             )}
                         </div>

@@ -28,9 +28,11 @@ class OrgLevelModel extends Model
         'depth' => 'integer',
     ];
 
+    /**
+     * @return HasMany<OrgUnitModel, $this>
+     */
     public function units(): HasMany
     {
         return $this->hasMany(OrgUnitModel::class, 'org_level_id');
     }
 }
-

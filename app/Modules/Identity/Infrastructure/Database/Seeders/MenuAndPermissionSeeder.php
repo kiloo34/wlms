@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class MenuAndPermissionSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         // ==========================================
         // 1. SEED PERMISSIONS
@@ -29,7 +29,7 @@ class MenuAndPermissionSeeder extends Seeder
         $permissionIds = [];
         foreach ($permissions as $perm) {
             $existing = DB::table('permissions')->where('name', $perm['name'])->first();
-            if (!$existing) {
+            if (! $existing) {
                 $id = Str::uuid()->toString();
                 DB::table('permissions')->insert([
                     'id' => $id,
@@ -54,7 +54,7 @@ class MenuAndPermissionSeeder extends Seeder
                 'route' => '/dashboard',
                 'icon' => 'layout-dashboard',
                 'sort_order' => 10,
-                'children' => []
+                'children' => [],
             ],
             [
                 'label' => 'Workspaces',
@@ -62,7 +62,7 @@ class MenuAndPermissionSeeder extends Seeder
                 'route' => '/workspaces',
                 'icon' => 'briefcase',
                 'sort_order' => 20,
-                'children' => []
+                'children' => [],
             ],
             [
                 'label' => 'Projects',
@@ -70,7 +70,7 @@ class MenuAndPermissionSeeder extends Seeder
                 'route' => '/projects',
                 'icon' => 'folder-kanban',
                 'sort_order' => 30,
-                'children' => []
+                'children' => [],
             ],
             [
                 'label' => 'Issues',
@@ -78,7 +78,7 @@ class MenuAndPermissionSeeder extends Seeder
                 'route' => '/issues',
                 'icon' => 'ticket',
                 'sort_order' => 40,
-                'children' => []
+                'children' => [],
             ],
             [
                 'label' => 'Settings',
@@ -92,23 +92,23 @@ class MenuAndPermissionSeeder extends Seeder
                         'key' => 'settings.profile',
                         'route' => '/settings/profile',
                         'icon' => 'user',
-                        'sort_order' => 1
+                        'sort_order' => 1,
                     ],
                     [
                         'label' => 'Security',
                         'key' => 'settings.security',
                         'route' => '/settings/security',
                         'icon' => 'shield',
-                        'sort_order' => 2
+                        'sort_order' => 2,
                     ],
                     [
                         'label' => 'RBAC (Roles)',
                         'key' => 'settings.rbac',
                         'route' => '/settings/rbac',
                         'icon' => 'key',
-                        'sort_order' => 3
+                        'sort_order' => 3,
                     ],
-                ]
+                ],
             ],
         ];
 
@@ -116,7 +116,7 @@ class MenuAndPermissionSeeder extends Seeder
 
         foreach ($menus as $menu) {
             $existing = DB::table('menus')->where('key', $menu['key'])->first();
-            if (!$existing) {
+            if (! $existing) {
                 $parentId = Str::uuid()->toString();
                 DB::table('menus')->insert([
                     'id' => $parentId,
@@ -137,10 +137,10 @@ class MenuAndPermissionSeeder extends Seeder
             }
 
             // Seed children
-            if (!empty($menu['children'])) {
+            if (! empty($menu['children'])) {
                 foreach ($menu['children'] as $child) {
                     $existingChild = DB::table('menus')->where('key', $child['key'])->first();
-                    if (!$existingChild) {
+                    if (! $existingChild) {
                         $childId = Str::uuid()->toString();
                         DB::table('menus')->insert([
                             'id' => $childId,
@@ -173,10 +173,10 @@ class MenuAndPermissionSeeder extends Seeder
                     ->where('role_id', $superadmin->id)
                     ->where('permission_id', $permId)
                     ->exists();
-                if (!$exists) {
+                if (! $exists) {
                     DB::table('role_permissions')->insert([
                         'role_id' => $superadmin->id,
-                        'permission_id' => $permId
+                        'permission_id' => $permId,
                     ]);
                 }
             }
@@ -187,10 +187,10 @@ class MenuAndPermissionSeeder extends Seeder
                     ->where('role_id', $superadmin->id)
                     ->where('menu_id', $mId)
                     ->exists();
-                if (!$exists) {
+                if (! $exists) {
                     DB::table('role_menus')->insert([
                         'role_id' => $superadmin->id,
-                        'menu_id' => $mId
+                        'menu_id' => $mId,
                     ]);
                 }
             }
@@ -200,4 +200,3 @@ class MenuAndPermissionSeeder extends Seeder
         $this->command->info('Menus and Permissions seeded successfully!');
     }
 }
-

@@ -1,12 +1,14 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Collaboration\Presentation\Http\Controllers;
 
-use Illuminate\Routing\Controller;
-use Illuminate\Http\JsonResponse;
-use App\Modules\Collaboration\Presentation\Http\Requests\EditCommentHttpRequest;
-use App\Modules\Collaboration\Application\UseCases\EditCommentUseCase;
 use App\Modules\Collaboration\Application\DTOs\EditCommentInput;
+use App\Modules\Collaboration\Application\UseCases\EditCommentUseCase;
+use App\Modules\Collaboration\Presentation\Http\Requests\EditCommentHttpRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
 
 class EditCommentController extends Controller
 {
@@ -35,7 +37,7 @@ class EditCommentController extends Controller
                 'is_edited' => $output->isEdited,
                 'created_at' => $output->createdAt,
                 'updated_at' => $output->updatedAt,
-            ]
+            ],
         ]);
     }
 }

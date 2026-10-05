@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Modules\Workload\Application\UseCases;
 
 use App\Modules\Workload\Application\DTOs\IssueOutput;
@@ -9,6 +11,7 @@ use App\Modules\Workload\Domain\Repositories\WorkflowRepositoryInterface;
 use App\Modules\Workload\Domain\ValueObjects\IssueId;
 use App\Modules\Workload\Domain\ValueObjects\StatusId;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 final class TransitionIssueStatusUseCase
 {
@@ -19,10 +22,10 @@ final class TransitionIssueStatusUseCase
 
     public function execute(TransitionIssueInput $input): IssueOutput
     {
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($input) {
+        return DB::transaction(function () use ($input) {
             $issue = $this->issueRepository->findById(new IssueId($input->issueId));
-            if (!$issue) {
-                throw new Exception("Issue not found.");
+            if (! $issue) {
+                throw new Exception('Issue not found.');
             }
 
             // Load workflow engine with all valid transitions for this project
