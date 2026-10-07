@@ -10,6 +10,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export interface BoardFilterState {
     assigneeIds: string[];
@@ -69,6 +70,7 @@ export const BoardFilterBar: React.FC<BoardFilterBarProps> = ({
     filters,
     onChange,
 }) => {
+    const { t } = useTranslate();
     const activeCount =
         filters.priorityIds.length + filters.issueTypeIds.length;
 
@@ -140,8 +142,8 @@ export const BoardFilterBar: React.FC<BoardFilterBarProps> = ({
                 <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-1.5 relative">
                         <SlidersHorizontal className="h-3.5 w-3.5" />
-                        Filter
-                        {activeCount > 0 && (
+                        {t('Filter')}
+                                                {activeCount > 0 && (
                             <Badge
                                 variant="destructive"
                                 className="absolute -top-1.5 -right-1.5 h-4 w-4 p-0 flex items-center justify-center text-[10px] rounded-full"
@@ -155,8 +157,8 @@ export const BoardFilterBar: React.FC<BoardFilterBarProps> = ({
                     {/* Priority filter */}
                     <div className="space-y-2">
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            Priority
-                        </p>
+                            {t('Priority')}
+                                                    </p>
                         <div className="flex flex-wrap gap-1.5">
                             {priorities.map((p) => {
                                 const active = filters.priorityIds.includes(String(p.id));
@@ -179,8 +181,8 @@ export const BoardFilterBar: React.FC<BoardFilterBarProps> = ({
                     {/* Issue type filter */}
                     <div className="space-y-2">
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            Type
-                        </p>
+                            {t('Type')}
+                                                    </p>
                         <div className="flex flex-wrap gap-1.5">
                             {issueTypes.map((t) => {
                                 const active = filters.issueTypeIds.includes(String(t.id));
@@ -209,8 +211,8 @@ export const BoardFilterBar: React.FC<BoardFilterBarProps> = ({
                     className="gap-1 text-muted-foreground hover:text-foreground h-8 px-2"
                 >
                     <X className="h-3.5 w-3.5" />
-                    Clear
-                </Button>
+                    {t('Clear')}
+                                    </Button>
             )}
         </div>
     );

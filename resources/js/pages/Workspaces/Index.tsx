@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { index as projectsIndex } from '@/routes/projects';
 import { toast } from 'sonner';
+import { useTranslate } from '@/hooks/useTranslate';
 
 export default function WorkspacesIndex() {
+    const { t } = useTranslate();
     const { data: workspaces = [], isLoading, error } = useGetWorkspaces();
     const { mutateAsync: updateWorkspace } = useUpdateWorkspace();
     const { mutateAsync: archiveWorkspace } = useArchiveWorkspace();
@@ -18,9 +20,9 @@ export default function WorkspacesIndex() {
     const handleUpdate = async (id: string, name: string) => {
         try {
             await updateWorkspace({ id, payload: { name } });
-            toast.success('Workspace updated successfully');
+            toast.success(t('Workspace updated successfully'));
         } catch (err: any) {
-            toast.error(err.response?.data?.message || 'Failed to update workspace');
+            toast.error(err.response?.data?.message || t('Failed to update workspace'));
             throw err;
         }
     };
@@ -28,23 +30,23 @@ export default function WorkspacesIndex() {
     const handleArchive = async (id: string) => {
         try {
             await archiveWorkspace(id);
-            toast.success('Workspace archived successfully');
+            toast.success(t('Workspace archived successfully'));
         } catch (err: any) {
-            toast.error(err.response?.data?.message || 'Failed to archive workspace');
+            toast.error(err.response?.data?.message || t('Failed to archive workspace'));
             throw err;
         }
     };
 
     return (
         <>
-            <Head title="Workspaces" />
+            <Head title={t('Workspaces')} />
             
             <div className="flex h-full w-full flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Workspaces</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">{t('Workspaces')}</h1>
                         <p className="text-muted-foreground mt-1">
-                            Manage your team's work environments and projects.
+                            {t("Manage your team's work environments and projects.")}
                         </p>
                     </div>
                     
@@ -52,7 +54,7 @@ export default function WorkspacesIndex() {
                         <CreateWorkspaceModal>
                             <Button>
                                 <Plus className="mr-2 h-4 w-4" />
-                                New Workspace
+                                {t('New Workspace')}
                             </Button>
                         </CreateWorkspaceModal>
                     )}
@@ -60,7 +62,7 @@ export default function WorkspacesIndex() {
 
                 {error ? (
                     <div className="p-4 border border-destructive/50 bg-destructive/10 text-destructive rounded-lg">
-                        Failed to load workspaces. Please try again later.
+                        {t('Failed to load workspaces. Please try again later.')}
                     </div>
                 ) : (
                     <WorkspaceList 

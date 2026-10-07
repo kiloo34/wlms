@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Issue } from '@/types/issue';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export interface LogWorkPayload {
     time_spent_seconds: number;
@@ -28,6 +29,7 @@ export const LogWorkDialog: React.FC<LogWorkDialogProps> = ({
     issue,
     isLoading,
 }) => {
+    const { t } = useTranslate();
     const [hours, setHours] = useState('');
     const [minutes, setMinutes] = useState('');
     const [description, setDescription] = useState('');
@@ -55,7 +57,7 @@ export const LogWorkDialog: React.FC<LogWorkDialogProps> = ({
         const time_spent_seconds = (h * 3600) + (m * 60);
 
         if (time_spent_seconds <= 0) {
-            toast.error('Validation Error', { description: 'Time spent must be greater than 0' });
+            toast.error(t('Validation Error'), { description: 'Time spent must be greater than 0' });
             return;
         }
 
@@ -79,13 +81,13 @@ export const LogWorkDialog: React.FC<LogWorkDialogProps> = ({
                 }}
             >
                 <DialogHeader>
-                    <DialogTitle>Log Work - {issue?.title}</DialogTitle>
+                    <DialogTitle>{t('Log Work -')} {issue?.title}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="hours">Hours</Label>
+                            <Label htmlFor="hours">{t('Hours')}</Label>
                             <Input
                                 id="hours"
                                 type="number"
@@ -96,7 +98,7 @@ export const LogWorkDialog: React.FC<LogWorkDialogProps> = ({
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="minutes">Minutes</Label>
+                            <Label htmlFor="minutes">{t('Minutes')}</Label>
                             <Input
                                 id="minutes"
                                 type="number"
@@ -110,7 +112,7 @@ export const LogWorkDialog: React.FC<LogWorkDialogProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="startedAt">Started At</Label>
+                        <Label htmlFor="startedAt">{t('Started At')}</Label>
                         <Input
                             id="startedAt"
                             type="datetime-local"
@@ -121,12 +123,12 @@ export const LogWorkDialog: React.FC<LogWorkDialogProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="workDescription">Description</Label>
+                        <Label htmlFor="workDescription">{t('Description')}</Label>
                         <Textarea
                             id="workDescription"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="What did you work on?"
+                            placeholder={t('What did you work on?')}
                             rows={3}
                             required
                         />
@@ -134,8 +136,8 @@ export const LogWorkDialog: React.FC<LogWorkDialogProps> = ({
 
                     <div className="flex justify-end space-x-2 pt-4">
                         <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                            Cancel
-                        </Button>
+                            {t('Cancel')}
+                                                    </Button>
                         <Button type="submit" disabled={isLoading}>
                             {isLoading ? 'Saving...' : 'Save Worklog'}
                         </Button>

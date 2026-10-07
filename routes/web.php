@@ -73,7 +73,9 @@ Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update
 Route::middleware(['auth'])->group(function () {
     Route::get('/docs/{slug?}', [DocumentationController::class, 'show'])->name('docs.show');
 
-    Route::get('/admin/docs', [AdminDocPageController::class, 'index'])->name('admin.docs.index');
-    Route::get('/admin/docs/{id}/edit', [AdminDocPageController::class, 'edit'])->name('admin.docs.edit');
-    Route::put('/admin/docs/{id}', [AdminDocPageController::class, 'update'])->name('admin.docs.update');
+    Route::middleware('can:manage-rbac')->group(function () {
+        Route::get('/admin/docs', [AdminDocPageController::class, 'index'])->name('admin.docs.index');
+        Route::get('/admin/docs/{id}/edit', [AdminDocPageController::class, 'edit'])->name('admin.docs.edit');
+        Route::put('/admin/docs/{id}', [AdminDocPageController::class, 'update'])->name('admin.docs.update');
+    });
 });

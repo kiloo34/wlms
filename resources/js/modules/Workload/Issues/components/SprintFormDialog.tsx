@@ -12,8 +12,7 @@ import { Sprint } from '@/types/sprint';
 import { useSprints, UpdateSprintPayload } from '../hooks/useSprints';
 import { toast } from 'sonner';
 import { addWeeks } from 'date-fns';
-
-
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface SprintFormDialogProps {
     open: boolean;
@@ -24,6 +23,7 @@ interface SprintFormDialogProps {
 }
 
 export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpenChange, sprint, projectId, mode = 'edit' }) => {
+    const { t } = useTranslate();
     const { updateSprint, startSprint, isUpdating, isStarting } = useSprints(projectId);
     
     const [name, setName] = useState('');
@@ -78,9 +78,9 @@ export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpen
             
             if (mode === 'start') {
                 await startSprint(sprint.id);
-                toast.success("Sprint started successfully!");
+                toast.success(t('Sprint started successfully!'));
             } else {
-                toast.success("Sprint updated successfully");
+                toast.success(t('Sprint updated successfully'));
             }
             onOpenChange(false);
         } catch (error: any) {
@@ -99,15 +99,15 @@ export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpen
                 </DialogHeader>
                 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                    <p className="text-xs text-muted-foreground">Required fields are marked with an asterisk <span className="text-destructive">*</span></p>
+                    <p className="text-xs text-muted-foreground">{t('Required fields are marked with an asterisk')} <span className="text-destructive">*</span></p>
                     
                     <div className="space-y-2">
-                        <Label>Sprint name <span className="text-destructive">*</span></Label>
+                        <Label>{t('Sprint name')} <span className="text-destructive">*</span></Label>
                         <Input required value={name} onChange={e => setName(e.target.value)} />
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Duration</Label>
+                        <Label>{t('Duration')}</Label>
                         <Popover open={durationOpen} onOpenChange={setDurationOpen}>
                             <PopoverTrigger asChild>
                                 <Button
@@ -122,9 +122,9 @@ export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpen
                             </PopoverTrigger>
                             <PopoverContent className="w-[450px] p-0" align="start">
                                 <Command>
-                                    <CommandInput placeholder="Search duration..." />
+                                    <CommandInput placeholder={t('Search duration...')} />
                                     <CommandList>
-                                        <CommandEmpty>No duration found.</CommandEmpty>
+                                        <CommandEmpty>{t('No duration found.')}</CommandEmpty>
                                         <CommandGroup>
                                             {durations.map((d) => (
                                                 <CommandItem
@@ -153,11 +153,11 @@ export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpen
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Start date</Label>
+                            <Label>{t('Start date')}</Label>
                             <Input type="datetime-local" value={startDate} onChange={e => setStartDate(e.target.value)} />
                         </div>
                         <div className="space-y-2">
-                            <Label>End date</Label>
+                            <Label>{t('End date')}</Label>
                             <Input 
                                 type="datetime-local" 
                                 value={endDate} 
@@ -169,7 +169,7 @@ export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpen
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Sprint goal</Label>
+                        <Label>{t('Sprint goal')}</Label>
                         <Textarea 
                             rows={4} 
                             value={goal} 
@@ -178,7 +178,7 @@ export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpen
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>{t('Cancel')}</Button>
                         <Button type="submit" disabled={isUpdating || (mode === 'start' && isStarting)}>
                             {mode === 'start' ? (isUpdating || isStarting ? 'Starting...' : 'Start') : (isUpdating ? 'Updating...' : 'Update')}
                         </Button>

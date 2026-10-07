@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export interface OrgLevelFormData {
     name: string;
@@ -41,6 +42,7 @@ export function OrgLevelFormDialog({
     onFormDataChange,
     onSubmit,
 }: OrgLevelFormDialogProps) {
+    const { t } = useTranslate();
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -49,14 +51,14 @@ export function OrgLevelFormDialog({
                         {editingLevel ? 'Edit Organization Level' : 'Add Organization Level'}
                     </DialogTitle>
                     <DialogDescription>
-                        Configure the properties of this organization level.
-                    </DialogDescription>
+                        {t('Configure the properties of this organization level.')}
+                                            </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="level-name">Name</Label>
+                            <Label htmlFor="level-name">{t('Name')}</Label>
                             <Input
                                 id="level-name"
                                 value={formData.name}
@@ -68,7 +70,7 @@ export function OrgLevelFormDialog({
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="level-slug">Slug</Label>
+                            <Label htmlFor="level-slug">{t('Slug')}</Label>
                             <Input
                                 id="level-slug"
                                 value={formData.slug}
@@ -101,10 +103,10 @@ export function OrgLevelFormDialog({
                     <div className="space-y-4 pt-2">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Active Status</Label>
+                                <Label>{t('Active Status')}</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    Is this level currently active?
-                                </p>
+                                    {t('Is this level currently active?')}
+                                                                    </p>
                             </div>
                             <Switch
                                 checked={formData.is_active}
@@ -116,10 +118,10 @@ export function OrgLevelFormDialog({
 
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Leaf Node</Label>
+                                <Label>{t('Leaf Node')}</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    Is this the lowest level in the hierarchy?
-                                </p>
+                                    {t('Is this the lowest level in the hierarchy?')}
+                                                                    </p>
                             </div>
                             <Switch
                                 checked={formData.is_leaf}
@@ -131,10 +133,10 @@ export function OrgLevelFormDialog({
 
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Workspace Owner</Label>
+                                <Label>{t('Workspace Owner')}</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    Can units at this level own workspaces?
-                                </p>
+                                    {t('Can units at this level own workspaces?')}
+                                                                    </p>
                             </div>
                             <Switch
                                 checked={formData.can_own_workspace}
@@ -151,8 +153,8 @@ export function OrgLevelFormDialog({
                             variant="outline"
                             onClick={() => onOpenChange(false)}
                         >
-                            Cancel
-                        </Button>
+                            {t('Cancel')}
+                                                    </Button>
                         <Button type="submit" disabled={isPending}>
                             {editingLevel ? 'Save Changes' : 'Create Level'}
                         </Button>

@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Combobox } from '@/components/ui/combobox';
 import { useWorkflows } from '../../Workflows/hooks/useWorkflows';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface ProjectFormDialogProps {
     open: boolean;
@@ -34,6 +35,7 @@ export function ProjectFormDialog({
     onSubmit,
     isPending = false,
 }: ProjectFormDialogProps) {
+    const { t } = useTranslate();
     const isEditing = !!project;
 
     const [key, setKey] = useState('');
@@ -86,7 +88,7 @@ export function ProjectFormDialog({
                     <div className="grid gap-4 py-4">
                         {!isEditing && (
                             <div className="grid gap-2">
-                                <Label htmlFor="key">Key</Label>
+                                <Label htmlFor="key">{t('Key')}</Label>
                                 <Input
                                     id="key"
                                     value={key}
@@ -97,17 +99,17 @@ export function ProjectFormDialog({
                                     disabled={isPending}
                                 />
                                 <p className="text-[0.8rem] text-muted-foreground">
-                                    A unique short identifier for the project.
-                                </p>
+                                    {t('A unique short identifier for the project.')}
+                                                                    </p>
                             </div>
                         )}
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">{t('Name')}</Label>
                             <Input
                                 id="name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Project Name"
+                                placeholder={t('Project Name')}
                                 required
                                 disabled={isPending}
                             />
@@ -118,33 +120,33 @@ export function ProjectFormDialog({
                                 id="description"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Describe the purpose of this project..."
+                                placeholder={t('Describe the purpose of this project...')}
                                 disabled={isPending}
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="workflow">Workflow</Label>
+                            <Label htmlFor="workflow">{t('Workflow')}</Label>
                             <Combobox 
                                 id="workflow"
                                 options={workflowOptions}
                                 value={workflowId}
                                 onChange={setWorkflowId}
                                 disabled={isPending || isLoadingWorkflows}
-                                placeholder="Select a workflow..."
+                                placeholder={t('Select a workflow...')}
                             />
                             <p className="text-[0.8rem] text-muted-foreground">
-                                Select a custom workflow to manage tasks statuses in this project.
-                            </p>
+                                {t('Select a custom workflow to manage tasks statuses in this project.')}
+                                                            </p>
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="priority">Project Level Priority</Label>
+                            <Label htmlFor="priority">{t('Project Level Priority')}</Label>
                             <Combobox 
                                 id="priority"
                                 options={priorityOptions}
                                 value={priorityId}
                                 onChange={setPriorityId}
                                 disabled={isPending}
-                                placeholder="Select a priority..."
+                                placeholder={t('Select a priority...')}
                             />
                             <p className="text-[0.8rem] text-muted-foreground">
                                 Optional urgency level indicating the project's importance.
@@ -154,8 +156,8 @@ export function ProjectFormDialog({
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-                            Cancel
-                        </Button>
+                            {t('Cancel')}
+                                                    </Button>
                         <Button type="submit" disabled={isPending || (!isEditing && !key.trim()) || !name.trim()}>
                             {isPending ? 'Saving...' : 'Save'}
                         </Button>

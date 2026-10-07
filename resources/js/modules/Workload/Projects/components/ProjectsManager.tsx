@@ -20,6 +20,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface ProjectsManagerProps {
     workspaceId: string;
@@ -27,6 +28,7 @@ interface ProjectsManagerProps {
 }
 
 export function ProjectsManager({ workspaceId, priorities = [] }: ProjectsManagerProps) {
+    const { t } = useTranslate();
     const { props } = usePage<any>();
     const permissions = props.auth?.user?.permissions || [];
     const canManageProjects = permissions.includes('projects:manage') || permissions.includes('*');
@@ -64,22 +66,22 @@ export function ProjectsManager({ workspaceId, priorities = [] }: ProjectsManage
                 { id: selectedProject.id, workspaceId, payload: payload as UpdateProjectPayload },
                 {
                     onSuccess: () => {
-                        toast.success('Project updated successfully.');
+                        toast.success(t('Project updated successfully.'));
                         setFormOpen(false);
                     },
                     onError: () => {
-                        toast.error('Failed to update project.');
+                        toast.error(t('Failed to update project.'));
                     },
                 }
             );
         } else {
             createProject.mutate(payload as CreateProjectPayload, {
                 onSuccess: () => {
-                    toast.success('Project created successfully.');
+                    toast.success(t('Project created successfully.'));
                     setFormOpen(false);
                 },
                 onError: () => {
-                    toast.error('Failed to create project.');
+                    toast.error(t('Failed to create project.'));
                 },
             });
         }
@@ -92,23 +94,23 @@ export function ProjectsManager({ workspaceId, priorities = [] }: ProjectsManage
             { id: projectToDelete.id, workspaceId },
             {
                 onSuccess: () => {
-                    toast.success('Project deleted successfully.');
+                    toast.success(t('Project deleted successfully.'));
                     setDeleteAlertOpen(false);
                     setProjectToDelete(null);
                 },
                 onError: () => {
-                    toast.error('Failed to delete project.');
+                    toast.error(t('Failed to delete project.'));
                 },
             }
         );
     };
 
     if (isLoading) {
-        return <div className="p-4 text-sm text-muted-foreground">Loading projects...</div>;
+        return <div className="p-4 text-sm text-muted-foreground">{t('Loading projects...')}</div>;
     }
 
     if (isError) {
-        return <div className="p-4 text-sm text-destructive">Failed to load projects.</div>;
+        return <div className="p-4 text-sm text-destructive">{t('Failed to load projects.')}</div>;
     }
 
     return (
@@ -135,13 +137,13 @@ export function ProjectsManager({ workspaceId, priorities = [] }: ProjectsManage
             <AlertDialog open={deleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('Are you absolutely sure?')}</AlertDialogTitle>
                         <AlertDialogDescription>
                             This will permanently delete the project "{projectToDelete?.name}" and remove its data from our servers.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleteProject.isPending}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel disabled={deleteProject.isPending}>{t('Cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleConfirmDelete}
                             disabled={deleteProject.isPending}

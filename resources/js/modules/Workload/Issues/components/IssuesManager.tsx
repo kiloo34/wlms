@@ -15,6 +15,8 @@ import { ProjectActivitySheet } from './ProjectActivitySheet';
 import { BacklogManager } from './BacklogManager';
 import { useSprints } from '../hooks/useSprints';
 import { toast } from 'sonner';
+import { useTranslate } from "@/hooks/useTranslate";
+
 interface LookupItem {
     id: string;
     name: string;
@@ -31,6 +33,7 @@ interface IssuesManagerProps {
 }
 
 export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups }) => {
+    const { t } = useTranslate();
     const { 
         issues, 
         isLoading, 
@@ -155,7 +158,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
             if (error.response?.data?.message) {
                 toast.error(error.response.data.message);
             } else {
-                toast.error('Gagal memindahkan tiket.');
+                toast.error(t('Gagal memindahkan tiket.'));
             }
         }
     };
@@ -188,11 +191,11 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
         if (!selectedLogWorkIssue) return;
         try {
             await logWork({ id: selectedLogWorkIssue.id, payload });
-            toast.success('Worklog berhasil ditambahkan');
+            toast.success(t('Worklog berhasil ditambahkan'));
             handleCloseLogWork();
         } catch (error) {
             console.error('Failed to log work:', error);
-            toast.error('Gagal menambahkan worklog');
+            toast.error(t('Gagal menambahkan worklog'));
         }
     };
 
@@ -205,7 +208,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="search"
-                                placeholder="Search issues..."
+                                placeholder={t('Search issues...')}
                                 className="pl-8"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -213,7 +216,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
                         </div>
                         <Button variant="outline" size="sm" onClick={() => setIsActivityOpen(true)} className="shrink-0 flex items-center gap-2">
                             <Activity className="h-4 w-4" />
-                            <span className="hidden sm:inline">Activity History</span>
+                            <span className="hidden sm:inline">{t('Activity History')}</span>
                         </Button>
                     </div>
 
@@ -223,21 +226,21 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
                         size="sm" 
                         onClick={() => setViewMode('board')}
                     >
-                        Board
-                    </Button>
+                        {t('Board')}
+                                                </Button>
                     <Button 
                         variant={viewMode === 'list' ? 'default' : 'ghost'} 
                         size="sm" 
                         onClick={() => setViewMode('list')}
                     >
-                        List
-                    </Button>
+                        {t('List')}
+                                                </Button>
                     <Button 
                         variant={viewMode === 'backlog' ? 'default' : 'ghost'} 
                         size="sm" 
                         onClick={() => setViewMode('backlog')}
-                    >x
-                        Backlog
+                    >
+                        {t('Backlog')}
                     </Button>
                 </div>
                 </div>
@@ -246,14 +249,14 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
             <div className="flex items-center gap-4 bg-card border rounded-lg p-4">
                 <div className="flex-1">
                     <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium">Project Progress</span>
+                        <span className="text-sm font-medium">{t('Project Progress')}</span>
                         <span className="text-sm font-medium">{progressPercentage}%</span>
                     </div>
                     <Progress value={progressPercentage} className="h-2" />
                 </div>
                 <div className="text-sm text-muted-foreground text-right min-w-[100px]">
-                    {closedIssues} / {totalIssues} Done
-                </div>
+                    {closedIssues} / {totalIssues} {t('Done')}
+                                    </div>
             </div>
 
             {viewMode === 'list' ? (
@@ -280,7 +283,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
                 <div className="space-y-4">
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                         <div className="flex items-center gap-3">
-                            <h3 className="text-lg font-medium">Issues Board</h3>
+                            <h3 className="text-lg font-medium">{t('Issues Board')}</h3>
                             <BoardFilterBar
                                 users={lookups.users}
                                 priorities={lookups.priorities}
@@ -289,10 +292,10 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
                                 onChange={setBoardFilters}
                             />
                         </div>
-                        <Button onClick={handleCreateClick}>Create Task</Button>
+                        <Button onClick={handleCreateClick}>{t('Create Task')}</Button>
                     </div>
                     {isLoading ? (
-                        <div className="text-center p-4">Loading board...</div>
+                        <div className="text-center p-4">{t('Loading board...')}</div>
                     ) : (
                         <KanbanBoard 
                             issues={sprints.length > 0 ? boardFilteredIssues.filter(i => i.sprint_id && sprints.some(s => s.id === i.sprint_id && s.state === 'ACTIVE')) : boardFilteredIssues}

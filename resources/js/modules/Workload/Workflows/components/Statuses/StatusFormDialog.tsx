@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Status, CreateStatusDto, UpdateStatusDto } from '../../types';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface StatusFormDialogProps {
     status?: Status | null;
@@ -15,6 +16,7 @@ interface StatusFormDialogProps {
 }
 
 export function StatusFormDialog({ status, open, onOpenChange, onSubmit, isLoading }: StatusFormDialogProps) {
+    const { t } = useTranslate();
     const [name, setName] = useState('');
     const [category, setCategory] = useState('TODO');
 
@@ -42,7 +44,7 @@ export function StatusFormDialog({ status, open, onOpenChange, onSubmit, isLoadi
                 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Name</Label>
+                        <Label htmlFor="name">{t('Name')}</Label>
                         <Input 
                             id="name" 
                             value={name} 
@@ -52,23 +54,23 @@ export function StatusFormDialog({ status, open, onOpenChange, onSubmit, isLoadi
                         />
                     </div>
                                         <div className="space-y-2">
-                        <Label htmlFor="category">Category</Label>
+                        <Label htmlFor="category">{t('Category')}</Label>
                         <select
                             id="category"
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            <option value="TODO">To Do</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="DONE">Done</option>
+                            <option value="TODO">{t('To Do')}</option>
+                            <option value="IN_PROGRESS">{t('In Progress')}</option>
+                            <option value="DONE">{t('Done')}</option>
                         </select>
                     </div>
                     
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Cancel
-                        </Button>
+                            {t('Cancel')}
+                                                    </Button>
                         <Button type="submit" disabled={isLoading || !name.trim()}>
                             {isLoading ? 'Saving...' : 'Save'}
                         </Button>

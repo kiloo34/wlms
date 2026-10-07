@@ -8,8 +8,10 @@ import { WorkflowBuilderDialog } from './WorkflowBuilderDialog';
 import { useWorkflows, useCreateWorkflow, useDeleteWorkflow } from '../../hooks/useWorkflows';
 import { useStatuses } from '../../hooks/useStatuses';
 import type { CreateWorkflowDto, Workflow } from '../../types';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export function WorkflowManager() {
+    const { t } = useTranslate();
     const { data: workflows = [], isLoading: isWorkflowsLoading } = useWorkflows();
     const { data: statuses = [] } = useStatuses();
     const createWorkflow = useCreateWorkflow();
@@ -38,7 +40,7 @@ export function WorkflowManager() {
     };
 
     if (isWorkflowsLoading) {
-        return <div className="py-4">Loading workflows...</div>;
+        return <div className="py-4">{t('Loading workflows...')}</div>;
     }
 
     return (
@@ -46,8 +48,8 @@ export function WorkflowManager() {
             <div className="flex justify-end">
                 <Button onClick={handleOpenCreate}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Workflow
-                </Button>
+                    {t('Create Workflow')}
+                                    </Button>
             </div>
             
             <WorkflowList 
@@ -73,14 +75,14 @@ export function WorkflowManager() {
             <AlertDialog open={!!workflowToDelete} onOpenChange={(open) => !open && setWorkflowToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('Are you absolutely sure?')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will {workflowToDelete?.statuses?.length ? "soft delete" : "permanently delete"} the workflow <strong>{workflowToDelete?.name}</strong>.
+                            {t('This will')} {workflowToDelete?.statuses?.length ? "soft delete" : "permanently delete"} {t('the workflow')} <strong>{workflowToDelete?.name}</strong>.
                             {workflowToDelete?.statuses?.length ? " Projects using this workflow will still be able to function normally." : " This action cannot be undone since this workflow is empty."}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleteWorkflow.isPending}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel disabled={deleteWorkflow.isPending}>{t('Cancel')}</AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={(e) => {
                                 e.preventDefault();

@@ -16,12 +16,12 @@ final class Comment
     private array $domainEvents = [];
 
     /**
-     * @param  int<0, max>  $authorId
+     * @param  string  $authorId
      */
     private function __construct(
         public readonly CommentId $id,
         public readonly string $issueId,
-        public readonly int $authorId,
+        public readonly string $authorId,
         public readonly ?string $parentId,
         public CommentBody $body,
         public bool $isEdited,
@@ -30,12 +30,12 @@ final class Comment
     ) {}
 
     /**
-     * @param  int<0, max>  $authorId
+     * @param  string  $authorId
      */
     public static function create(
         CommentId $id,
         string $issueId,
-        int $authorId,
+        string $authorId,
         ?string $parentId,
         CommentBody $body
     ): self {
@@ -55,12 +55,12 @@ final class Comment
     }
 
     /**
-     * @param  int<0, max>  $authorId
+     * @param  string  $authorId
      */
     public static function reconstruct(
         string $id,
         string $issueId,
-        int $authorId,
+        string $authorId,
         ?string $parentId,
         string $body,
         bool $isEdited,

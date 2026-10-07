@@ -22,6 +22,7 @@ final class GetProjectsController extends Controller
         $validated = $request->validated();
 
         $input = new GetProjectsInput(
+            actorUserId: (string) $request->user()?->id,
             workspaceId: $workspaceId,
             limit: (int) ($validated['limit'] ?? 50),
             cursor: $validated['cursor'] ?? null

@@ -11,6 +11,7 @@ import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import PasskeyVerify from '@/components/passkey-verify';
+import { useTranslate } from "@/hooks/useTranslate";
 
 type Props = {
     status?: string;
@@ -21,9 +22,10 @@ export default function Login({
     status,
     canResetPassword,
 }: Props) {
+    const { t } = useTranslate();
     return (
         <>
-            <Head title="Log in" />
+            <Head title={t('Log in')} />
 
             <PasskeyVerify />
 
@@ -36,7 +38,7 @@ export default function Login({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">{t('Email address')}</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -45,22 +47,22 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder={t('email@example.com')}
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password">{t('Password')}</Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
                                             className="ml-auto text-sm"
                                             tabIndex={5}
                                         >
-                                            Forgot password?
-                                        </TextLink>
+                                            {t('Forgot password?')}
+                                                                                    </TextLink>
                                     )}
                                 </div>
                                 <PasswordInput
@@ -69,7 +71,7 @@ export default function Login({
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder={t('Password')}
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -80,7 +82,7 @@ export default function Login({
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember">{t('Remember me')}</Label>
                             </div>
 
                             <Button
@@ -91,8 +93,8 @@ export default function Login({
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
-                            </Button>
+                                {t('Log in')}
+                                                            </Button>
                         </div>
 
                         <div className="text-muted-foreground text-center text-sm">
@@ -102,8 +104,8 @@ export default function Login({
                                 data-test="register-link"
                                 tabIndex={5}
                             >
-                                Sign up
-                            </TextLink>
+                                {t('Sign up')}
+                                                            </TextLink>
                         </div>
                     </>
                 )}

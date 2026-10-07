@@ -8,6 +8,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpDown, Building2 } from 'lucide-react';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface UserListProps {
     users: User[];
@@ -20,6 +21,7 @@ interface UserListProps {
 }
 
 export function UserList({ users, roles, orgUnits, isAssigning, isUpdating = false, onAssignRole, onUpdateUser }: UserListProps) {
+    const { t } = useTranslate();
     const columns = useMemo<ColumnDef<User>[]>(
         () => [
             {
@@ -30,8 +32,8 @@ export function UserList({ users, roles, orgUnits, isAssigning, isUpdating = fal
                         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                         className="-ml-4"
                     >
-                        Name
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                        {t('Name')}
+                                                <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 ),
                 cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>,
@@ -64,7 +66,7 @@ export function UserList({ users, roles, orgUnits, isAssigning, isUpdating = fal
                 cell: ({ row }) => {
                     const userRoles: string[] = row.original.roles ?? [];
                     if (userRoles.length === 0) {
-                        return <span className="text-muted-foreground text-xs">No role</span>;
+                        return <span className="text-muted-foreground text-xs">{t('No role')}</span>;
                     }
                     return (
                         <div className="flex flex-wrap gap-1">
@@ -79,7 +81,7 @@ export function UserList({ users, roles, orgUnits, isAssigning, isUpdating = fal
             },
             {
                 id: 'actions',
-                header: () => <div className="text-right">Actions</div>,
+                header: () => <div className="text-right">{t('Actions')}</div>,
                 cell: ({ row }) => {
                     const user = row.original;
                     return (

@@ -16,6 +16,7 @@ import { Trash2, Shield, ArrowUpDown } from 'lucide-react';
 import { ManageRoleAccessDialog } from './Roles/ManageRoleAccessDialog';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface RoleListProps {
     roles: Role[];
@@ -23,6 +24,7 @@ interface RoleListProps {
 }
 
 export function RoleList({ roles, onDelete }: RoleListProps) {
+    const { t } = useTranslate();
     const [managedRole, setManagedRole] = useState<Role | null>(null);
 
     const columns = useMemo<ColumnDef<Role>[]>(
@@ -36,8 +38,8 @@ export function RoleList({ roles, onDelete }: RoleListProps) {
                             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                             className="-ml-4"
                         >
-                            Role Name
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                            {t('Role Name')}
+                                                        <ArrowUpDown className="ml-2 h-4 w-4" />
                         </Button>
                     )
                 },
@@ -61,14 +63,14 @@ export function RoleList({ roles, onDelete }: RoleListProps) {
                     const role = row.original;
                     return (
                         <span className="text-muted-foreground">
-                            {role.permissions?.length || 0} permissions
-                        </span>
+                            {role.permissions?.length || 0} {t('permissions')}
+                                                    </span>
                     );
                 },
             },
             {
                 id: 'actions',
-                header: () => <div className="text-right">Actions</div>,
+                header: () => <div className="text-right">{t('Actions')}</div>,
                 cell: ({ row }) => {
                     const role = row.original;
                     return (
@@ -77,10 +79,10 @@ export function RoleList({ roles, onDelete }: RoleListProps) {
                                 variant="ghost" 
                                 size="sm" 
                                 onClick={() => setManagedRole(role)}
-                                title="Manage Access"
+                                title={t('Manage Access')}
                             >
                                 <Shield className="w-4 h-4" />
-                                <span className="sr-only">Manage Access</span>
+                                <span className="sr-only">{t('Manage Access')}</span>
                             </Button>
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -88,24 +90,24 @@ export function RoleList({ roles, onDelete }: RoleListProps) {
                                         variant="ghost" 
                                         size="sm" 
                                         className="text-destructive hover:text-destructive"
-                                        title="Delete Role"
+                                        title={t('Delete Role')}
                                     >
                                         <Trash2 className="w-4 h-4" />
-                                        <span className="sr-only">Delete Role</span>
+                                        <span className="sr-only">{t('Delete Role')}</span>
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogTitle>{t('Are you absolutely sure?')}</AlertDialogTitle>
                                         <AlertDialogDescription>
                                             This action cannot be undone. This will permanently delete the role "{role.name}" and remove it from any assigned users.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                                         <AlertDialogAction onClick={() => onDelete(role.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                            Delete
-                                        </AlertDialogAction>
+                                            {t('Delete')}
+                                                                                    </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>

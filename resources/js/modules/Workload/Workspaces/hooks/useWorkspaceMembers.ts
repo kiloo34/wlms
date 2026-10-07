@@ -65,7 +65,7 @@ export const useUpdateWorkspaceMember = (workspaceId: string) => {
             return data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['workspaces', workspaceId, 'members'] });
+            queryClient.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
             // Juga invalidate workload query jika ada
             queryClient.invalidateQueries({ queryKey: ['sprints'] });
         },

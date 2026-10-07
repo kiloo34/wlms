@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/react';
 import { useGetWorkspaceMembers, useAddWorkspaceMember, useRemoveWorkspaceMember, useUpdateWorkspaceMember } from '../hooks/useWorkspaceMembers';
 import { toast } from 'sonner';
 import { WorkspaceMembersUI } from './WorkspaceMembersUI';
+import { useTranslate } from '@/hooks/useTranslate';
 
 interface WorkspaceMembersDialogProps {
     workspaceId: string;
@@ -18,6 +19,7 @@ interface LookupUser {
 }
 
 export function WorkspaceMembersDialog({ workspaceId, workspaceName, open, onOpenChange }: WorkspaceMembersDialogProps) {
+    const { t } = useTranslate();
     const { props } = usePage();
     const lookups = (props.lookups || {}) as { users?: LookupUser[] };
     const allUsers = lookups.users || [];
@@ -32,9 +34,18 @@ export function WorkspaceMembersDialog({ workspaceId, workspaceName, open, onOpe
     const handleUpdateCapacity = async (userId: string, hours: number) => {
         try {
             await updateMember({ userId, payload: { daily_capacity_hours: hours } });
-            toast.success('Capacity updated successfully');
+            toast.success(t('Capacity updated successfully'));
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to update capacity');
+            toast.error(error.response?.data?.message || t('Failed to update capacity'));
+        }
+    };
+
+    const handleUpdateRole = async (userId: string, role: string) => {
+        try {
+            await updateMember({ userId, payload: { role } });
+            toast.success(t('Role updated successfully'));
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || t('Failed to update role'));
         }
     };
 
@@ -42,20 +53,20 @@ export function WorkspaceMembersDialog({ workspaceId, workspaceName, open, onOpe
         if (!selectedUserId) return;
 
         try {
-            await addMember({ user_id: selectedUserId, role: 'MEMBER' });
-            toast.success('Member added successfully');
+            await addMember({ user_id: selectedUserId, role: 'member' });
+            toast.success(t('Member added successfully'));
             setSelectedUserId('');
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to add member');
+            toast.error(error.response?.data?.message || t('Failed to add member'));
         }
     };
 
     const handleRemoveMember = async (userId: string) => {
         try {
             await removeMember(userId);
-            toast.success('Member removed successfully');
+            toast.success(t('Member removed successfully'));
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to remove member');
+            toast.error(error.response?.data?.message || t('Failed to remove member'));
         }
     };
 
@@ -81,6 +92,7 @@ export function WorkspaceMembersDialog({ workspaceId, workspaceName, open, onOpe
             onRemoveMember={handleRemoveMember}
             isRemoving={isRemoving}
             onUpdateCapacity={handleUpdateCapacity}
+            onUpdateRole={handleUpdateRole}
             isUpdating={isUpdating}
         />
     );

@@ -2,7 +2,8 @@ export interface Workspace {
     id: string;
     name: string;
     status: 'ACTIVE' | 'ARCHIVED' | string;
-    ownerGroupId: string;
+    owner_group_id: string;
+    ownerGroupId?: string; // Fallback
 }
 
 export interface CreateWorkspacePayload {

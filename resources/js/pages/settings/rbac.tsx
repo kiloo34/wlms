@@ -7,8 +7,10 @@ import { UserCreateDialog } from '@/modules/Identity/components/Users/UserCreate
 import { RoleCreateDialog } from '@/modules/Identity/components/RoleCreateDialog';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export default function RBACIndex() {
+    const { t } = useTranslate();
     const [activeTab, setActiveTabState] = useState(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -44,13 +46,13 @@ export default function RBACIndex() {
 
     return (
         <>
-            <Head title="Users" />
+            <Head title={t('Users')} />
             
             <div className="space-y-8">
                 <Card>
                     <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="space-y-1">
-                            <CardTitle>Users</CardTitle>
+                            <CardTitle>{t('Users')}</CardTitle>
                             <CardDescription>
                                 Invite or manage your organization's users.
                             </CardDescription>
@@ -65,11 +67,11 @@ export default function RBACIndex() {
                             <div className="pb-4">
                                 <TabsList className="grid w-full max-w-md grid-cols-2">
                                     <TabsTrigger value="users">
-                                        All users
-                                    </TabsTrigger>
+                                        {t('All users')}
+                                                                            </TabsTrigger>
                                     <TabsTrigger value="roles">
-                                        User role manager
-                                    </TabsTrigger>
+                                        {t('User role manager')}
+                                                                            </TabsTrigger>
                                 </TabsList>
                             </div>
                             

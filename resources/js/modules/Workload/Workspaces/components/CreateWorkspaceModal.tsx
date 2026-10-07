@@ -13,12 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateWorkspace } from '../hooks/useWorkspaces';
 import { toast } from 'sonner';
+import { useTranslate } from '@/hooks/useTranslate';
 
 interface CreateWorkspaceModalProps {
     children: React.ReactNode;
 }
 
 export function CreateWorkspaceModal({ children }: CreateWorkspaceModalProps) {
+    const { t } = useTranslate();
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const { mutate: createWorkspace, isPending } = useCreateWorkspace();
@@ -31,13 +33,13 @@ export function CreateWorkspaceModal({ children }: CreateWorkspaceModalProps) {
             { name },
             {
                 onSuccess: () => {
-                    toast.success('Workspace created successfully!');
+                    toast.success(t('Workspace created successfully!'));
                     setOpen(false);
                     setName('');
                 },
                 onError: (error: any) => {
                     toast.error(
-                        error.response?.data?.message || 'Failed to create workspace'
+                        error.response?.data?.message || t('Failed to create workspace')
                     );
                 }
             }
@@ -52,20 +54,20 @@ export function CreateWorkspaceModal({ children }: CreateWorkspaceModalProps) {
             <DialogContent className="sm:max-w-[425px]">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Create Workspace</DialogTitle>
+                        <DialogTitle>{t('Create Workspace')}</DialogTitle>
                         <DialogDescription>
-                            Create a new workspace for your team to manage projects and tasks.
+                            {t('Create a new workspace for your team to manage projects and tasks.')}
                         </DialogDescription>
                     </DialogHeader>
                     
                     <div className="grid gap-4 py-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Workspace Name</Label>
+                            <Label htmlFor="name">{t('Workspace Name')}</Label>
                             <Input
                                 id="name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="e.g. Project Alpha"
+                                placeholder={t('e.g. Project Alpha')}
                                 disabled={isPending}
                                 autoFocus
                             />
@@ -79,10 +81,10 @@ export function CreateWorkspaceModal({ children }: CreateWorkspaceModalProps) {
                             onClick={() => setOpen(false)}
                             disabled={isPending}
                         >
-                            Cancel
+                            {t('Cancel')}
                         </Button>
                         <Button type="submit" disabled={isPending || !name.trim()}>
-                            {isPending ? 'Creating...' : 'Create'}
+                            {isPending ? t('Creating...') : t('Create')}
                         </Button>
                     </DialogFooter>
                 </form>

@@ -16,6 +16,7 @@ import { Edit2, Trash2, ArrowUpDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface OrgLevelListProps {
     levels: OrgLevel[];
@@ -24,6 +25,7 @@ interface OrgLevelListProps {
 }
 
 export function OrgLevelList({ levels, onEdit, onDelete }: OrgLevelListProps) {
+    const { t } = useTranslate();
     const columns = useMemo<ColumnDef<OrgLevel>[]>(
         () => [
             {
@@ -35,8 +37,8 @@ export function OrgLevelList({ levels, onEdit, onDelete }: OrgLevelListProps) {
                             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                             className="-ml-4"
                         >
-                            Level Name
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                            {t('Level Name')}
+                                                        <ArrowUpDown className="ml-2 h-4 w-4" />
                         </Button>
                     )
                 },
@@ -69,9 +71,9 @@ export function OrgLevelList({ levels, onEdit, onDelete }: OrgLevelListProps) {
                     const level = row.original;
                     return (
                         <div className="space-x-1 flex">
-                            {level.is_leaf && <Badge variant="outline">Leaf</Badge>}
+                            {level.is_leaf && <Badge variant="outline">{t('Leaf')}</Badge>}
                             {level.can_own_workspace && (
-                                <Badge variant="outline">Workspace Owner</Badge>
+                                <Badge variant="outline">{t('Workspace Owner')}</Badge>
                             )}
                         </div>
                     );
@@ -79,7 +81,7 @@ export function OrgLevelList({ levels, onEdit, onDelete }: OrgLevelListProps) {
             },
             {
                 id: 'actions',
-                header: () => <div className="text-right">Actions</div>,
+                header: () => <div className="text-right">{t('Actions')}</div>,
                 cell: ({ row }) => {
                     const level = row.original;
                     return (
@@ -88,7 +90,7 @@ export function OrgLevelList({ levels, onEdit, onDelete }: OrgLevelListProps) {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => onEdit(level)}
-                                title="Edit Level"
+                                title={t('Edit Level')}
                             >
                                 <Edit2 className="h-4 w-4" />
                             </Button>
@@ -98,23 +100,23 @@ export function OrgLevelList({ levels, onEdit, onDelete }: OrgLevelListProps) {
                                         variant="ghost"
                                         size="icon"
                                         className="text-destructive hover:text-destructive"
-                                        title="Delete Level"
+                                        title={t('Delete Level')}
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogTitle>{t('Are you absolutely sure?')}</AlertDialogTitle>
                                         <AlertDialogDescription>
                                             This action cannot be undone. This will permanently delete the level "{level.name}".
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                                         <AlertDialogAction onClick={() => onDelete(level)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                            Delete
-                                        </AlertDialogAction>
+                                            {t('Delete')}
+                                                                                    </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>

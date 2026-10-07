@@ -7,8 +7,10 @@ import { OrgLevelManager } from '@/modules/Identity/components/Organization/OrgL
 import { OrgUnitManager } from '@/modules/Identity/components/Organization/OrgUnitManager';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export default function OrganizationSettings() {
+    const { t } = useTranslate();
     const [activeTab, setActiveTabState] = useState(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -46,16 +48,16 @@ export default function OrganizationSettings() {
 
     return (
         <>
-            <Head title="Organization Settings" />
+            <Head title={t('Organization Settings')} />
             
             <div className="space-y-8">
                 <Card>
                     <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="space-y-1">
-                            <CardTitle>Organization</CardTitle>
+                            <CardTitle>{t('Organization')}</CardTitle>
                             <CardDescription>
-                                Manage your organizational hierarchy, levels, and units.
-                            </CardDescription>
+                                {t('Manage your organizational hierarchy, levels, and units.')}
+                                                            </CardDescription>
                         </div>
                         <div className="flex-shrink-0">
                             <Button 
@@ -72,11 +74,11 @@ export default function OrganizationSettings() {
                             <div className="pb-4">
                                 <TabsList className="grid w-full max-w-md grid-cols-2">
                                     <TabsTrigger value="levels">
-                                        Organization Levels
-                                    </TabsTrigger>
+                                        {t('Organization Levels')}
+                                                                            </TabsTrigger>
                                     <TabsTrigger value="units">
-                                        Organization Units
-                                    </TabsTrigger>
+                                        {t('Organization Units')}
+                                                                            </TabsTrigger>
                                 </TabsList>
                             </div>
                             

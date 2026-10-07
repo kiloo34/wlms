@@ -14,6 +14,7 @@ import {
 import { Combobox } from '@/components/ui/combobox';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { Progress } from '@/components/ui/progress';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export function ProjectList({
     projects,
@@ -30,6 +31,7 @@ export function ProjectList({
     onDelete: (project: Project) => void;
     onCreate: () => void;
 }) {
+    const { t } = useTranslate();
     const [searchQuery, setSearchQuery] = useState('');
     const [priorityFilter, setPriorityFilter] = useState('all');
 
@@ -51,7 +53,7 @@ export function ProjectList({
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="search"
-                        placeholder="Search projects..."
+                        placeholder={t('Search projects...')}
                         className="pl-8"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -62,14 +64,14 @@ export function ProjectList({
                         options={priorityOptions}
                         value={priorityFilter}
                         onChange={setPriorityFilter}
-                        placeholder="Filter by priority..."
+                        placeholder={t('Filter by priority...')}
                     />
                 </div>
                 {canManageProjects && (
                     <Button onClick={onCreate} size="sm" className="w-full sm:w-auto">
                         <Plus className="mr-2 h-4 w-4" />
-                        Create Project
-                    </Button>
+                        {t('Create Project')}
+                                            </Button>
                 )}
             </div>
 
@@ -104,22 +106,22 @@ export function ProjectList({
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button variant="ghost" className="h-8 w-8 p-0 shrink-0">
-                                                <span className="sr-only">Open menu</span>
+                                                <span className="sr-only">{t('Open menu')}</span>
                                                 <MoreHorizontal className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuItem onClick={() => onEdit(project)}>
                                                 <Pencil className="mr-2 h-4 w-4" />
-                                                Edit
-                                            </DropdownMenuItem>
+                                                {t('Edit')}
+                                                                                            </DropdownMenuItem>
                                             <DropdownMenuItem
                                                 className="text-destructive focus:text-destructive"
                                                 onClick={() => onDelete(project)}
                                             >
                                                 <Trash className="mr-2 h-4 w-4" />
-                                                Delete
-                                            </DropdownMenuItem>
+                                                {t('Delete')}
+                                                                                            </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 )}
@@ -132,7 +134,7 @@ export function ProjectList({
                                 {project.total_issues_count !== undefined && (
                                     <div className="mt-4 space-y-1">
                                         <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                            <span>Progress</span>
+                                            <span>{t('Progress')}</span>
                                             <span>{project.completed_issues_count || 0} / {project.total_issues_count || 0}</span>
                                         </div>
                                         <Progress value={project.total_issues_count > 0 ? ((project.completed_issues_count || 0) / project.total_issues_count) * 100 : 0} className="h-1.5" />

@@ -45,3 +45,7 @@
 * **Hati-hati dengan CSS Selectors pada Konten Editor:** Saat memberikan gaya (*styling*) pada kontainer Markdown atau TipTap (seperti `.markdown-body` atau `.prose`), **DILARANG KERAS** menggunakan *pseudo-class* seperti `p:first-of-type` atau `p:last-of-type` secara global tanpa *child combinator* (`>`).
 * **Konteks Masalah:** Mesin TipTap secara otomatis membungkus teks di dalam `<li>` (List) dan `<blockquote>` menggunakan tag `<p>`. Menggunakan `.markdown-body p:first-of-type` akan tanpa sengaja menyembunyikan atau mengubah gaya *semua* teks pertama di dalam daftar dan blockquote.
 * **Solusi Wajib:** Jika niatnya adalah menargetkan paragraf terluar di dokumen, selalu gunakan *Direct Child Selector*: `.markdown-body > p:first-of-type`.
+
+**8. Lessons Learned from Technical Debt Resolution**
+- **AST Manipulation over Regex:** When performing mass codebase refactoring or modifications (e.g., localizing strings across many files), Regular Expressions are highly dangerous and will corrupt complex React/TSX syntax (like breaking `useState<string>`). AST-based tools (such as `ts-morph` via Node.js scripts) are mandatory for safe, large-scale structural edits.
+- **Strict Internationalization (i18n):** All user-facing strings must be wrapped in `useTranslate()` (e.g., `{t('Hello')}`). Hardcoded English text inside components is strictly forbidden, except for primitive UI building blocks that do not display business text.
