@@ -44,7 +44,7 @@ class HandleInertiaRequests extends Middleware
 
         if ($user) {
             // Eager load roles, permissions, and menus for the user
-            $user->load(['userRoles.role.permissions', 'userRoles.role.menus']);
+            $user->load(['userRoles.role.permissions', 'userRoles.role.menus', 'orgUnit.level', 'orgUnit.lineage.level']);
 
             $uniqueMenus = [];
 

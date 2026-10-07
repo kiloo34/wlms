@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Status, CreateWorkflowDto } from '../../types';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface WorkflowFormDialogProps {
     open: boolean;
@@ -16,6 +17,7 @@ interface WorkflowFormDialogProps {
 }
 
 export function WorkflowFormDialog({ open, onOpenChange, onSubmit, statuses, isLoading }: WorkflowFormDialogProps) {
+    const { t } = useTranslate();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [isActive, setIsActive] = useState(true);
@@ -44,15 +46,15 @@ export function WorkflowFormDialog({ open, onOpenChange, onSubmit, statuses, isL
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Create Workflow</DialogTitle>
+                    <DialogTitle>{t('Create Workflow')}</DialogTitle>
                     <DialogDescription>
-                        Create a new workflow and assign statuses to it.
-                    </DialogDescription>
+                        {t('Create a new workflow and assign statuses to it.')}
+                                            </DialogDescription>
                 </DialogHeader>
                 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="workflow_name">Name</Label>
+                        <Label htmlFor="workflow_name">{t('Name')}</Label>
                         <Input 
                             id="workflow_name" 
                             value={name} 
@@ -63,12 +65,12 @@ export function WorkflowFormDialog({ open, onOpenChange, onSubmit, statuses, isL
                     </div>
                     
                     <div className="space-y-2">
-                        <Label htmlFor="workflow_desc">Description</Label>
+                        <Label htmlFor="workflow_desc">{t('Description')}</Label>
                         <Textarea 
                             id="workflow_desc" 
                             value={description} 
                             onChange={(e) => setDescription(e.target.value)} 
-                            placeholder="Optional description"
+                            placeholder={t('Optional description')}
                         />
                     </div>
 
@@ -78,14 +80,14 @@ export function WorkflowFormDialog({ open, onOpenChange, onSubmit, statuses, isL
                             checked={isActive} 
                             onCheckedChange={(checked) => setIsActive(checked === true)}
                         />
-                        <Label htmlFor="is_active">Active</Label>
+                        <Label htmlFor="is_active">{t('Active')}</Label>
                     </div>
 
                                         
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Cancel
-                        </Button>
+                            {t('Cancel')}
+                                                    </Button>
                         <Button type="submit" disabled={isLoading || !name.trim()}>
                             {isLoading ? 'Saving...' : 'Create'}
                         </Button>

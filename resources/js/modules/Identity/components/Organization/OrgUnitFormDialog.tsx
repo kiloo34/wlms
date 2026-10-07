@@ -21,6 +21,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export interface OrgUnitFormData {
     name: string;
@@ -56,6 +57,7 @@ export function OrgUnitFormDialog({
     onFormDataChange,
     onSubmit,
 }: OrgUnitFormDialogProps) {
+    const { t } = useTranslate();
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -64,14 +66,14 @@ export function OrgUnitFormDialog({
                         {editingUnit ? 'Edit Organization Unit' : 'Add Organization Unit'}
                     </DialogTitle>
                     <DialogDescription>
-                        Configure the properties and hierarchy of this organization unit.
-                    </DialogDescription>
+                        {t('Configure the properties and hierarchy of this organization unit.')}
+                                            </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="unit-name">Name</Label>
+                            <Label htmlFor="unit-name">{t('Name')}</Label>
                             <Input
                                 id="unit-name"
                                 value={formData.name}
@@ -83,7 +85,7 @@ export function OrgUnitFormDialog({
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="unit-code">Code</Label>
+                            <Label htmlFor="unit-code">{t('Code')}</Label>
                             <Input
                                 id="unit-code"
                                 value={formData.code}
@@ -97,13 +99,13 @@ export function OrgUnitFormDialog({
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="unit-org-level">Organization Level</Label>
+                        <Label htmlFor="unit-org-level">{t('Organization Level')}</Label>
                         <Combobox
                             id="unit-org-level"
                             options={levels.map((level) => ({ value: level.id, label: `${level.name} (Depth: ${level.depth})` }))}
                             value={formData.org_level_id}
                             onChange={(value: string) => onFormDataChange({ ...formData, org_level_id: value })}
-                            placeholder="Select a level..."
+                            placeholder={t('Select a level...')}
                         />
                     </div>
 
@@ -119,7 +121,7 @@ export function OrgUnitFormDialog({
                             }
                         >
                             <SelectTrigger id="unit-parent">
-                                <SelectValue placeholder="Select parent unit (None for root)" />
+                                <SelectValue placeholder={t('Select parent unit (None for root)')} />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="none">None (Root Level)</SelectItem>
@@ -142,10 +144,10 @@ export function OrgUnitFormDialog({
                     <div className="space-y-4 pt-2">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Active Status</Label>
+                                <Label>{t('Active Status')}</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    Is this unit currently active?
-                                </p>
+                                    {t('Is this unit currently active?')}
+                                                                    </p>
                             </div>
                             <Switch
                                 checked={formData.is_active}
@@ -162,8 +164,8 @@ export function OrgUnitFormDialog({
                             variant="outline"
                             onClick={() => onOpenChange(false)}
                         >
-                            Cancel
-                        </Button>
+                            {t('Cancel')}
+                                                    </Button>
                         <Button type="submit" disabled={isPending}>
                             {editingUnit ? 'Save Changes' : 'Create Unit'}
                         </Button>

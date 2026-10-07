@@ -57,6 +57,7 @@ Route::middleware(['auth:sanctum'])->prefix('projects')->group(function () {
     Route::post('/{project_id}/issues', [IssueController::class, 'store']);
     Route::get('/{project_id}/activity', [ProjectActivityController::class, 'index']);
     Route::get('/{id}/sprints', GetProjectSprintsController::class);
+    Route::get('/{id}/lookups', \App\Modules\Workload\Presentation\Http\Controllers\GetProjectLookupsController::class);
 });
 
 Route::middleware(['auth:sanctum'])->prefix('sprints')->group(function () {
@@ -77,8 +78,6 @@ Route::middleware(['auth:sanctum'])->prefix('issues')->group(function () {
     Route::get('/{id}/transitions', GetValidTransitionsController::class);
     Route::post('/{id}/worklogs', LogWorkController::class);
     Route::get('/{id}/worklogs', GetIssueWorklogsController::class);
-    Route::get('/{id}/comments', [IssueCommentController::class, 'index']);
-    Route::post('/{id}/comments', [IssueCommentController::class, 'store']);
 
 });
 

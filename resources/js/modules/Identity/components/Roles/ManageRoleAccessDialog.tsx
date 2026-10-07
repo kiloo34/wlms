@@ -13,6 +13,7 @@ import { usePermissions } from '../../hooks/use-permissions';
 import { useMenus } from '../../hooks/use-menus';
 import axios from '@/lib/axios';
 import { isAxiosError } from 'axios';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface ManageRoleAccessDialogProps {
     role: Role | null;
@@ -21,6 +22,7 @@ interface ManageRoleAccessDialogProps {
 }
 
 export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleAccessDialogProps) {
+    const { t } = useTranslate();
     const { data: permissions } = usePermissions();
     const { data: menus } = useMenus();
     const syncPermissions = useSyncPermissions();
@@ -48,13 +50,13 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
             permissionIds: selectedPermissionIds
         }, {
             onSuccess: () => {
-                toast.success('Permissions updated successfully');
+                toast.success(t('Permissions updated successfully'));
             },
             onError: (error) => {
                 if (isAxiosError(error)) {
                     toast.error(error.response?.data?.message || 'Failed to update permissions');
                 } else {
-                    toast.error('An error occurred while updating permissions');
+                    toast.error(t('An error occurred while updating permissions'));
                 }
             }
         });
@@ -67,13 +69,13 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
             menuIds: selectedMenuIds
         }, {
             onSuccess: () => {
-                toast.success('Menus updated successfully');
+                toast.success(t('Menus updated successfully'));
             },
             onError: (error) => {
                 if (isAxiosError(error)) {
                     toast.error(error.response?.data?.message || 'Failed to update menus');
                 } else {
-                    toast.error('An error occurred while updating menus');
+                    toast.error(t('An error occurred while updating menus'));
                 }
             }
         });
@@ -100,14 +102,14 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
 
                 <Tabs defaultValue="permissions" className="w-full flex-1 flex flex-col min-h-0">
                     <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="permissions">Permissions</TabsTrigger>
-                        <TabsTrigger value="menus">Menus</TabsTrigger>
+                        <TabsTrigger value="permissions">{t('Permissions')}</TabsTrigger>
+                        <TabsTrigger value="menus">{t('Menus')}</TabsTrigger>
                     </TabsList>
                     
                     {/* PERMISSIONS TAB */}
                     <TabsContent value="permissions" className="flex-1 flex flex-col space-y-4 pt-4 min-h-0">
                         <div className="flex-1 flex flex-col space-y-3 min-h-0">
-                            <label className="text-sm font-medium">Select Permissions</label>
+                            <label className="text-sm font-medium">{t('Select Permissions')}</label>
                             
                             <Popover open={openPermissions} onOpenChange={setOpenPermissions}>
                                 <PopoverTrigger asChild>
@@ -118,7 +120,7 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
                                         className="w-full justify-between h-auto min-h-10 py-2"
                                     >
                                         <div className="flex flex-wrap gap-1 items-center">
-                                            {selectedPermissionIds.length === 0 && <span className="text-muted-foreground font-normal">Select permissions...</span>}
+                                            {selectedPermissionIds.length === 0 && <span className="text-muted-foreground font-normal">{t('Select permissions...')}</span>}
                                             {selectedPermissionIds.length > 0 && selectedPermissionIds.length <= 3 && 
                                                 selectedPermissionIds.map(id => {
                                                     const p = permissions?.find(x => x.id === id);
@@ -126,7 +128,7 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
                                                 })
                                             }
                                             {selectedPermissionIds.length > 3 && (
-                                                <Badge variant="secondary">{selectedPermissionIds.length} selected</Badge>
+                                                <Badge variant="secondary">{selectedPermissionIds.length} {t('selected')}</Badge>
                                             )}
                                         </div>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -134,9 +136,9 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
                                 </PopoverTrigger>
                                 <PopoverContent className="w-[500px] p-0" align="start">
                                     <Command>
-                                        <CommandInput placeholder="Search permissions..." />
+                                        <CommandInput placeholder={t('Search permissions...')} />
                                         <CommandList>
-                                            <CommandEmpty>No permissions found.</CommandEmpty>
+                                            <CommandEmpty>{t('No permissions found.')}</CommandEmpty>
                                             <CommandGroup>
                                                 {permissions?.map((p) => (
                                                     <CommandItem
@@ -170,7 +172,7 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
                     {/* MENUS TAB */}
                     <TabsContent value="menus" className="flex-1 flex flex-col space-y-4 pt-4 min-h-0">
                         <div className="flex-1 flex flex-col space-y-3 min-h-0">
-                            <label className="text-sm font-medium">Select Menus</label>
+                            <label className="text-sm font-medium">{t('Select Menus')}</label>
                             
                             <Popover open={openMenus} onOpenChange={setOpenMenus}>
                                 <PopoverTrigger asChild>
@@ -181,7 +183,7 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
                                         className="w-full justify-between h-auto min-h-10 py-2"
                                     >
                                         <div className="flex flex-wrap gap-1 items-center">
-                                            {selectedMenuIds.length === 0 && <span className="text-muted-foreground font-normal">Select menus...</span>}
+                                            {selectedMenuIds.length === 0 && <span className="text-muted-foreground font-normal">{t('Select menus...')}</span>}
                                             {selectedMenuIds.length > 0 && selectedMenuIds.length <= 3 && 
                                                 selectedMenuIds.map(id => {
                                                     const m = menus?.find(x => x.id === id);
@@ -189,7 +191,7 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
                                                 })
                                             }
                                             {selectedMenuIds.length > 3 && (
-                                                <Badge variant="secondary">{selectedMenuIds.length} selected</Badge>
+                                                <Badge variant="secondary">{selectedMenuIds.length} {t('selected')}</Badge>
                                             )}
                                         </div>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -197,9 +199,9 @@ export function ManageRoleAccessDialog({ role, open, onOpenChange }: ManageRoleA
                                 </PopoverTrigger>
                                 <PopoverContent className="w-[500px] p-0" align="start">
                                     <Command>
-                                        <CommandInput placeholder="Search menus..." />
+                                        <CommandInput placeholder={t('Search menus...')} />
                                         <CommandList>
-                                            <CommandEmpty>No menus found.</CommandEmpty>
+                                            <CommandEmpty>{t('No menus found.')}</CommandEmpty>
                                             <CommandGroup>
                                                 {menus?.map((m) => (
                                                     <CommandItem

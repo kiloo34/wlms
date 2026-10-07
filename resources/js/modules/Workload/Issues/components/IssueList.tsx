@@ -4,6 +4,7 @@ import { Issue } from '@/types/issue';
 import { SharedData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { SelectOption } from './IssueFormDialog';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface IssueListProps {
     issues: Issue[];
@@ -31,6 +32,7 @@ export const IssueList: React.FC<IssueListProps> = ({
     statuses,
     assignees,
 }) => {
+    const { t } = useTranslate();
     const { auth } = usePage<SharedData>().props;
     const currentUserId: number | null = auth.user?.id ?? null;
 
@@ -40,33 +42,33 @@ export const IssueList: React.FC<IssueListProps> = ({
     };
 
     if (isLoading) {
-        return <div className="text-center p-4">Loading issues...</div>;
+        return <div className="text-center p-4">{t('Loading issues...')}</div>;
     }
 
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Issues</h3>
+                <h3 className="text-lg font-medium">{t('Issues')}</h3>
                 {onCreateClick && (
-                    <Button onClick={onCreateClick}>Create Task</Button>
+                    <Button onClick={onCreateClick}>{t('Create Task')}</Button>
                 )}
             </div>
 
             {(!issues || issues.length === 0) ? (
                 <div className="text-center p-4 border rounded-md bg-muted">
-                    No issues found.
-                </div>
+                    {t('No issues found.')}
+                                    </div>
             ) : (
                 <div className="overflow-x-auto rounded-md border">
                     <table className="min-w-full divide-y divide-border">
                 <thead className="bg-muted">
                     <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Title</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Priority</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Assignee</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('Title')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('Type')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('Status')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('Priority')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('Assignee')}</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('Actions')}</th>
                     </tr>
                 </thead>
                 <tbody className="bg-card divide-y divide-border">
@@ -90,19 +92,19 @@ export const IssueList: React.FC<IssueListProps> = ({
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 {currentUserId && issue.assignee_id && String(currentUserId) === String(issue.assignee_id) && (
                                     <Button variant="outline" size="sm" onClick={() => onLogWork(issue)}>
-                                        Log Work
-                                    </Button>
+                                        {t('Log Work')}
+                                                                            </Button>
                                 )}
                                 <Button variant="outline" size="sm" onClick={() => onEdit(issue)}>
-                                    Edit
-                                </Button>
+                                    {t('Edit')}
+                                                                    </Button>
                                 <Button variant="destructive" size="sm" onClick={() => {
                                     if (window.confirm('Are you sure you want to delete this issue?')) {
                                         onDelete(issue.id);
                                     }
                                 }}>
-                                    Delete
-                                </Button>
+                                    {t('Delete')}
+                                                                    </Button>
                             </td>
 
                         </tr>

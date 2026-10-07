@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { useCreateUser } from '../../hooks/use-users';
 import { toast } from 'sonner';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export function UserCreateDialog() {
+    const { t } = useTranslate();
     const [isOpen, setIsOpen] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -19,13 +21,13 @@ export function UserCreateDialog() {
         e.preventDefault();
         try {
             await createUser.mutateAsync({ name, email, password: password || undefined });
-            toast.success('User created successfully');
+            toast.success(t('User created successfully'));
             setIsOpen(false);
             setName('');
             setEmail('');
             setPassword('');
         } catch (error) {
-            toast.error('Failed to create user');
+            toast.error(t('Failed to create user'));
         }
     };
 
@@ -33,16 +35,16 @@ export function UserCreateDialog() {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                    <Plus className="w-4 h-4 mr-2" /> Create User
-                </Button>
+                    <Plus className="w-4 h-4 mr-2" /> {t('Create User')}
+                                    </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Create New User</DialogTitle>
+                    <DialogTitle>{t('Create New User')}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Name</Label>
+                        <Label htmlFor="name">{t('Name')}</Label>
                         <Input 
                             id="name" 
                             value={name} 
@@ -52,7 +54,7 @@ export function UserCreateDialog() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email">{t('Email')}</Label>
                         <Input 
                             id="email" 
                             type="email"
@@ -69,7 +71,7 @@ export function UserCreateDialog() {
                             type="password"
                             value={password} 
                             onChange={(e) => setPassword(e.target.value)} 
-                            placeholder="Leave blank for no password"
+                            placeholder={t('Leave blank for no password')}
                         />
                     </div>
                     <Button type="submit" disabled={createUser.isPending} className="w-full">

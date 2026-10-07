@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('category_id')->constrained('doc_categories')->cascadeOnDelete();
             $table->string('title');
             $table->string('slug')->unique();
-            $table->longText('content');
+            $table->json('content');
             $table->integer('order')->default(0);
             $table->boolean('is_published')->default(true);
             $table->timestamps();

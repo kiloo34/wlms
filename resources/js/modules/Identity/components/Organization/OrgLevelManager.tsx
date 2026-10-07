@@ -12,6 +12,7 @@ import {
 import { OrgLevelList } from './OrgLevelList';
 import { OrgLevelFormDialog, OrgLevelFormData } from './OrgLevelFormDialog';
 import { toast } from 'sonner';
+import { useTranslate } from "@/hooks/useTranslate";
 
 const DEFAULT_FORM_DATA: OrgLevelFormData = {
     name: '',
@@ -40,6 +41,7 @@ interface OrgLevelManagerProps {
 }
 
 export function OrgLevelManager({ createTrigger = 0 }: OrgLevelManagerProps) {
+    const { t } = useTranslate();
     const { data: levels = [], isLoading } = useOrgLevels();
     const createLevel = useCreateOrgLevel();
     const updateLevel = useUpdateOrgLevel();
@@ -76,7 +78,7 @@ export function OrgLevelManager({ createTrigger = 0 }: OrgLevelManagerProps) {
 
     const handleDelete = (level: OrgLevel) => {
         deleteLevel.mutate(level.id, {
-            onSuccess: () => toast.success('Organization level deleted'),
+            onSuccess: () => toast.success(t('Organization level deleted')),
             onError: (error: Error | AxiosError) =>
                 handleAxiosError(error, 'Failed to delete level'),
         });
@@ -95,7 +97,7 @@ export function OrgLevelManager({ createTrigger = 0 }: OrgLevelManagerProps) {
                 { id: editingLevel.id, ...payload },
                 {
                     onSuccess: () => {
-                        toast.success('Organization level updated');
+                        toast.success(t('Organization level updated'));
                         setIsDialogOpen(false);
                     },
                     onError: (error: Error | AxiosError) =>
@@ -105,7 +107,7 @@ export function OrgLevelManager({ createTrigger = 0 }: OrgLevelManagerProps) {
         } else {
             createLevel.mutate(payload, {
                 onSuccess: () => {
-                    toast.success('Organization level created');
+                    toast.success(t('Organization level created'));
                     setIsDialogOpen(false);
                 },
                 onError: (error: Error | AxiosError) =>
@@ -120,7 +122,7 @@ export function OrgLevelManager({ createTrigger = 0 }: OrgLevelManagerProps) {
         <div className="space-y-4">
             {isLoading ? (
                 <div className="flex h-32 items-center justify-center rounded-md border">
-                    <span className="text-sm text-muted-foreground">Loading levels...</span>
+                    <span className="text-sm text-muted-foreground">{t('Loading levels...')}</span>
                 </div>
             ) : (
                 <OrgLevelList levels={levels} onEdit={openEditDialog} onDelete={handleDelete} />

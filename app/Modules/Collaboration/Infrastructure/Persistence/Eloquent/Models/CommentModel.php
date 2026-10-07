@@ -8,6 +8,16 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property string $id
+ * @property string $issue_id
+ * @property string|null $parent_id
+ * @property string $author_id
+ * @property string $body
+ * @property bool $is_edited
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ */
 class CommentModel extends Model
 {
     use HasUuids, SoftDeletes;

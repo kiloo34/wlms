@@ -1,6 +1,7 @@
 import { Workspace } from '../types';
 import { WorkspaceCard } from './WorkspaceCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslate } from '@/hooks/useTranslate';
 
 interface WorkspaceListProps {
     workspaces: Workspace[];
@@ -19,6 +20,7 @@ export function WorkspaceList({
     onArchiveWorkspace,
     canManage = false
 }: WorkspaceListProps) {
+    const { t } = useTranslate();
     if (isLoading) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -32,9 +34,9 @@ export function WorkspaceList({
     if (workspaces.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center p-12 text-center border rounded-xl bg-muted/20">
-                <h3 className="text-lg font-medium">No Workspaces Found</h3>
+                <h3 className="text-lg font-medium">{t('No Workspaces Found')}</h3>
                 <p className="text-muted-foreground mt-2">
-                    You don't have any workspaces yet. Create one to get started.
+                    {t("You don't have any workspaces yet. Create one to get started.")}
                 </p>
             </div>
         );

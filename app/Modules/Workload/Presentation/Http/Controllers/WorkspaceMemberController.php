@@ -60,14 +60,17 @@ final class WorkspaceMemberController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, string $workspaceId, string $userId): JsonResponse
+    public function update(Request $request, string $workspaceId, int $userId): JsonResponse
     {
+        $workspace = WorkspaceModel::findOrFail($workspaceId);
+        if ($request->user()->cannot('update', $workspace)) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
             'role' => 'sometimes|string',
             'daily_capacity_hours' => 'sometimes|integer|min:0|max:24',
         ]);
-
-        $workspace = WorkspaceModel::findOrFail($workspaceId);
 
         $updateData = [];
         if (isset($validated['role'])) {

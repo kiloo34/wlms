@@ -8,6 +8,7 @@ import { Workspace } from '../types';
 import { EditWorkspaceDialog } from './EditWorkspaceDialog';
 import { ArchiveWorkspaceDialog } from './ArchiveWorkspaceDialog';
 import { WorkspaceMembersDialog } from './WorkspaceMembersDialog';
+import { useTranslate } from '@/hooks/useTranslate';
 
 interface WorkspaceCardProps {
     workspace: Workspace;
@@ -18,6 +19,7 @@ interface WorkspaceCardProps {
 }
 
 export function WorkspaceCard({ workspace, onSelect, onUpdate, onArchive, canManage = false }: WorkspaceCardProps) {
+    const { t } = useTranslate();
     const [editOpen, setEditOpen] = useState(false);
     const [archiveOpen, setArchiveOpen] = useState(false);
     const [membersOpen, setMembersOpen] = useState(false);
@@ -54,49 +56,49 @@ export function WorkspaceCard({ workspace, onSelect, onUpdate, onArchive, canMan
                         <div className="flex flex-col gap-1">
                             <CardTitle className="text-xl">{workspace.name}</CardTitle>
                             <Badge variant={workspace.status === 'ACTIVE' ? 'default' : 'secondary'} className="w-fit">
-                                {workspace.status}
+                                {t(workspace.status)}
                             </Badge>
                         </div>
                         {canManage && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="h-8 w-8 p-0">
-                                        <span className="sr-only">Open menu</span>
+                                        <span className="sr-only">{t('Open menu')}</span>
                                         <MoreVertical className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={() => setMembersOpen(true)}>
                                         <Users className="mr-2 h-4 w-4" />
-                                        <span>Manage Members</span>
+                                        <span>{t('Manage Members')}</span>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => setEditOpen(true)}>
                                         <Edit className="mr-2 h-4 w-4" />
-                                        <span>Edit</span>
+                                        <span>{t('Edit')}</span>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                         onClick={() => setArchiveOpen(true)}
                                         className="text-destructive focus:text-destructive"
                                     >
                                         <Archive className="mr-2 h-4 w-4" />
-                                        <span>Archive</span>
+                                        <span>{t('Archive')}</span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}
                     </div>
                     <CardDescription className="pt-2">
-                        ID: {workspace.id.split('-')[0]}...
+                        {t('ID')}: {(workspace?.id || '').split('-')[0]}...
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="text-sm text-muted-foreground">
-                        Owned by Group: {workspace.ownerGroupId.split('-')[0]}...
+                        {t('Owned by Group')}: {(workspace.owner_group_id || workspace.ownerGroupId || '').split('-')[0]}...
                     </div>
                 </CardContent>
                 <CardFooter>
                     <Button variant="outline" className="w-full" onClick={() => onSelect?.(workspace.id)}>
-                        View Workspace
+                        {t('View Workspace')}
                     </Button>
                 </CardFooter>
             </Card>

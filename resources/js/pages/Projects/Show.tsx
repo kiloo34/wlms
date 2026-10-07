@@ -5,6 +5,7 @@ import { Project } from '@/modules/Workload/Projects/types';
 import { Button } from '@/components/ui/button';
 import { index as projectsIndex } from '@/routes/projects';
 import { PriorityBadge } from '@/components/PriorityBadge';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface LookupItem {
     id: string;
@@ -22,6 +23,7 @@ interface ProjectShowProps {
 }
 
 export default function ProjectShow({ project, lookups }: ProjectShowProps) {
+    const { t } = useTranslate();
     const handleBack = () => {
         router.visit(projectsIndex({ query: { workspace_id: project.workspace_id } }).url);
     };
@@ -34,8 +36,8 @@ export default function ProjectShow({ project, lookups }: ProjectShowProps) {
                 <div>
                     <Button variant="ghost" size="sm" onClick={handleBack} className="-ml-2 text-muted-foreground">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Projects
-                    </Button>
+                        {t('Back to Projects')}
+                                            </Button>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

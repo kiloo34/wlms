@@ -53,6 +53,22 @@ class OrgUnitModel extends Model
     }
 
     /**
+     * Get all ancestors in order from root to self.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<OrgUnitModel, $this>
+     */
+    public function lineage(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            OrgUnitModel::class,
+            'org_unit_closures',
+            'descendant_id',
+            'ancestor_id'
+        )
+        ->withPivot('depth')
+        ->orderByDesc('org_unit_closures.depth');
+    }
+
+    /**
      * @return HasMany<OrgUnitModel, $this>
      */
     public function children(): HasMany

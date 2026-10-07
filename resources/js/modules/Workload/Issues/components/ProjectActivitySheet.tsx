@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/sheet';
 import { Activity } from 'lucide-react';
 import { format } from 'date-fns';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface ProjectActivitySheetProps {
     projectId: string;
@@ -32,6 +33,7 @@ interface ActivityItem {
 }
 
 export const ProjectActivitySheet: React.FC<ProjectActivitySheetProps> = ({ projectId, isOpen, onClose }) => {
+    const { t } = useTranslate();
     const { data: activities = [], isLoading } = useQuery<ActivityItem[]>({
         queryKey: ['projects', projectId, 'activity'],
         queryFn: async () => {
@@ -47,18 +49,18 @@ export const ProjectActivitySheet: React.FC<ProjectActivitySheetProps> = ({ proj
                 <SheetHeader className="mb-6">
                     <SheetTitle className="flex items-center gap-2">
                         <Activity className="h-5 w-5" />
-                        Activity History
-                    </SheetTitle>
+                        {t('Activity History')}
+                                            </SheetTitle>
                     <SheetDescription>
-                        Recent activities in this project.
-                    </SheetDescription>
+                        {t('Recent activities in this project.')}
+                                            </SheetDescription>
                 </SheetHeader>
 
                 <div className="space-y-4 p-6">
                     {isLoading ? (
-                        <div className="text-sm text-muted-foreground text-center py-4">Loading activities...</div>
+                        <div className="text-sm text-muted-foreground text-center py-4">{t('Loading activities...')}</div>
                     ) : activities.length === 0 ? (
-                        <div className="text-sm text-muted-foreground text-center py-4">No activities found.</div>
+                        <div className="text-sm text-muted-foreground text-center py-4">{t('No activities found.')}</div>
                     ) : (
                         activities.map((activity) => (
                             <div key={activity.id} className="flex flex-col space-y-1 p-3 bg-muted/40 rounded-lg border">

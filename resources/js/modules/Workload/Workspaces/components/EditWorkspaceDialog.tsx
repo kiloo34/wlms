@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslate } from '@/hooks/useTranslate';
 
 interface EditWorkspaceDialogProps {
     open: boolean;
@@ -26,6 +27,7 @@ export function EditWorkspaceDialog({
     onSubmit, 
     isPending = false 
 }: EditWorkspaceDialogProps) {
+    const { t } = useTranslate();
     const [name, setName] = useState(initialName);
 
     // Reset name when dialog opens/closes or initialName changes
@@ -51,20 +53,20 @@ export function EditWorkspaceDialog({
             <DialogContent className="sm:max-w-[425px]">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Edit Workspace</DialogTitle>
+                        <DialogTitle>{t('Edit Workspace')}</DialogTitle>
                         <DialogDescription>
-                            Change the name of your workspace.
+                            {t('Change the name of your workspace.')}
                         </DialogDescription>
                     </DialogHeader>
                     
                     <div className="grid gap-4 py-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="edit-name">Workspace Name</Label>
+                            <Label htmlFor="edit-name">{t('Workspace Name')}</Label>
                             <Input
                                 id="edit-name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="e.g. Project Alpha"
+                                placeholder={t('e.g. Project Alpha')}
                                 disabled={isPending}
                                 autoFocus
                             />
@@ -78,10 +80,10 @@ export function EditWorkspaceDialog({
                             onClick={() => onOpenChange(false)}
                             disabled={isPending}
                         >
-                            Cancel
+                            {t('Cancel')}
                         </Button>
                         <Button type="submit" disabled={isPending || !name.trim() || name === initialName}>
-                            {isPending ? 'Saving...' : 'Save Changes'}
+                            {isPending ? t('Saving...') : t('Save Changes')}
                         </Button>
                     </DialogFooter>
                 </form>

@@ -11,6 +11,7 @@ import { useStatuses } from '../../hooks/useStatuses';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trash } from 'lucide-react';
 import type { Workflow } from '../../types';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface WorkflowBuilderDialogProps {
     workflow: Workflow | null;
@@ -19,6 +20,7 @@ interface WorkflowBuilderDialogProps {
 }
 
 export function WorkflowBuilderDialog({ workflow, open, onOpenChange }: WorkflowBuilderDialogProps) {
+    const { t } = useTranslate();
     const { data: fullWorkflow, isLoading } = useGetWorkflow(workflow?.id || '');
     const { data: statuses = [] } = useStatuses();
     const createTransition = useCreateTransition();
@@ -57,21 +59,21 @@ export function WorkflowBuilderDialog({ workflow, open, onOpenChange }: Workflow
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Workflow Builder - {workflow?.name}</DialogTitle>
+                    <DialogTitle>{t('Workflow Builder -')} {workflow?.name}</DialogTitle>
                     <DialogDescription>
-                        Manage transitions between statuses for this workflow.
-                    </DialogDescription>
+                        {t('Manage transitions between statuses for this workflow.')}
+                                            </DialogDescription>
                 </DialogHeader>
 
-                {isLoading && <div>Loading workflow details...</div>}
+                {isLoading && <div>{t('Loading workflow details...')}</div>}
 
                 {fullWorkflow && (
                     <div className="space-y-6">
                         <div className="border rounded-md p-4 bg-muted/20">
-                            <h4 className="font-medium mb-4">Add New Transition</h4>
+                            <h4 className="font-medium mb-4">{t('Add New Transition')}</h4>
                             <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-3 items-end">
                                 <div className="space-y-1.5 flex-1">
-                                    <Label htmlFor="transitionName">Name</Label>
+                                    <Label htmlFor="transitionName">{t('Name')}</Label>
                                     <Input 
                                         id="transitionName" 
                                         value={name} 
@@ -80,21 +82,21 @@ export function WorkflowBuilderDialog({ workflow, open, onOpenChange }: Workflow
                                     />
                                 </div>
                                 <div className="space-y-1.5 flex-1">
-                                    <Label>From Status</Label>
+                                    <Label>{t('From Status')}</Label>
                                     <Combobox
                                         options={fromStatusOptions}
                                         value={fromStatusId}
                                         onChange={setFromStatusId}
-                                        placeholder="Select status..."
+                                        placeholder={t('Select status...')}
                                     />
                                 </div>
                                 <div className="space-y-1.5 flex-1">
-                                    <Label>To Status</Label>
+                                    <Label>{t('To Status')}</Label>
                                     <Combobox
                                         options={statusOptions}
                                         value={toStatusId}
                                         onChange={setToStatusId}
-                                        placeholder="Select status..."
+                                        placeholder={t('Select status...')}
                                     />
                                 </div>
                                 <div>
@@ -102,7 +104,7 @@ export function WorkflowBuilderDialog({ workflow, open, onOpenChange }: Workflow
                                         type="submit" 
                                         disabled={createTransition.isPending || !name || !fromStatusId || !toStatusId}
                                         size="icon"
-                                        title="Add Transition"
+                                        title={t('Add Transition')}
                                         className="shrink-0"
                                     >
                                         <Plus className="h-4 w-4" />
@@ -112,17 +114,17 @@ export function WorkflowBuilderDialog({ workflow, open, onOpenChange }: Workflow
                         </div>
 
                         <div>
-                            <h4 className="font-medium mb-3">Transitions</h4>
+                            <h4 className="font-medium mb-3">{t('Transitions')}</h4>
                             {(!fullWorkflow.transitions || fullWorkflow.transitions.length === 0) ? (
-                                <p className="text-sm text-muted-foreground">No transitions found for this workflow.</p>
+                                <p className="text-sm text-muted-foreground">{t('No transitions found for this workflow.')}</p>
                             ) : (
                                 <div className="border rounded-md">
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Name</TableHead>
-                                                <TableHead>From Status</TableHead>
-                                                <TableHead>To Status</TableHead>
+                                                <TableHead>{t('Name')}</TableHead>
+                                                <TableHead>{t('From Status')}</TableHead>
+                                                <TableHead>{t('To Status')}</TableHead>
                                                 <TableHead className="w-16"></TableHead>
                                             </TableRow>
                                         </TableHeader>

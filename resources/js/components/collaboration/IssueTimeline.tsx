@@ -1,11 +1,13 @@
 import { useIssueTimeline } from '@/hooks/collaboration/use-issue-timeline';
 import { Spinner } from '@/components/ui/spinner';
+import { useTranslate } from "@/hooks/useTranslate";
 
 type Props = {
     issueId: string;
 };
 
 export function IssueTimeline({ issueId }: Props) {
+    const { t } = useTranslate();
     const { data: timeline, isLoading, error } = useIssueTimeline(issueId);
 
     if (isLoading) {
@@ -17,11 +19,11 @@ export function IssueTimeline({ issueId }: Props) {
     }
 
     if (error) {
-        return <div className="text-red-500">Failed to load timeline</div>;
+        return <div className="text-red-500">{t('Failed to load timeline')}</div>;
     }
 
     if (!timeline || timeline.length === 0) {
-        return <div className="text-muted-foreground p-4 text-center text-sm">No activity yet.</div>;
+        return <div className="text-muted-foreground p-4 text-center text-sm">{t('No activity yet.')}</div>;
     }
 
     const formatTime = (dateString: string) => {
@@ -39,7 +41,7 @@ export function IssueTimeline({ issueId }: Props) {
                         {item.type === 'comment' ? (
                             <div className="space-y-2">
                                 <div className="flex justify-between">
-                                    <span className="font-semibold text-sm">User {item.actorId}</span>
+                                    <span className="font-semibold text-sm">{t('User')} {item.actorId}</span>
                                     <span className="text-xs text-muted-foreground">
                                         {formatTime(item.createdAt)}
                                     </span>
@@ -49,7 +51,7 @@ export function IssueTimeline({ issueId }: Props) {
                         ) : (
                             <div className="flex justify-between items-center">
                                 <span className="text-sm">
-                                    <span className="font-medium">User {item.actorId}</span>{' '}
+                                    <span className="font-medium">{t('User')} {item.actorId}</span>{' '}
                                     <span className="text-muted-foreground">{item.payload.event}</span>
                                 </span>
                                 <span className="text-xs text-muted-foreground">

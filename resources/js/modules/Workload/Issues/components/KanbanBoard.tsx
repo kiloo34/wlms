@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors, closestCorners } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface KanbanBoardProps {
     issues: Issue[];
@@ -23,6 +24,7 @@ interface KanbanBoardProps {
 }
 
 const SortableIssueCard = ({ issue, onEdit, onLogWork, lookups }: { issue: Issue, onEdit: (issue: Issue) => void, onLogWork: (issue: Issue) => void, lookups?: { issueTypes: {id:string,name:string}[], priorities: {id:string,name:string}[], users: {id:string,name:string}[] } }) => {
+    const { t } = useTranslate();
     const {
         attributes,
         listeners,
@@ -85,21 +87,22 @@ const SortableIssueCard = ({ issue, onEdit, onLogWork, lookups }: { issue: Issue
                         className="text-xs text-primary hover:text-primary/80 font-medium px-1"
                         onClick={(e) => { e.stopPropagation(); onLogWork(issue); }}
                     >
-                        Log
-                    </button>
+                        {t('Log')}
+                                            </button>
                 )}
                 <button 
                     className="text-xs text-secondary hover:text-secondary/80 font-medium px-1"
                     onClick={(e) => { e.stopPropagation(); onEdit(issue); }}
                 >
-                    Edit
-                </button>
+                    {t('Edit')}
+                                    </button>
             </div>
         </div>
     );
 };
 
 const KanbanColumn = ({ status, issues, onEdit, onLogWork, lookups }: { status: SelectOption, issues: Issue[], onEdit: (issue: Issue) => void, onLogWork: (issue: Issue) => void, lookups?: { issueTypes: {id:string,name:string}[], priorities: {id:string,name:string}[], users: {id:string,name:string}[] } }) => {
+    const { t } = useTranslate();
     const { setNodeRef } = useSortable({
         id: status.id,
         data: { type: 'Column', status },
@@ -123,8 +126,8 @@ const KanbanColumn = ({ status, issues, onEdit, onLogWork, lookups }: { status: 
                         ))
                     ) : (
                         <div className="h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center text-sm text-muted-foreground">
-                            No issues here
-                        </div>
+                            {t('No issues here')}
+                                                        </div>
                     )}
                 </SortableContext>
             </div>
@@ -133,6 +136,7 @@ const KanbanColumn = ({ status, issues, onEdit, onLogWork, lookups }: { status: 
 };
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({ issues, statuses, onTransition, onEdit, onLogWork, lookups }) => {
+    const { t } = useTranslate();
     const [activeIssue, setActiveIssue] = React.useState<Issue | null>(null);
 
     const columns = useMemo(() => {

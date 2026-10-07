@@ -3,20 +3,22 @@ import AppearanceTabs from '@/components/appearance-tabs';
 import { edit as editAppearance } from '@/routes/appearance';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export default function Appearance() {
+    const { t } = useTranslate();
     return (
         <>
-            <Head title="Appearance settings" />
+            <Head title={t('Appearance settings')} />
 
             <div className="space-y-8">
                 {/* Appearance Card */}
                 <Card>
                     <CardHeader className="border-b border-border pb-6">
-                        <CardTitle>Appearance Settings</CardTitle>
+                        <CardTitle>{t('Appearance Settings')}</CardTitle>
                         <CardDescription>
-                            Customize the appearance of the application to match your preference.
-                        </CardDescription>
+                            {t('Customize the appearance of the application to match your preference.')}
+                                                    </CardDescription>
                     </CardHeader>
 
                     <CardContent className="pt-6 max-w-2xl">

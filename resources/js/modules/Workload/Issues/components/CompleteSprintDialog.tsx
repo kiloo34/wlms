@@ -6,6 +6,7 @@ import { Sprint } from '@/types/sprint';
 import { Issue } from '@/types/issue';
 import { Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface CompleteSprintDialogProps {
     open: boolean;
@@ -26,6 +27,7 @@ export const CompleteSprintDialog: React.FC<CompleteSprintDialogProps> = ({
     onComplete,
     isCompleting
 }) => {
+    const { t } = useTranslate();
     const [moveTo, setMoveTo] = useState<string>('backlog');
 
     if (!sprint) return null;
@@ -58,22 +60,22 @@ export const CompleteSprintDialog: React.FC<CompleteSprintDialogProps> = ({
                 
                 <form onSubmit={handleSubmit} className="p-6 pt-4 space-y-6">
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-bold">Complete {sprint.name}</DialogTitle>
+                        <DialogTitle className="text-xl font-bold">{t('Complete')} {sprint.name}</DialogTitle>
                     </DialogHeader>
 
                     <div className="space-y-4 text-sm">
                         <p>
-                            This sprint contains <span className="font-bold">{completedCount} completed work items</span> and <span className="font-bold">{openCount} open work items</span>.
+                            {t('This sprint contains')} <span className="font-bold">{completedCount} {t('completed work items')}</span> {t('and')} <span className="font-bold">{openCount} {t('open work items')}</span>.
                         </p>
                         
                         <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                            <li>Completed work items includes everything in the last column on the board, Done.</li>
-                            <li>Open work items includes everything from any other column on the board. Move these to a new sprint or the backlog.</li>
+                            <li>{t('Completed work items includes everything in the last column on the board, Done.')}</li>
+                            <li>{t('Open work items includes everything from any other column on the board. Move these to a new sprint or the backlog.')}</li>
                         </ul>
                         
                         {openCount > 0 && (
                             <div className="space-y-2 pt-2">
-                                <label className="font-medium text-sm">Move open work items to</label>
+                                <label className="font-medium text-sm">{t('Move open work items to')}</label>
                                 <Combobox 
                                     options={[
                                         ...targetSprints.map(ts => ({ value: ts.id, label: ts.name })),
@@ -81,14 +83,14 @@ export const CompleteSprintDialog: React.FC<CompleteSprintDialogProps> = ({
                                     ]}
                                     value={moveTo}
                                     onChange={(val) => setMoveTo(val || 'backlog')}
-                                    placeholder="Select destination"
+                                    placeholder={t('Select destination')}
                                 />
                             </div>
                         )}
                     </div>
 
                     <DialogFooter className="gap-2 sm:gap-0 pt-2">
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>{t('Cancel')}</Button>
                         <Button type="submit" disabled={isCompleting}>
                             {isCompleting ? 'Completing...' : 'Complete sprint'}
                         </Button>

@@ -65,6 +65,7 @@ const getTypeIcon = (name: string) => {
 };
 
 const StatusDropdown = ({ issue, lookups, updateIssue }: { issue: Issue, lookups?: LookupData, updateIssue: any }) => {
+    const { t } = useTranslate();
     const statusName = lookups?.statuses?.find((s: any) => String(s.id) === String(issue.status_id))?.name || 'To Do';
     
     return (
@@ -87,7 +88,7 @@ const StatusDropdown = ({ issue, lookups, updateIssue }: { issue: Issue, lookups
                     </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-muted-foreground">View workflow</DropdownMenuItem>
+                <DropdownMenuItem className="text-muted-foreground">{t('View workflow')}</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -97,8 +98,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/hooks/useTranslate";
 
 const AssigneeDropdown = ({ issue, lookups, assignIssue, disabled }: { issue: Issue, lookups?: LookupData, assignIssue: any, disabled: boolean }) => {
+    const { t } = useTranslate();
     const [open, setOpen] = useState(false);
     
     const assigneeName = issue.assignee?.name || lookups?.users?.find((u: any) => String(u.id) === String(issue.assignee_id))?.name || 'Unassigned';
@@ -125,9 +128,9 @@ const AssigneeDropdown = ({ issue, lookups, assignIssue, disabled }: { issue: Is
                 e.stopPropagation();
             }}>
                 <Command>
-                    <CommandInput placeholder="Search user..." />
+                    <CommandInput placeholder={t('Search user...')} />
                     <CommandList>
-                        <CommandEmpty>No users found.</CommandEmpty>
+                        <CommandEmpty>{t('No users found.')}</CommandEmpty>
                         <CommandGroup heading="Assign to...">
                             <CommandItem
                                 onSelect={() => {
@@ -136,8 +139,8 @@ const AssigneeDropdown = ({ issue, lookups, assignIssue, disabled }: { issue: Is
                                 }}
                             >
                                 <Check className={cn("mr-2 h-4 w-4", !issue.assignee_id ? "opacity-100" : "opacity-0")} />
-                                Unassigned
-                            </CommandItem>
+                                {t('Unassigned')}
+                                                            </CommandItem>
                             {lookups?.users?.map((user: any) => (
                                 <CommandItem 
                                     key={user.id} 
@@ -159,6 +162,7 @@ const AssigneeDropdown = ({ issue, lookups, assignIssue, disabled }: { issue: Is
 }
 
 const DraggableIssue = ({ issue, lookups, updateIssue, assignIssue, isOwner, onIssueClick }: { issue: Issue, lookups?: LookupData, updateIssue: any, assignIssue: any, isOwner: boolean, onIssueClick?: (issue: Issue) => void }) => {
+    const { t } = useTranslate();
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: issue.id,
         data: { type: 'Issue', issue },
@@ -184,7 +188,7 @@ const DraggableIssue = ({ issue, lookups, updateIssue, assignIssue, isOwner, onI
             <div className="flex items-center gap-3 overflow-hidden">
                 <input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-muted-foreground/30 text-primary focus:ring-primary opacity-100 [@media(hover:hover)]:opacity-50 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity" />
                 {getTypeIcon(typeName)}
-                <span onClick={() => onIssueClick?.(issue)} className="text-xs font-medium text-muted-foreground w-16 truncate hover:underline cursor-pointer" title={issue.id}>TES-{issue.id.substring(0,3)}</span>
+                <span onClick={() => onIssueClick?.(issue)} className="text-xs font-medium text-muted-foreground w-16 truncate hover:underline cursor-pointer" title={issue.id}>{t('TES-')}{issue.id.substring(0,3)}</span>
                 <span onClick={() => onIssueClick?.(issue)} className="text-sm font-medium text-foreground truncate flex items-center gap-2 cursor-pointer hover:text-primary">
                     {issue.title}
                     <Pencil className="w-3.5 h-3.5 text-muted-foreground opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity" />
@@ -208,6 +212,7 @@ const DraggableIssue = ({ issue, lookups, updateIssue, assignIssue, isOwner, onI
 };
 
 const InlineCreateIssue = ({ projectId, sprintId, lookups }: { projectId: string, sprintId: string | null, lookups?: LookupData }) => {
+    const { t } = useTranslate();
     const { createIssue } = useIssues(projectId);
     const [title, setTitle] = useState('');
 
@@ -232,7 +237,7 @@ const InlineCreateIssue = ({ projectId, sprintId, lookups }: { projectId: string
             <Plus className="w-4 h-4 text-muted-foreground" />
             <input 
                 type="text" 
-                placeholder="What needs to be done?" 
+                placeholder={t('What needs to be done?')} 
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -243,6 +248,7 @@ const InlineCreateIssue = ({ projectId, sprintId, lookups }: { projectId: string
 }
 
 const DroppableSprint = ({ sprint, issues, lookups, onStart, onComplete, projectId, updateIssue, assignIssue, isOwner, onIssueClick, onEditSprint }: { sprint: Sprint, issues: Issue[], lookups?: LookupData, onStart: (id: string) => void, onComplete: (id: string) => void, projectId: string, updateIssue: any, assignIssue: any, isOwner: boolean, onIssueClick?: (issue: Issue) => void, onEditSprint: (sprint: Sprint, mode: 'edit'|'start') => void }) => {
+    const { t } = useTranslate();
     const { setNodeRef, isOver } = useDroppable({
         id: sprint.id,
         data: { type: 'Sprint', sprint },
@@ -263,15 +269,15 @@ const DroppableSprint = ({ sprint, issues, lookups, onStart, onComplete, project
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 mr-2 opacity-70">
-                        <div className="w-5 h-5 rounded-sm bg-secondary flex items-center justify-center text-[10px] font-medium text-secondary-foreground" title="To Do">0</div>
-                        <div className="w-5 h-5 rounded-sm bg-info flex items-center justify-center text-[10px] font-medium text-info-foreground" title="In Progress">0</div>
-                        <div className="w-5 h-5 rounded-sm bg-success flex items-center justify-center text-[10px] font-medium text-success-foreground" title="Done">0</div>
+                        <div className="w-5 h-5 rounded-sm bg-secondary flex items-center justify-center text-[10px] font-medium text-secondary-foreground" title={t('To Do')}>0</div>
+                        <div className="w-5 h-5 rounded-sm bg-info flex items-center justify-center text-[10px] font-medium text-info-foreground" title={t('In Progress')}>0</div>
+                        <div className="w-5 h-5 rounded-sm bg-success flex items-center justify-center text-[10px] font-medium text-success-foreground" title={t('Done')}>0</div>
                     </div>
                     {sprint.state?.toUpperCase() === 'PENDING' && isOwner && (
-                        <Button size="sm" variant="secondary" className="h-7 text-xs px-3 font-medium bg-muted hover:bg-muted/80 text-foreground" onClick={() => onEditSprint(sprint, 'start')}>Start sprint</Button>
+                        <Button size="sm" variant="secondary" className="h-7 text-xs px-3 font-medium bg-muted hover:bg-muted/80 text-foreground" onClick={() => onEditSprint(sprint, 'start')}>{t('Start sprint')}</Button>
                     )}
                     {sprint.state?.toUpperCase() === 'ACTIVE' && isOwner && (
-                        <Button size="sm" variant="default" className="h-7 text-xs px-3 font-medium" onClick={() => onComplete(sprint.id)}>Complete sprint</Button>
+                        <Button size="sm" variant="default" className="h-7 text-xs px-3 font-medium" onClick={() => onComplete(sprint.id)}>{t('Complete sprint')}</Button>
                     )}
                                         {isOwner && (
                     <DropdownMenu>
@@ -279,8 +285,8 @@ const DroppableSprint = ({ sprint, issues, lookups, onStart, onComplete, project
                             <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground"><MoreHorizontal className="w-4 h-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => onEditSprint(sprint, 'edit')}>Edit sprint</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Delete sprint</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onEditSprint(sprint, 'edit')}>{t('Edit sprint')}</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive">{t('Delete sprint')}</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                     )}
@@ -298,8 +304,8 @@ const DroppableSprint = ({ sprint, issues, lookups, onStart, onComplete, project
                         issues.map(issue => <DraggableIssue key={issue.id} issue={issue} lookups={lookups} updateIssue={updateIssue} assignIssue={assignIssue} isOwner={isOwner} onIssueClick={onIssueClick} />)
                     ) : (
                         <div className="h-16 border-dashed border-2 border-transparent flex items-center justify-center text-xs text-muted-foreground m-1 rounded bg-muted/10">
-                            Plan a sprint by dragging work items into it.
-                        </div>
+                            {t('Plan a sprint by dragging work items into it.')}
+                                                        </div>
                     )}
                     <InlineCreateIssue projectId={projectId} sprintId={sprint.id} lookups={lookups} />
                 </div>
@@ -309,6 +315,7 @@ const DroppableSprint = ({ sprint, issues, lookups, onStart, onComplete, project
 };
 
 const DroppableBacklog = ({ issues, lookups, projectId, updateIssue, assignIssue, isOwner, onIssueClick, onCreateSprint }: { issues: Issue[], lookups?: LookupData, projectId: string, updateIssue: any, assignIssue: any, isOwner: boolean, onIssueClick?: (issue: Issue) => void, onCreateSprint: () => void }) => {
+    const { t } = useTranslate();
     const { setNodeRef, isOver } = useDroppable({
         id: 'backlog',
         data: { type: 'Backlog' },
@@ -322,7 +329,7 @@ const DroppableBacklog = ({ issues, lookups, projectId, updateIssue, assignIssue
                     <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-muted rounded-sm text-muted-foreground">
                         {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
-                    <h3 className="font-semibold text-sm">Backlog</h3>
+                    <h3 className="font-semibold text-sm">{t('Backlog')}</h3>
                     <span className="text-xs text-muted-foreground">({issues.length} work items)</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -331,7 +338,7 @@ const DroppableBacklog = ({ issues, lookups, projectId, updateIssue, assignIssue
                         <div className="w-5 h-5 rounded-sm bg-info flex items-center justify-center text-[10px] font-medium text-info-foreground">0</div>
                         <div className="w-5 h-5 rounded-sm bg-success flex items-center justify-center text-[10px] font-medium text-success-foreground">0</div>
                     </div>
-                    {isOwner && <Button size="sm" variant="secondary" onClick={onCreateSprint} className="h-7 text-xs px-3 font-medium bg-muted hover:bg-muted/80 text-foreground">Create sprint</Button>}
+                    {isOwner && <Button size="sm" variant="secondary" onClick={onCreateSprint} className="h-7 text-xs px-3 font-medium bg-muted hover:bg-muted/80 text-foreground">{t('Create sprint')}</Button>}
                 </div>
             </div>
             
@@ -341,8 +348,8 @@ const DroppableBacklog = ({ issues, lookups, projectId, updateIssue, assignIssue
                         issues.map(issue => <DraggableIssue key={issue.id} issue={issue} lookups={lookups} updateIssue={updateIssue} assignIssue={assignIssue} isOwner={isOwner} onIssueClick={onIssueClick} />)
                     ) : (
                         <div className="h-16 border-dashed border-2 border-transparent flex items-center justify-center text-xs text-muted-foreground m-1 rounded bg-muted/10">
-                            Your backlog is empty.
-                        </div>
+                            {t('Your backlog is empty.')}
+                                                        </div>
                     )}
                     <InlineCreateIssue projectId={projectId} sprintId={null} lookups={lookups} />
                 </div>
@@ -352,6 +359,7 @@ const DroppableBacklog = ({ issues, lookups, projectId, updateIssue, assignIssue
 };
 
 export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issues, lookups, onIssueClick }) => {
+    const { t } = useTranslate();
     const { sprints, startSprint, completeSprint, createSprint, isLoading, isCompleting } = useSprints(projectId);
     const { auth } = usePage<any>().props;
     const isOwner = auth.user?.roles?.includes('Workspace Owner') || auth.user?.roles?.includes('Superadmin');
@@ -464,7 +472,7 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issue
         }
     };
 
-    if (isLoading) return <div>Loading sprints...</div>;
+    if (isLoading) return <div>{t('Loading sprints...')}</div>;
 
     return (
         <>
@@ -476,7 +484,7 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issue
                         <div className="relative">
                             <input 
                                 type="text" 
-                                placeholder="Search backlog"
+                                placeholder={t('Search backlog')}
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                                 className="h-8 w-48 rounded-md border border-input bg-background pl-8 pr-3 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -487,7 +495,7 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issue
                                                         <Avatar 
                                 onClick={() => setAssigneeFilters(prev => prev.includes('unassigned') ? prev.filter(p => p !== 'unassigned') : [...prev, 'unassigned'])}
                                 className={`h-8 w-8 rounded-full border-2 border-background cursor-pointer transition-all ${assigneeFilters.includes('unassigned') ? 'ring-2 ring-offset-1 ring-primary z-10' : 'hover:z-10 hover:-translate-y-0.5'}`}
-                                title="Unassigned"
+                                title={t('Unassigned')}
                             >
                                 <AvatarFallback className="bg-muted text-muted-foreground">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -505,11 +513,11 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issue
                             ))}
                         </div>
                         <Button variant="outline" size="sm" className={`h-8 text-xs font-medium ${(searchQuery || assigneeFilters.length > 0) ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' : 'text-muted-foreground'}`}>
-                            <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5" /> Filter
-                            {(searchQuery || assigneeFilters.length > 0) && <span className="ml-1.5 bg-primary/20 text-primary rounded-full px-1.5 py-0.5 text-[10px] leading-none">{(searchQuery ? 1 : 0) + assigneeFilters.length}</span>}
+                            <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5" /> {t('Filter')}
+                                                            {(searchQuery || assigneeFilters.length > 0) && <span className="ml-1.5 bg-primary/20 text-primary rounded-full px-1.5 py-0.5 text-[10px] leading-none">{(searchQuery ? 1 : 0) + assigneeFilters.length}</span>}
                         </Button>
                         {(searchQuery || assigneeFilters.length > 0) && (
-                            <button onClick={() => { setSearchQuery(''); setAssigneeFilters([]); }} className="text-xs font-medium text-muted-foreground hover:text-foreground mx-1">Clear filters</button>
+                            <button onClick={() => { setSearchQuery(''); setAssigneeFilters([]); }} className="text-xs font-medium text-muted-foreground hover:text-foreground mx-1">{t('Clear filters')}</button>
                         )}
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -529,7 +537,7 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issue
                             lookups={lookups}
                             onStart={(id) => {
                                 startSprint(id)
-                                    .then(() => toast.success('Sprint started successfully'))
+                                    .then(() => toast.success(t('Sprint started successfully')))
                                     .catch((err: any) => toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to start sprint'));
                             }}
                             onComplete={(id) => {
@@ -572,7 +580,7 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issue
                 onComplete={async (sprintId, moveToSprintId) => {
                     try {
                         await completeSprint({ sprintId, moveToSprintId });
-                        toast.success('Sprint completed successfully');
+                        toast.success(t('Sprint completed successfully'));
                     } catch (err: any) {
                         toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to complete sprint');
                         throw err; // Re-throw to prevent dialog from closing

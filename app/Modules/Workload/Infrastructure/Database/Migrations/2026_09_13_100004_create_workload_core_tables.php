@@ -41,7 +41,7 @@ return new class extends Migration
             // FIX #4b: string menggantikan ENUM. Valid: 'ACTIVE' | 'ARCHIVED'
             $table->string('status', 20)->default('ACTIVE');
 
-            $table->uuid('lead_id')->nullable();
+            $table->unsignedBigInteger('lead_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

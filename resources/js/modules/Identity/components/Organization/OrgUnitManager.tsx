@@ -13,6 +13,7 @@ import { useOrgLevels } from '../../hooks/use-org-levels';
 import { OrgUnitTree } from './OrgUnitTree';
 import { OrgUnitFormDialog, OrgUnitFormData } from './OrgUnitFormDialog';
 import { toast } from 'sonner';
+import { useTranslate } from "@/hooks/useTranslate";
 
 const DEFAULT_FORM_DATA: OrgUnitFormData = {
     name: '',
@@ -54,6 +55,7 @@ interface OrgUnitManagerProps {
 }
 
 export function OrgUnitManager({ createTrigger = 0 }: OrgUnitManagerProps) {
+    const { t } = useTranslate();
     const { data: units = [], isLoading: isLoadingUnits } = useOrgUnits();
     const { data: levels = [], isLoading: isLoadingLevels } = useOrgLevels();
     const createUnit = useCreateOrgUnit();
@@ -90,7 +92,7 @@ export function OrgUnitManager({ createTrigger = 0 }: OrgUnitManagerProps) {
 
     const handleDelete = (unit: OrgUnit) => {
         deleteUnit.mutate(unit.id, {
-            onSuccess: () => toast.success('Organization unit deleted'),
+            onSuccess: () => toast.success(t('Organization unit deleted')),
             onError: (error: Error | AxiosError) =>
                 handleAxiosError(error, 'Failed to delete unit'),
         });
@@ -112,7 +114,7 @@ export function OrgUnitManager({ createTrigger = 0 }: OrgUnitManagerProps) {
                 { id: editingUnit.id, ...payload },
                 {
                     onSuccess: () => {
-                        toast.success('Organization unit updated');
+                        toast.success(t('Organization unit updated'));
                         setIsDialogOpen(false);
                     },
                     onError: (error: Error | AxiosError) =>
@@ -122,7 +124,7 @@ export function OrgUnitManager({ createTrigger = 0 }: OrgUnitManagerProps) {
         } else {
             createUnit.mutate(payload, {
                 onSuccess: () => {
-                    toast.success('Organization unit created');
+                    toast.success(t('Organization unit created'));
                     setIsDialogOpen(false);
                 },
                 onError: (error: Error | AxiosError) =>
@@ -139,7 +141,7 @@ export function OrgUnitManager({ createTrigger = 0 }: OrgUnitManagerProps) {
         <div className="space-y-4">
             {isLoadingUnits ? (
                 <div className="flex h-32 items-center justify-center rounded-md border">
-                    <span className="text-sm text-muted-foreground">Loading units...</span>
+                    <span className="text-sm text-muted-foreground">{t('Loading units...')}</span>
                 </div>
             ) : (
                 <OrgUnitTree units={units} onEdit={openEditDialog} onDelete={handleDelete} />
