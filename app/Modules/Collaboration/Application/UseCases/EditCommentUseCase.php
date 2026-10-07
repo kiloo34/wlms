@@ -24,12 +24,12 @@ final class EditCommentUseCase
         $comment = $this->repository->findById($commentId);
 
         if (! $comment) {
-            throw new RuntimeException('Comment not found.');
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Comment not found.');
         }
 
         // Anti-IDOR: Only author can edit
-        if ((int) $comment->authorId !== (int) $input->authorId) {
-            throw new RuntimeException('Unauthorized to edit this comment.');
+        if ((string) $comment->authorId !== (string) $input->authorId) {
+            throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException('Unauthorized to edit this comment.');
         }
 
         $comment->edit(new CommentBody($input->body), new DateTimeImmutable);

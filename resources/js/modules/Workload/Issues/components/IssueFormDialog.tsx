@@ -10,6 +10,7 @@ import { Issue } from '@/types/issue';
 import { CreateIssuePayload, UpdateIssuePayload, useIssueWorklogs } from '../hooks/useIssues';
 import { WorklogHistory } from './WorklogHistory';
 import { IssueCommentSection } from './IssueCommentSection';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export interface SelectOption {
     id: string;
@@ -43,6 +44,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
     statuses,
     assignees,
 }) => {
+    const { t } = useTranslate();
     const isEdit = !!issue;
 
     const [selectedProjectId, setSelectedProjectId] = useState(projectId || '');
@@ -132,30 +134,30 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                         options={(projects || []).map((p) => ({ value: String(p.id), label: p.name }))}
                         value={selectedProjectId}
                         onChange={setSelectedProjectId}
-                        placeholder="Select project..."
+                        placeholder={t('Select project...')}
                         emptyText="No project found."
                     />
                 </div>
             )}
             
             <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">{t('Title')}</Label>
                 <Input
                     id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Issue title"
+                    placeholder={t('Issue title')}
                     required
                 />
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('Description')}</Label>
                 <Textarea
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Description..."
+                    placeholder={t('Description...')}
                     rows={4}
                 />
                 {!isEdit && (
@@ -167,25 +169,25 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="issue_type">Type</Label>
+                    <Label htmlFor="issue_type">{t('Type')}</Label>
                     <Combobox 
                         id="issue_type"
                         options={(issueTypes || []).map((type) => ({ value: String(type.id), label: type.name }))}
                         value={issueTypeId}
                         onChange={setIssueTypeId}
-                        placeholder="Search type..."
+                        placeholder={t('Search type...')}
                         emptyText="No type found."
                     />
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="priority">Priority</Label>
+                    <Label htmlFor="priority">{t('Priority')}</Label>
                     <Combobox 
                         id="priority"
                         options={(priorities || []).map((p) => ({ value: String(p.id), label: p.name }))}
                         value={priorityId}
                         onChange={setPriorityId}
-                        placeholder="Search priority..."
+                        placeholder={t('Search priority...')}
                         emptyText="No priority found."
                     />
                 </div>
@@ -193,19 +195,19 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="status">Status {isEdit ? '*' : '(Optional)'}</Label>
+                    <Label htmlFor="status">{t('Status')} {isEdit ? '*' : '(Optional)'}</Label>
                     <Combobox 
                         id="status"
                         options={(statuses || []).map((s) => ({ value: String(s.id), label: s.name }))}
                         value={statusId}
                         onChange={setStatusId}
-                        placeholder="Search status..."
+                        placeholder={t('Search status...')}
                         emptyText="No status found."
                     />
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="assignee">Assignee</Label>
+                    <Label htmlFor="assignee">{t('Assignee')}</Label>
                     <Combobox 
                         id="assignee"
                         options={[
@@ -214,7 +216,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                         ]}
                         value={assigneeId}
                         onChange={setAssigneeId}
-                        placeholder="Search assignee..."
+                        placeholder={t('Search assignee...')}
                         emptyText="No user found."
                     />
                 </div>
@@ -237,8 +239,8 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
 
             <div className="flex justify-end space-x-2 pt-4">
                 <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                    Cancel
-                </Button>
+                    {t('Cancel')}
+                                    </Button>
                 <Button type="submit" disabled={isLoading}>
                     {isLoading ? 'Saving...' : 'Save Issue'}
                 </Button>
@@ -263,9 +265,9 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                 {isEdit ? (
                     <Tabs defaultValue="details" className="w-full mt-4">
                         <TabsList className="w-full">
-                            <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
-                            <TabsTrigger value="worklogs" className="flex-1">Worklogs</TabsTrigger>
-                            <TabsTrigger value="comments" className="flex-1">Comments</TabsTrigger>
+                            <TabsTrigger value="details" className="flex-1">{t('Details')}</TabsTrigger>
+                            <TabsTrigger value="worklogs" className="flex-1">{t('Worklogs')}</TabsTrigger>
+                            <TabsTrigger value="comments" className="flex-1">{t('Comments')}</TabsTrigger>
                         </TabsList>
                         <TabsContent value="details">
                             {formContent}

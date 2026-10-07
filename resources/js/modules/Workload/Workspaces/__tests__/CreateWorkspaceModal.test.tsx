@@ -14,6 +14,11 @@ vi.mock('@/lib/axios', () => {
     };
 });
 
+// Mock useTranslate
+vi.mock('@/hooks/useTranslate', () => ({
+    useTranslate: () => ({ t: (k: string) => k, locale: 'en' })
+}));
+
 describe('CreateWorkspaceModal Behavioral Test', () => {
     const queryClient = new QueryClient();
 

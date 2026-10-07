@@ -3,12 +3,14 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useIssueComments } from '../hooks/useIssueComments';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface IssueCommentSectionProps {
     issueId: string;
 }
 
 export const IssueCommentSection: React.FC<IssueCommentSectionProps> = ({ issueId }) => {
+    const { t } = useTranslate();
     const { comments, isLoading, addComment, isAdding } = useIssueComments(issueId);
     const [newComment, setNewComment] = useState('');
 
@@ -23,11 +25,11 @@ export const IssueCommentSection: React.FC<IssueCommentSectionProps> = ({ issueI
     return (
         <div className="space-y-6 mt-4">
             <div className="space-y-4">
-                <h3 className="text-sm font-medium">Comments</h3>
+                <h3 className="text-sm font-medium">{t('Comments')}</h3>
                 {isLoading ? (
-                    <div className="text-center text-sm text-muted-foreground py-4">Loading comments...</div>
+                    <div className="text-center text-sm text-muted-foreground py-4">{t('Loading comments...')}</div>
                 ) : comments.length === 0 ? (
-                    <div className="text-center text-sm text-muted-foreground py-4">No comments yet.</div>
+                    <div className="text-center text-sm text-muted-foreground py-4">{t('No comments yet.')}</div>
                 ) : (
                     <div className="space-y-4">
                         {comments.map((comment) => (
@@ -51,7 +53,7 @@ export const IssueCommentSection: React.FC<IssueCommentSectionProps> = ({ issueI
 
             <form onSubmit={handleSubmit} className="space-y-4 pt-4 border-t">
                 <Textarea
-                    placeholder="Add a comment..."
+                    placeholder={t('Add a comment...')}
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     rows={3}

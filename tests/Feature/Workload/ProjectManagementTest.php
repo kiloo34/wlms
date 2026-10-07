@@ -30,6 +30,13 @@ it('can create a project in a workspace', function () {
         'status' => 'ACTIVE',
     ]);
 
+    \Illuminate\Support\Facades\DB::table('workspace_members')->insert([
+        'workspace_id' => $workspaceId,
+        'user_id' => $user->id,
+        'role' => 'admin',
+        'created_at' => now(),
+    ]);
+
     $response = actingAs($user)->postJson('/api/projects', [
         'workspace_id' => $workspaceId,
         'key' => 'TECH',
@@ -59,6 +66,13 @@ it('can create a project with priority and response does not leak internal field
         'owner_group_id' => (string) Str::uuid(),
         'name' => 'Tech Dept',
         'status' => 'ACTIVE',
+    ]);
+
+    \Illuminate\Support\Facades\DB::table('workspace_members')->insert([
+        'workspace_id' => $workspaceId,
+        'user_id' => $user->id,
+        'role' => 'admin',
+        'created_at' => now(),
     ]);
 
     $this->seed(WorkloadLookupSeeder::class);
@@ -96,6 +110,13 @@ it('cannot create project with non-existent priority (Anti-IDOR)', function () {
         'owner_group_id' => (string) Str::uuid(),
         'name' => 'Tech Dept',
         'status' => 'ACTIVE',
+    ]);
+
+    \Illuminate\Support\Facades\DB::table('workspace_members')->insert([
+        'workspace_id' => $workspaceId,
+        'user_id' => $user->id,
+        'role' => 'admin',
+        'created_at' => now(),
     ]);
 
     $response = actingAs($user)->postJson('/api/projects', [

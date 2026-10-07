@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Building2 } from 'lucide-react';
 import type { User } from '../../hooks/use-users';
+import { useTranslate } from "@/hooks/useTranslate";
 
 // Since OrgUnits might be loaded globally or passed from parent, let's assume we pass them
 interface UserAssignOrgUnitDialogProps {
@@ -14,6 +15,7 @@ interface UserAssignOrgUnitDialogProps {
 }
 
 export function UserAssignOrgUnitDialog({ user, orgUnits, isSubmitting, onSubmit }: UserAssignOrgUnitDialogProps) {
+    const { t } = useTranslate();
     const [isOpen, setIsOpen] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState<string>(user.org_unit_id ?? '');
 
@@ -33,16 +35,16 @@ export function UserAssignOrgUnitDialog({ user, orgUnits, isSubmitting, onSubmit
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                     <Building2 className="w-4 h-4 mr-2" />
-                    Assign Unit
-                </Button>
+                    {t('Assign Unit')}
+                                    </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Assign Unit for {user.name}</DialogTitle>
+                    <DialogTitle>{t('Assign Unit for')} {user.name}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="unit">Select Organization Unit</Label>
+                        <Label htmlFor="unit">{t('Select Organization Unit')}</Label>
                         <select
                             id="unit"
                             value={selectedUnit}

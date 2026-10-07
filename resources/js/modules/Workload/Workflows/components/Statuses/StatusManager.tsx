@@ -5,8 +5,10 @@ import { StatusList } from './StatusList';
 import { StatusFormDialog } from './StatusFormDialog';
 import { useStatuses, useCreateStatus, useUpdateStatus, useDeleteStatus } from '../../hooks/useStatuses';
 import type { Status, CreateStatusDto, UpdateStatusDto } from '../../types';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export function StatusManager() {
+    const { t } = useTranslate();
     const { data: statuses = [], isLoading } = useStatuses();
     const createStatus = useCreateStatus();
     const updateStatus = useUpdateStatus();
@@ -44,7 +46,7 @@ export function StatusManager() {
     };
 
     if (isLoading) {
-        return <div className="py-4">Loading statuses...</div>;
+        return <div className="py-4">{t('Loading statuses...')}</div>;
     }
 
     return (
@@ -52,8 +54,8 @@ export function StatusManager() {
             <div className="flex justify-end">
                 <Button onClick={handleOpenCreate}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Status
-                </Button>
+                    {t('Create Status')}
+                                    </Button>
             </div>
             
             <StatusList 

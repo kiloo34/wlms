@@ -11,19 +11,21 @@ import {
 } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyConfirmationController';
 import PasskeyVerify from '@/components/passkey-verify';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export default function ConfirmPassword() {
+    const { t } = useTranslate();
     return (
         <>
-            <Head title="Security Verification" />
+            <Head title={t('Security Verification')} />
 
             <div className="space-y-8">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Security Verification</CardTitle>
+                        <CardTitle>{t('Security Verification')}</CardTitle>
                         <CardDescription>
-                            You are trying to access a sensitive area or perform a highly secure action. Please confirm your password to verify your identity.
-                        </CardDescription>
+                            {t('You are trying to access a sensitive area or perform a highly secure action. Please confirm your password to verify your identity.')}
+                                                    </CardDescription>
                     </CardHeader>
 
                     <div className="pt-6 px-6 max-w-2xl space-y-8">
@@ -32,7 +34,7 @@ export default function ConfirmPassword() {
                                 options: confirmOptions(),
                                 submit: confirmStore(),
                             }}
-                            label="Confirm with passkey"
+                            label={t('Confirm with passkey')}
                             loadingLabel="Confirming..."
                             separator="Or confirm with password"
                         />
@@ -43,11 +45,11 @@ export default function ConfirmPassword() {
                             <>
                                 <CardContent >
                                     <div className="max-w-xl space-y-2">
-                                        <Label htmlFor="password">Password</Label>
+                                        <Label htmlFor="password">{t('Password')}</Label>
                                         <PasswordInput
                                             id="password"
                                             name="password"
-                                            placeholder="Enter your current password"
+                                            placeholder={t('Enter your current password')}
                                             autoComplete="current-password"
                                             autoFocus
                                             className="w-full max-w-md"
@@ -62,8 +64,8 @@ export default function ConfirmPassword() {
                                         data-test="confirm-password-button"
                                     >
                                         {processing && <Spinner className="mr-2" />}
-                                        Confirm Password
-                                    </Button>
+                                        {t('Confirm Password')}
+                                                                            </Button>
                                 </CardFooter>
                             </>
                         )}

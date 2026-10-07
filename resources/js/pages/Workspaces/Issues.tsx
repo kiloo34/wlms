@@ -9,6 +9,7 @@ import { CreateIssuePayload } from '@/modules/Workload/Issues/hooks/useIssues';
 import axios from '@/lib/axios';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslate } from '@/hooks/useTranslate';
 
 interface WorkspaceLookups {
     projects: SelectOption[];
@@ -19,6 +20,7 @@ interface WorkspaceLookups {
 }
 
 export default function WorkspaceIssues() {
+    const { t } = useTranslate();
     const { workspace_id, lookups, auth } = usePage().props as unknown as { 
         workspace_id: string; 
         lookups: WorkspaceLookups;
@@ -59,15 +61,15 @@ export default function WorkspaceIssues() {
             // Need to handle project_id from payload since we are in global workspace
             const projectId = payload.project_id;
             if (!projectId) {
-                toast.error('Project is required');
+                toast.error(t('Project is required'));
                 return;
             }
             await axios.post(`/api/projects/${projectId}/issues`, payload);
-            toast.success('Issue created successfully');
+            toast.success(t('Issue created successfully'));
             queryClient.invalidateQueries({ queryKey: ['workspaces', workspace_id, 'issues'] });
             setIsCreateOpen(false);
         } catch (error) {
-            toast.error('Failed to create issue');
+            toast.error(t('Failed to create issue'));
         } finally {
             setIsCreating(false);
         }
@@ -77,20 +79,20 @@ export default function WorkspaceIssues() {
 
     return (
         <>
-            <Head title="All Tasks" />
+            <Head title={t('All Tasks')} />
             
             <div className="flex h-full w-full flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">All Tasks</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">{t('All Tasks')}</h1>
                         <p className="text-muted-foreground mt-1">
-                            Global view of issues across the workspace.
+                            {t('Global view of issues across the workspace.')}
                         </p>
                     </div>
                     
                     <Button onClick={() => setIsCreateOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Create Issue
+                        {t('Create Issue')}
                     </Button>
                 </div>
 
@@ -101,7 +103,7 @@ export default function WorkspaceIssues() {
                             variant={activeTab === tab ? 'default' : 'outline'}
                             onClick={() => handleFilterChange(tab)}
                         >
-                            {tab}
+                            {t(tab)}
                         </Button>
                     ))}
                 </div>
@@ -110,31 +112,31 @@ export default function WorkspaceIssues() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Project</TableHead>
-                                <TableHead>Key/Title</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Priority</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Assignee</TableHead>
+                                <TableHead>{t('Project')}</TableHead>
+                                <TableHead>{t('Key/Title')}</TableHead>
+                                <TableHead>{t('Status')}</TableHead>
+                                <TableHead>{t('Priority')}</TableHead>
+                                <TableHead>{t('Type')}</TableHead>
+                                <TableHead>{t('Assignee')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                        Loading...
+                                        {t('Loading...')}
                                     </TableCell>
                                 </TableRow>
                             ) : issues.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                        No tasks found.
+                                        {t('No tasks found.')}
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 issues.map((issue: any) => (
                                     <TableRow key={issue.id}>
-                                        <TableCell>{issue.project?.name || 'N/A'}</TableCell>
+                                        <TableCell>{issue.project?.name || t('N/A')}</TableCell>
                                         <TableCell>
                                             <div className="font-medium">{issue.title}</div>
                                             <div className="text-xs text-muted-foreground">{issue.id}</div>
@@ -142,7 +144,7 @@ export default function WorkspaceIssues() {
                                         <TableCell>{issue.status?.name}</TableCell>
                                         <TableCell>{issue.priority?.name}</TableCell>
                                         <TableCell>{issue.issue_type?.name}</TableCell>
-                                        <TableCell>{issue.assignee?.name || 'Unassigned'}</TableCell>
+                                        <TableCell>{issue.assignee?.name || t('Unassigned')}</TableCell>
                                     </TableRow>
                                 ))
                             )}

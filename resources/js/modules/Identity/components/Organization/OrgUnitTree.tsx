@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface OrgUnitTreeProps {
     units: OrgUnit[];
@@ -30,6 +31,7 @@ interface OrgUnitTreeNodeProps {
 }
 
 function OrgUnitTreeNode({ unit, depth = 0, onEdit, onDelete }: OrgUnitTreeNodeProps) {
+    const { t } = useTranslate();
     const [isExpanded, setIsExpanded] = React.useState(true);
     const hasChildren = unit.children && unit.children.length > 0;
 
@@ -62,7 +64,7 @@ function OrgUnitTreeNode({ unit, depth = 0, onEdit, onDelete }: OrgUnitTreeNodeP
                         {unit.code}
                     </span>
                     {!unit.is_active && (
-                        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">Inactive</Badge>
+                        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{t('Inactive')}</Badge>
                     )}
                     {unit.level && (
                         <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-normal">
@@ -77,7 +79,7 @@ function OrgUnitTreeNode({ unit, depth = 0, onEdit, onDelete }: OrgUnitTreeNodeP
                         size="icon"
                         className="h-7 w-7"
                         onClick={() => onEdit(unit)}
-                        title="Edit Unit"
+                        title={t('Edit Unit')}
                     >
                         <Edit2 className="h-3 w-3" />
                     </Button>
@@ -87,23 +89,23 @@ function OrgUnitTreeNode({ unit, depth = 0, onEdit, onDelete }: OrgUnitTreeNodeP
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-destructive hover:text-destructive"
-                                title="Delete Unit"
+                                title={t('Delete Unit')}
                             >
                                 <Trash2 className="h-3 w-3" />
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogTitle>{t('Are you absolutely sure?')}</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     This action cannot be undone. This will permanently delete the unit "{unit.name}".
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
                                 <AlertDialogAction onClick={() => onDelete(unit)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                    Delete
-                                </AlertDialogAction>
+                                    {t('Delete')}
+                                                                    </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
@@ -128,6 +130,7 @@ function OrgUnitTreeNode({ unit, depth = 0, onEdit, onDelete }: OrgUnitTreeNodeP
 }
 
 export function OrgUnitTree({ units, onEdit, onDelete }: OrgUnitTreeProps) {
+    const { t } = useTranslate();
     if (!units.length) {
         return (
             <div className="flex flex-col items-center justify-center p-12 text-muted-foreground space-y-2 border rounded-md">
@@ -146,7 +149,7 @@ export function OrgUnitTree({ units, onEdit, onDelete }: OrgUnitTreeProps) {
                     <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                     <rect width="20" height="14" x="2" y="6" rx="2" />
                 </svg>
-                <span className="text-sm font-medium">No organization units found. Create one to get started.</span>
+                <span className="text-sm font-medium">{t('No organization units found. Create one to get started.')}</span>
             </div>
         );
     }

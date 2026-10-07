@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Issue } from "@/types/issue";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface EstimatePopoverProps {
     issue: Issue;
@@ -11,6 +12,7 @@ interface EstimatePopoverProps {
 }
 
 export const EstimatePopover = ({ issue, updateIssue }: EstimatePopoverProps) => {
+    const { t } = useTranslate();
     const [open, setOpen] = useState(false);
     const currentOriginal = issue.original_estimate_seconds ? (issue.original_estimate_seconds / 3600).toString() : '';
     const currentRemaining = issue.remaining_estimate_seconds !== undefined && issue.remaining_estimate_seconds !== null ? (issue.remaining_estimate_seconds / 3600).toString() : currentOriginal;
@@ -51,7 +53,7 @@ export const EstimatePopover = ({ issue, updateIssue }: EstimatePopoverProps) =>
             }
         }}>
             <PopoverTrigger asChild>
-                <span className="text-xs font-mono text-muted-foreground bg-muted/50 hover:bg-muted cursor-pointer px-1.5 py-0.5 rounded transition-colors select-none min-w-[20px] text-center inline-block" title="Remaining Estimate">
+                <span className="text-xs font-mono text-muted-foreground bg-muted/50 hover:bg-muted cursor-pointer px-1.5 py-0.5 rounded transition-colors select-none min-w-[20px] text-center inline-block" title={t('Remaining Estimate')}>
                     {currentRemaining ? currentRemaining : '-'}
                 </span>
             </PopoverTrigger>

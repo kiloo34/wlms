@@ -15,7 +15,7 @@ final class CommentMapper
         return Comment::reconstruct(
             $model->id,
             $model->issue_id,
-            $model->author_id,
+            (string) $model->author_id,
             $model->parent_id,
             $model->body,
             (bool) $model->is_edited,
@@ -29,7 +29,7 @@ final class CommentMapper
         if ($model === null) {
             $model = new CommentModel;
             $model->id = $entity->id->value;
-            $model->created_at = $entity->createdAt->format('Y-m-d H:i:s');
+            $model->created_at = \Illuminate\Support\Carbon::instance($entity->createdAt);
         }
 
         $model->issue_id = $entity->issueId;
@@ -37,7 +37,7 @@ final class CommentMapper
         $model->parent_id = $entity->parentId;
         $model->body = $entity->body->value;
         $model->is_edited = $entity->isEdited;
-        $model->updated_at = $entity->updatedAt->format('Y-m-d H:i:s');
+        $model->updated_at = \Illuminate\Support\Carbon::instance($entity->updatedAt);
 
         return $model;
     }

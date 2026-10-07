@@ -6,6 +6,7 @@ import { StatusManager } from '@/modules/Workload/Workflows/components/Statuses/
 import { WorkflowManager } from '@/modules/Workload/Workflows/components/Workflows/WorkflowManager';
 
 export default function WorkflowsIndex() {
+    const { t } = useTranslate();
     const [activeTab, setActiveTabState] = useState(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -41,7 +42,7 @@ export default function WorkflowsIndex() {
 
     return (
         <>
-            <Head title="Workflows & Statuses" />
+            <Head title={t('Workflows & Statuses')} />
             
             <div className="space-y-8">
                 <Card>
@@ -49,8 +50,8 @@ export default function WorkflowsIndex() {
                         <div className="space-y-1">
                             <CardTitle>Workflows & Statuses</CardTitle>
                             <CardDescription>
-                                Manage statuses and workflows for your organization.
-                            </CardDescription>
+                                {t('Manage statuses and workflows for your organization.')}
+                                                            </CardDescription>
                         </div>
                     </CardHeader>
 
@@ -59,11 +60,11 @@ export default function WorkflowsIndex() {
                             <div className="pb-4">
                                 <TabsList className="grid w-full max-w-md grid-cols-2">
                                     <TabsTrigger value="workflows">
-                                        Workflows
-                                    </TabsTrigger>
+                                        {t('Workflows')}
+                                                                            </TabsTrigger>
                                     <TabsTrigger value="statuses">
-                                        Statuses
-                                    </TabsTrigger>
+                                        {t('Statuses')}
+                                                                            </TabsTrigger>
                                 </TabsList>
                             </div>
                             
@@ -83,6 +84,7 @@ export default function WorkflowsIndex() {
 }
 
 import { index as workflowsIndex } from '@/routes/workflows';
+import { useTranslate } from "@/hooks/useTranslate";
 
 WorkflowsIndex.layout = {
     breadcrumbs: [

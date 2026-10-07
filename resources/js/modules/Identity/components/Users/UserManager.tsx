@@ -5,10 +5,12 @@ import { Users, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { UserList } from './UserList';
 import { UserCreateDialog } from './UserCreateDialog';
+import { useTranslate } from "@/hooks/useTranslate";
 
 // This is a Smart Component
 // It handles Server State (React Query) and API interaction.
 export function UserManager() {
+    const { t } = useTranslate();
     const { data: users, isLoading: isLoadingUsers } = useUsers();
     const { data: roles, isLoading: isLoadingRoles } = useRoles();
     const { data: orgUnits, isLoading: isLoadingOrgUnits } = useOrgUnits();
@@ -28,9 +30,9 @@ export function UserManager() {
     const handleCreate = async (payload: { name: string; email: string; password?: string }) => {
         try {
             await createUser.mutateAsync(payload);
-            toast.success('User created successfully');
+            toast.success(t('User created successfully'));
         } catch (error) {
-            toast.error('Failed to create user');
+            toast.error(t('Failed to create user'));
             throw error;
         }
     };
@@ -38,9 +40,9 @@ export function UserManager() {
     const handleAssignRole = async (payload: { user_id: string; role_id: string }) => {
         try {
             await assignRole.mutateAsync(payload);
-            toast.success('Role assigned to user successfully');
+            toast.success(t('Role assigned to user successfully'));
         } catch (error) {
-            toast.error('Failed to assign role');
+            toast.error(t('Failed to assign role'));
             throw error;
         }
     };
@@ -48,9 +50,9 @@ export function UserManager() {
     const handleUpdateUser = async (payload: { id: string; org_unit_id: string | null }) => {
         try {
             await updateUser.mutateAsync(payload);
-            toast.success('User updated successfully');
+            toast.success(t('User updated successfully'));
         } catch (error) {
-            toast.error('Failed to update user');
+            toast.error(t('Failed to update user'));
             throw error;
         }
     };

@@ -6,10 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { useCreateRole } from '../hooks/use-roles';
 import { toast } from 'sonner';
+import { useTranslate } from "@/hooks/useTranslate";
 
 type RoleScope = 'GLOBAL' | 'WORKSPACE' | 'PROJECT';
 
 export function RoleCreateDialog() {
+    const { t } = useTranslate();
     const [isOpen, setIsOpen] = useState(false);
     const [name, setName] = useState('');
     const [scope, setScope] = useState<RoleScope>('GLOBAL');
@@ -20,12 +22,12 @@ export function RoleCreateDialog() {
         e.preventDefault();
         try {
             await createRole.mutateAsync({ name, scope });
-            toast.success('Role created successfully');
+            toast.success(t('Role created successfully'));
             setIsOpen(false);
             setName('');
             setScope('GLOBAL');
         } catch (error) {
-            toast.error('Failed to create role');
+            toast.error(t('Failed to create role'));
         }
     };
 
@@ -33,16 +35,16 @@ export function RoleCreateDialog() {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                    <Plus className="w-4 h-4 mr-2" /> Create Role
-                </Button>
+                    <Plus className="w-4 h-4 mr-2" /> {t('Create Role')}
+                                    </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Create New Role</DialogTitle>
+                    <DialogTitle>{t('Create New Role')}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Role Name</Label>
+                        <Label htmlFor="name">{t('Role Name')}</Label>
                         <Input 
                             id="name" 
                             value={name} 
@@ -52,16 +54,16 @@ export function RoleCreateDialog() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="scope">Scope</Label>
+                        <Label htmlFor="scope">{t('Scope')}</Label>
                         <select 
                             id="scope" 
                             value={scope} 
                             onChange={(e) => setScope(e.target.value as RoleScope)}
                             className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
                         >
-                            <option value="GLOBAL">Global</option>
-                            <option value="WORKSPACE">Workspace</option>
-                            <option value="PROJECT">Project</option>
+                            <option value="GLOBAL">{t('Global')}</option>
+                            <option value="WORKSPACE">{t('Workspace')}</option>
+                            <option value="PROJECT">{t('Project')}</option>
                         </select>
                     </div>
                     <Button type="submit" disabled={createRole.isPending} className="w-full">

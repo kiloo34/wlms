@@ -48,7 +48,7 @@ beforeEach(function () {
 
     // Setup Users
     $this->normalUser = UserModel::factory()->create([
-        'org_unit_id' => $this->groupId,
+        'org_unit_id' => Str::uuid()->toString(),
     ]);
 
     $this->superAdminRole = RoleModel::create([
@@ -58,13 +58,20 @@ beforeEach(function () {
     ]);
 
     $this->superAdmin = UserModel::factory()->create([
-        'org_unit_id' => $this->groupId,
+        'org_unit_id' => Str::uuid()->toString(),
     ]);
 
     DB::table('user_roles')->insert([
         'id' => Str::uuid()->toString(),
         'user_id' => $this->superAdmin->id,
         'role_id' => $this->superAdminRole->id,
+    ]);
+
+    DB::table('workspace_members')->insert([
+        'workspace_id' => $this->workspaceId,
+        'user_id' => $this->superAdmin->id,
+        'role' => 'admin',
+        'created_at' => now(),
     ]);
 });
 
@@ -150,4 +157,49 @@ test('superadmin can manage projects (CRUD) without leaking sensitive data', fun
         'id' => $this->projectId,
         'status' => 'ARCHIVED',
     ]);
+});
+
+test('workspace member only sees projects they are explicitly assigned to', function () {
+    // Make normalUser a member of the workspace (but not superadmin)
+    DB::table('workspace_members')->insert([
+        'workspace_id' => $this->workspaceId,
+        'user_id' => $this->normalUser->id,
+        'role' => 'member',
+        'created_at' => now(),
+    ]);
+
+    $this->actingAs($this->normalUser);
+
+    // Give normal user the workspace view permission globally so they pass the first gate
+    // Assuming GetProjectsHttpRequest authorizes via `projects:view` or `workspaces:view`
+    $permId = Str::uuid()->toString();
+    DB::table('permissions')->insert(['id' => $permId, 'name' => 'workspaces:view']);
+    $roleId = Str::uuid()->toString();
+    DB::table('roles')->insert(['id' => $roleId, 'name' => 'Basic']);
+    DB::table('role_permissions')->insert(['role_id' => $roleId, 'permission_id' => $permId]);
+    DB::table('user_roles')->insert([
+        'id' => Str::uuid()->toString(),
+        'user_id' => $this->normalUser->id,
+        'role_id' => $roleId,
+    ]);
+
+    // 1. Fetch projects - should be empty because normalUser is not assigned to MAIN project
+    $response = $this->getJson("/api/workspaces/{$this->workspaceId}/projects");
+    $response->assertStatus(200);
+    $this->assertEmpty($response->json());
+
+    // 2. Assign normalUser to the project via user_roles
+    DB::table('user_roles')->insert([
+        'id' => Str::uuid()->toString(),
+        'user_id' => $this->normalUser->id,
+        'role_id' => $roleId,
+        'context_type' => 'PROJECT',
+        'context_id' => $this->projectId
+    ]);
+
+    // 3. Fetch again - should now see MAIN project
+    $response2 = $this->getJson("/api/workspaces/{$this->workspaceId}/projects");
+    $response2->assertStatus(200);
+    $this->assertCount(1, $response2->json());
+    $this->assertEquals('MAIN', $response2->json('0.key'));
 });

@@ -25,7 +25,7 @@ final class AddCommentToIssueUseCase
         $comment = Comment::create(
             new CommentId($input->commentId),
             $input->issueId,
-            max(0, (int) $input->authorId),
+            (string) $input->authorId,
             $input->parentId,
             new CommentBody($input->body)
         );

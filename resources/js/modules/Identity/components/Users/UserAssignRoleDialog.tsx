@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { UserPlus } from 'lucide-react';
 import type { Role } from '../../hooks/use-roles';
 import type { User } from '../../hooks/use-users';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface UserAssignRoleDialogProps {
     user: User;
@@ -14,6 +15,7 @@ interface UserAssignRoleDialogProps {
 }
 
 export function UserAssignRoleDialog({ user, roles, isSubmitting, onSubmit }: UserAssignRoleDialogProps) {
+    const { t } = useTranslate();
     const [isOpen, setIsOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<string>('');
 
@@ -35,16 +37,16 @@ export function UserAssignRoleDialog({ user, roles, isSubmitting, onSubmit }: Us
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                     <UserPlus className="w-4 h-4 mr-2" />
-                    Assign Role
-                </Button>
+                    {t('Assign Role')}
+                                    </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Assign Role to {user.name}</DialogTitle>
+                    <DialogTitle>{t('Assign Role to')} {user.name}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="role">Select Role</Label>
+                        <Label htmlFor="role">{t('Select Role')}</Label>
                         <select
                             id="role"
                             value={selectedRole}
@@ -52,7 +54,7 @@ export function UserAssignRoleDialog({ user, roles, isSubmitting, onSubmit }: Us
                             className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
                             required
                         >
-                            <option value="" disabled>Select a role...</option>
+                            <option value="" disabled>{t('Select a role...')}</option>
                             {roles.map((role) => (
                                 <option key={role.id} value={role.id}>
                                     {role.name} ({role.scope})

@@ -12,6 +12,7 @@ import type { Props as ManageTwoFactorProps } from '@/components/manage-two-fact
 import ManageTwoFactor from '@/components/manage-two-factor';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { useTranslate } from "@/hooks/useTranslate";
 
 // oxfmt-ignore
 type Props = {
@@ -20,21 +21,22 @@ type Props = {
     ManageTwoFactorProps;
 
 export default function Security(props: Props) {
+    const { t } = useTranslate();
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
     return (
         <>
-            <Head title="Security settings" />
+            <Head title={t('Security settings')} />
 
             <div className="space-y-8">
                 {/* Section 1: Password Card */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Update Password</CardTitle>
+                        <CardTitle>{t('Update Password')}</CardTitle>
                         <CardDescription>
-                            Ensure your account is using a long, random password to stay secure.
-                        </CardDescription>
+                            {t('Ensure your account is using a long, random password to stay secure.')}
+                                                    </CardDescription>
                     </CardHeader>
 
                     <Form
@@ -63,28 +65,28 @@ export default function Security(props: Props) {
                                 <CardContent className="space-y-6 max-w-xl">
                                     <div className="space-y-2">
                                         <Label htmlFor="current_password">
-                                            Current password
-                                        </Label>
+                                            {t('Current password')}
+                                                                                    </Label>
                                         <PasswordInput
                                             id="current_password"
                                             ref={currentPasswordInput}
                                             name="current_password"
                                             className="w-full max-w-md"
                                             autoComplete="current-password"
-                                            placeholder="Current password"
+                                            placeholder={t('Current password')}
                                         />
                                         <InputError message={errors.current_password} />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="password">New password</Label>
+                                        <Label htmlFor="password">{t('New password')}</Label>
                                         <PasswordInput
                                             id="password"
                                             ref={passwordInput}
                                             name="password"
                                             className="w-full max-w-md"
                                             autoComplete="new-password"
-                                            placeholder="New password"
+                                            placeholder={t('New password')}
                                             passwordrules={props.passwordRules}
                                         />
                                         <InputError message={errors.password} />
@@ -92,14 +94,14 @@ export default function Security(props: Props) {
 
                                     <div className="space-y-2">
                                         <Label htmlFor="password_confirmation">
-                                            Confirm password
-                                        </Label>
+                                            {t('Confirm password')}
+                                                                                    </Label>
                                         <PasswordInput
                                             id="password_confirmation"
                                             name="password_confirmation"
                                             className="w-full max-w-md"
                                             autoComplete="new-password"
-                                            placeholder="Confirm password"
+                                            placeholder={t('Confirm password')}
                                             passwordrules={props.passwordRules}
                                         />
                                         <InputError message={errors.password_confirmation} />
@@ -111,8 +113,8 @@ export default function Security(props: Props) {
                                         data-test="update-password-button"
                                         
                                     >
-                                        Save Password
-                                    </Button>
+                                        {t('Save Password')}
+                                                                            </Button>
                                 </CardFooter>
                             </>
                         )}

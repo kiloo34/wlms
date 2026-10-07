@@ -17,6 +17,7 @@ export function useGetWorkspaces() {
                 id: item.id,
                 name: item.name,
                 status: item.status,
+                owner_group_id: item.owner_group_id || item.ownerGroupId,
                 ownerGroupId: item.owner_group_id || item.ownerGroupId,
             }));
         },
@@ -35,6 +36,7 @@ export function useCreateWorkspace() {
                 id: item.id,
                 name: item.name,
                 status: item.status,
+                owner_group_id: item.owner_group_id || item.ownerGroupId,
                 ownerGroupId: item.owner_group_id || item.ownerGroupId,
             };
         },
@@ -57,6 +59,7 @@ export function useUpdateWorkspace() {
                 id: item.id,
                 name: item.name,
                 status: item.status,
+                owner_group_id: item.owner_group_id || item.ownerGroupId,
                 ownerGroupId: item.owner_group_id || item.ownerGroupId,
             };
         },

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAddComment } from '@/hooks/collaboration/use-add-comment';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useTranslate } from "@/hooks/useTranslate";
 
 type Props = {
     issueId: string;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function CommentBox({ issueId, parentId, onSuccess }: Props) {
+    const { t } = useTranslate();
     const [body, setBody] = useState('');
     const { mutate: addComment, isPending } = useAddComment();
 
@@ -31,7 +33,7 @@ export function CommentBox({ issueId, parentId, onSuccess }: Props) {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <Textarea
-                placeholder="Leave a comment..."
+                placeholder={t('Leave a comment...')}
                 value={body}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBody(e.target.value)}
                 disabled={isPending}

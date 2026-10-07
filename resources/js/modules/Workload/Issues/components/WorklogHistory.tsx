@@ -1,6 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { Worklog } from '../hooks/useIssues';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface WorklogHistoryProps {
     worklogs: Worklog[];
@@ -17,12 +18,13 @@ const formatDuration = (seconds: number) => {
 };
 
 export const WorklogHistory: React.FC<WorklogHistoryProps> = ({ worklogs, isLoading }) => {
+    const { t } = useTranslate();
     if (isLoading) {
-        return <div className="text-center text-sm text-muted-foreground py-4">Loading worklogs...</div>;
+        return <div className="text-center text-sm text-muted-foreground py-4">{t('Loading worklogs...')}</div>;
     }
 
     if (!worklogs || worklogs.length === 0) {
-        return <div className="text-center text-sm text-muted-foreground py-4">No worklogs found.</div>;
+        return <div className="text-center text-sm text-muted-foreground py-4">{t('No worklogs found.')}</div>;
     }
 
     return (

@@ -3,6 +3,7 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SprintWorkloadMember } from '../hooks/useSprints';
 import { cn } from '@/lib/utils';
+import { useTranslate } from "@/hooks/useTranslate";
 
 interface SprintWorkloadWidgetProps {
     workload: SprintWorkloadMember[];
@@ -10,6 +11,7 @@ interface SprintWorkloadWidgetProps {
 }
 
 export const SprintWorkloadWidget: React.FC<SprintWorkloadWidgetProps> = ({ workload, isLoading }) => {
+    const { t } = useTranslate();
     if (isLoading) {
         return (
             <div className="space-y-4">
@@ -25,7 +27,7 @@ export const SprintWorkloadWidget: React.FC<SprintWorkloadWidgetProps> = ({ work
 
     return (
         <div className="space-y-4 py-2">
-            <h4 className="text-sm font-medium">Sprint Capacity</h4>
+            <h4 className="text-sm font-medium">{t('Sprint Capacity')}</h4>
             <div className="space-y-3">
                 {workload.map((member) => {
                     const capacityHours = Math.round(member.capacity_seconds / 3600 * 10) / 10;

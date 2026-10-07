@@ -21,6 +21,7 @@ final class GetWorkspaceMembersQuery
                 'users.name',
                 'users.email',
                 'workspace_members.role',
+                'workspace_members.daily_capacity_hours',
                 'workspace_members.created_at',
             ])
             ->orderBy('workspace_members.created_at', 'desc')

@@ -9,8 +9,10 @@ import { Combobox } from '@/components/ui/combobox';
 import { WorkspaceMembersDialog } from '@/modules/Workload/Workspaces/components/WorkspaceMembersDialog';
 import { Users, CheckSquare } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslate } from "@/hooks/useTranslate";
 
 export default function ProjectsIndex() {
+    const { t } = useTranslate();
     const { url, props } = usePage<any>();
     const urlParams = new URLSearchParams(url.split('?')[1] || '');
     const workspaceId = urlParams.get('workspace_id');
@@ -32,15 +34,15 @@ export default function ProjectsIndex() {
 
     return (
         <>
-            <Head title="Projects" />
+            <Head title={t('Projects')} />
             
             <div className="flex h-full w-full flex-col gap-6 p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">{t('Projects')}</h1>
                         <p className="text-muted-foreground mt-1">
-                            Manage projects within your workspace.
-                        </p>
+                            {t('Manage projects within your workspace.')}
+                                                    </p>
                     </div>
                     
                     <div className="w-full sm:w-auto flex items-center gap-3"><span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Active Workspace:</span>
@@ -49,17 +51,17 @@ export default function ProjectsIndex() {
                             value={workspaceId || ''}
                             onChange={handleWorkspaceChange}
                             disabled={isLoading}
-                            placeholder="Select Workspace..."
+                            placeholder={t('Select Workspace...')}
                         />
                         {workspaceId && activeWorkspace && hasManagePermission && (
                             <>
-                                <Button variant="outline" className="h-9 px-3 shrink-0 flex items-center gap-2" onClick={() => setMembersOpen(true)} title="Manage Workspace Members">
-                                    <span className="sr-only sm:not-sr-only sm:text-xs">Members</span>
+                                <Button variant="outline" className="h-9 px-3 shrink-0 flex items-center gap-2" onClick={() => setMembersOpen(true)} title={t('Manage Workspace Members')}>
+                                    <span className="sr-only sm:not-sr-only sm:text-xs">{t('Members')}</span>
                                     <Users className="h-4 w-4" />
                                 </Button>
                                 
-                                <Button variant="outline" className="h-9 px-3 shrink-0 flex items-center gap-2" onClick={() => router.visit(`/workspaces/${activeWorkspace.id}/issues`)} title="All Tasks in Workspace">
-                                    <span className="sr-only sm:not-sr-only sm:text-xs">All Tasks</span>
+                                <Button variant="outline" className="h-9 px-3 shrink-0 flex items-center gap-2" onClick={() => router.visit(`/workspaces/${activeWorkspace.id}/issues`)} title={t('All Tasks in Workspace')}>
+                                    <span className="sr-only sm:not-sr-only sm:text-xs">{t('All Tasks')}</span>
                                     <CheckSquare className="h-4 w-4" />
                                 </Button>
                                 <WorkspaceMembersDialog
@@ -76,15 +78,15 @@ export default function ProjectsIndex() {
                 {!workspaceId ? (
                     <Card className="mt-4">
                         <CardHeader>
-                            <CardTitle>No Workspace Selected</CardTitle>
+                            <CardTitle>{t('No Workspace Selected')}</CardTitle>
                             <CardDescription>
-                                Please select a workspace from the dropdown above to view its projects.
-                            </CardDescription>
+                                {t('Please select a workspace from the dropdown above to view its projects.')}
+                                                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Button onClick={() => router.visit(workspacesIndex().url)} variant="outline">
-                                Go to Workspaces Directory
-                            </Button>
+                                {t('Go to Workspaces Directory')}
+                                                            </Button>
                         </CardContent>
                     </Card>
                 ) : (
