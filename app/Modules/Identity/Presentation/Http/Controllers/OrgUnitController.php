@@ -8,47 +8,36 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class OrgUnitController extends Controller
 {
     public function index(): JsonResponse
     {
-        // Get all root nodes (where parent_id is null)
-        $units = OrgUnitModel::with(['level', 'children' => function ($query) {
-            $query->with(['level', 'children' => function ($q) {
-                // Fetch up to arbitrary depth if needed, but since it's an API,
-                // recursive loading is often handled via nested relations or a closure.
-                // Let's use a simpler recursive relation in the model or just load a few depths.
-            }]);
-        }])->whereNull('parent_id')->get();
-
-        // Better way to load infinite depth in Eloquent without causing N+1 is eager loading
-        // But for a simple tree structure, we can just load all and build the tree in memory
-
+        Gate::authorize('manage-rbac');
         $allUnits = OrgUnitModel::with('level')->get();
-        $tree = $this->buildTree($allUnits);
+        
+        // Group by parent_id. Laravel groupBy maps null to empty string.
+        $grouped = $allUnits->groupBy(fn ($unit) => $unit->parent_id ?: '');
+        
+        $tree = $this->buildTree($grouped, '');
 
         return response()->json(['data' => $tree]);
     }
 
     /**
-     * @param  Collection<int, OrgUnitModel>  $elements
+     * @param  \Illuminate\Support\Collection<string, \Illuminate\Database\Eloquent\Collection<int, OrgUnitModel>>  $grouped
      * @return array<int, OrgUnitModel>
      */
-    private function buildTree(Collection $elements, ?string $parentId = null): array
+    private function buildTree(\Illuminate\Support\Collection $grouped, string $parentId = ''): array
     {
         $branch = [];
+        $elements = $grouped->get($parentId) ?? collect();
 
         foreach ($elements as $element) {
-            if ($element->parent_id === $parentId) {
-                $children = $this->buildTree($elements, $element->id);
-                if (! empty($children)) {
-                    $element->setRelation('children', collect($children));
-                } else {
-                    $element->setRelation('children', collect([]));
-                }
-                $branch[] = $element;
-            }
+            $children = $this->buildTree($grouped, $element->id);
+            $element->setRelation('children', collect($children));
+            $branch[] = $element;
         }
 
         return $branch;
@@ -56,6 +45,8 @@ class OrgUnitController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        Gate::authorize('manage-rbac');
+
         $validated = $request->validate([
             'parent_id' => 'nullable|exists:org_units,id',
             'org_level_id' => 'required|exists:org_levels,id',
@@ -108,6 +99,8 @@ class OrgUnitController extends Controller
 
     public function update(Request $request, string $id): JsonResponse
     {
+        Gate::authorize('manage-rbac');
+
         $unit = OrgUnitModel::findOrFail($id);
 
         $validated = $request->validate([
@@ -176,6 +169,8 @@ class OrgUnitController extends Controller
 
     public function destroy(string $id): JsonResponse
     {
+        Gate::authorize('manage-rbac');
+
         $unit = OrgUnitModel::findOrFail($id);
 
         if ($unit->children()->exists()) {
