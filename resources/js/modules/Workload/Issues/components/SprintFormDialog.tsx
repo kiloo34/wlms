@@ -13,6 +13,7 @@ import { useSprints, UpdateSprintPayload } from '../hooks/useSprints';
 import { toast } from 'sonner';
 import { addWeeks } from 'date-fns';
 import { useTranslate } from "@/hooks/useTranslate";
+import { useIconSize } from '@/hooks/use-appearance';
 
 interface SprintFormDialogProps {
     open: boolean;
@@ -24,6 +25,7 @@ interface SprintFormDialogProps {
 
 export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpenChange, sprint, projectId, mode = 'edit' }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const { updateSprint, startSprint, isUpdating, isStarting } = useSprints(projectId);
     
     const [name, setName] = useState('');
@@ -91,45 +93,61 @@ export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpen
 
     if (!sprint) return null;
 
+    const inputClass =
+        iconSize === 'sm' ? 'h-8 text-xs' : iconSize === 'lg' ? 'h-10 text-base' : 'h-9 text-sm';
+    const labelClass =
+        iconSize === 'sm' ? 'text-xs' : iconSize === 'lg' ? 'text-base font-medium' : 'text-sm font-medium';
+    const btnClass =
+        iconSize === 'sm' ? 'h-8 text-xs px-3' : iconSize === 'lg' ? 'h-10 text-base px-5' : 'h-9 text-sm px-4';
+    const iconClass =
+        iconSize === 'sm' ? 'h-3.5 w-3.5' : iconSize === 'lg' ? 'h-5 w-5' : 'h-4 w-4';
+    const formSpacing =
+        iconSize === 'sm' ? 'space-y-3 py-3' : iconSize === 'lg' ? 'space-y-5 py-5' : 'space-y-4 py-4';
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className={cn(iconSize === 'sm' ? 'sm:max-w-[460px]' : iconSize === 'lg' ? 'sm:max-w-[560px]' : 'sm:max-w-[500px]')}>
                 <DialogHeader>
-                    <DialogTitle>{mode === 'start' ? 'Start sprint' : 'Edit sprint'}: {sprint.name}</DialogTitle>
+                    <DialogTitle className={iconSize === 'sm' ? 'text-base' : iconSize === 'lg' ? 'text-xl' : 'text-lg'}>
+                        {mode === 'start' ? 'Start sprint' : 'Edit sprint'}: {sprint.name}
+                    </DialogTitle>
                 </DialogHeader>
                 
-                <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                    <p className="text-xs text-muted-foreground">{t('Required fields are marked with an asterisk')} <span className="text-destructive">*</span></p>
+                <form onSubmit={handleSubmit} className={formSpacing}>
+                    <p className={cn("text-muted-foreground", iconSize === 'sm' ? 'text-[11px]' : iconSize === 'lg' ? 'text-sm' : 'text-xs')}>
+                        {t('Required fields are marked with an asterisk')} <span className="text-destructive">*</span>
+                    </p>
                     
-                    <div className="space-y-2">
-                        <Label>{t('Sprint name')} <span className="text-destructive">*</span></Label>
-                        <Input required value={name} onChange={e => setName(e.target.value)} />
+                    <div className="space-y-1.5">
+                        <Label className={labelClass}>{t('Sprint name')} <span className="text-destructive">*</span></Label>
+                        <Input required value={name} onChange={e => setName(e.target.value)} className={inputClass} />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label>{t('Duration')}</Label>
+                    <div className="space-y-1.5">
+                        <Label className={labelClass}>{t('Duration')}</Label>
                         <Popover open={durationOpen} onOpenChange={setDurationOpen}>
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
                                     role="combobox"
                                     aria-expanded={durationOpen}
-                                    className="w-full justify-between font-normal"
+                                    className={cn("w-full justify-between font-normal", inputClass)}
                                 >
                                     {durations.find((d) => d.value === duration)?.label || "Select duration..."}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    <ChevronsUpDown className={cn("ml-2 shrink-0 opacity-50", iconClass)} />
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[450px] p-0" align="start">
+                            <PopoverContent className={cn("p-0", iconSize === 'sm' ? 'w-[400px]' : iconSize === 'lg' ? 'w-[500px]' : 'w-[450px]')} align="start">
                                 <Command>
-                                    <CommandInput placeholder={t('Search duration...')} />
+                                    <CommandInput placeholder={t('Search duration...')} className={inputClass} />
                                     <CommandList>
-                                        <CommandEmpty>{t('No duration found.')}</CommandEmpty>
+                                        <CommandEmpty className={iconSize === 'sm' ? 'py-4 text-xs' : iconSize === 'lg' ? 'py-6 text-sm' : 'py-6 text-xs'}>{t('No duration found.')}</CommandEmpty>
                                         <CommandGroup>
                                             {durations.map((d) => (
                                                 <CommandItem
                                                     key={d.value}
                                                     value={d.value}
+                                                    className={iconSize === 'sm' ? 'text-xs py-1.5' : iconSize === 'lg' ? 'text-base py-2.5' : 'text-sm py-2'}
                                                     onSelect={(currentValue) => {
                                                         setDuration(currentValue);
                                                         setDurationOpen(false);
@@ -137,7 +155,8 @@ export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpen
                                                 >
                                                     <Check
                                                         className={cn(
-                                                            "mr-2 h-4 w-4",
+                                                            "mr-2",
+                                                            iconClass,
                                                             duration === d.value ? "opacity-100" : "opacity-0"
                                                         )}
                                                     />
@@ -152,34 +171,35 @@ export const SprintFormDialog: React.FC<SprintFormDialogProps> = ({ open, onOpen
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>{t('Start date')}</Label>
-                            <Input type="datetime-local" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                        <div className="space-y-1.5">
+                            <Label className={labelClass}>{t('Start date')}</Label>
+                            <Input type="datetime-local" value={startDate} onChange={e => setStartDate(e.target.value)} className={inputClass} />
                         </div>
-                        <div className="space-y-2">
-                            <Label>{t('End date')}</Label>
+                        <div className="space-y-1.5">
+                            <Label className={labelClass}>{t('End date')}</Label>
                             <Input 
                                 type="datetime-local" 
                                 value={endDate} 
                                 onChange={e => setEndDate(e.target.value)} 
                                 readOnly={duration !== 'custom'}
-                                className={duration !== 'custom' ? 'bg-muted opacity-70 cursor-not-allowed' : ''}
+                                className={cn(inputClass, duration !== 'custom' ? 'bg-muted opacity-70 cursor-not-allowed' : '')}
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label>{t('Sprint goal')}</Label>
+                    <div className="space-y-1.5">
+                        <Label className={labelClass}>{t('Sprint goal')}</Label>
                         <Textarea 
-                            rows={4} 
+                            rows={iconSize === 'sm' ? 3 : iconSize === 'lg' ? 5 : 4} 
                             value={goal} 
                             onChange={e => setGoal(e.target.value)} 
+                            className={cn(iconSize === 'sm' ? 'text-xs' : iconSize === 'lg' ? 'text-base' : 'text-sm')}
                         />
                     </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>{t('Cancel')}</Button>
-                        <Button type="submit" disabled={isUpdating || (mode === 'start' && isStarting)}>
+                    <DialogFooter className="gap-2">
+                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className={btnClass}>{t('Cancel')}</Button>
+                        <Button type="submit" disabled={isUpdating || (mode === 'start' && isStarting)} className={btnClass}>
                             {mode === 'start' ? (isUpdating || isStarting ? 'Starting...' : 'Start') : (isUpdating ? 'Updating...' : 'Update')}
                         </Button>
                     </DialogFooter>

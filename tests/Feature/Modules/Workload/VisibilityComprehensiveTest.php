@@ -1,28 +1,27 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Modules\Workload\Application\DTOs\GetProjectsInput;
 use App\Modules\Workload\Application\Queries\GetWorkspacesByGroupQuery;
 use App\Modules\Workload\Application\UseCases\GetProjectsUseCase;
-use App\Modules\Workload\Application\DTOs\GetProjectsInput;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Schema::dropIfExists('org_levels');
     Schema::dropIfExists('org_units');
-    
+
     Schema::create('org_levels', function (Blueprint $table) {
         $table->uuid('id')->primary();
         $table->string('name');
         $table->string('slug')->nullable();
         $table->integer('order')->default(1);
     });
-    
+
     Schema::create('org_units', function (Blueprint $table) {
         $table->uuid('id')->primary();
         $table->uuid('org_level_id')->nullable();
@@ -31,7 +30,7 @@ beforeEach(function () {
         $table->string('slug')->nullable();
     });
 
-    if (!Schema::hasColumn('users', 'org_unit_id')) {
+    if (! Schema::hasColumn('users', 'org_unit_id')) {
         Schema::table('users', function (Blueprint $table) {
             $table->uuid('org_unit_id')->nullable();
             $table->uuid('uuid')->nullable();
@@ -45,7 +44,7 @@ beforeEach(function () {
     $this->internalOrgId = Str::uuid()->toString();
     $this->externalOrgId = Str::uuid()->toString();
     $this->superadminOrgId = Str::uuid()->toString();
-    
+
     DB::table('org_units')->insert([
         ['id' => $this->internalOrgId, 'name' => 'Divisi Internal', 'org_level_id' => $this->orgLevelId, 'code' => 'INT', 'slug' => 'int'],
         ['id' => $this->externalOrgId, 'name' => 'Divisi Eksternal', 'org_level_id' => $this->orgLevelId, 'code' => 'EXT', 'slug' => 'ext'],
@@ -61,13 +60,13 @@ beforeEach(function () {
     DB::table('user_roles')->insert(['id' => Str::uuid()->toString(), 'user_id' => $this->superadminId, 'role_id' => $this->roleSuperadminId, 'context_type' => 'GLOBAL', 'context_id' => 'GLOBAL']);
 
     $this->workspaceAdminId = DB::table('users')->insertGetId(['uuid' => (string) Str::uuid(), 'name' => 'Workspace Admin', 'email' => 'wa@test.com', 'password' => 'sec', 'org_unit_id' => $this->externalOrgId]);
-    
+
     $this->internalMemberId = DB::table('users')->insertGetId(['uuid' => (string) Str::uuid(), 'name' => 'Internal Member', 'email' => 'im@test.com', 'password' => 'sec', 'org_unit_id' => $this->internalOrgId]);
-    
+
     $this->externalLeadId = DB::table('users')->insertGetId(['uuid' => (string) Str::uuid(), 'name' => 'External Lead', 'email' => 'el@test.com', 'password' => 'sec', 'org_unit_id' => $this->externalOrgId]);
-    
+
     $this->externalAssigneeId = DB::table('users')->insertGetId(['uuid' => (string) Str::uuid(), 'name' => 'External Assignee', 'email' => 'ea@test.com', 'password' => 'sec', 'org_unit_id' => $this->externalOrgId]);
-    
+
     $this->externalPlainId = DB::table('users')->insertGetId(['uuid' => (string) Str::uuid(), 'name' => 'External Plain', 'email' => 'ep@test.com', 'password' => 'sec', 'org_unit_id' => $this->externalOrgId]);
 
     // Workspace
@@ -76,14 +75,14 @@ beforeEach(function () {
         'id' => $this->workspaceId,
         'name' => 'Internal Workspace',
         'owner_group_id' => $this->internalOrgId,
-        'status' => 'ACTIVE'
+        'status' => 'ACTIVE',
     ]);
 
     // Workspace Admin
     DB::table('workspace_members')->insert([
         'workspace_id' => $this->workspaceId,
         'user_id' => $this->workspaceAdminId,
-        'role' => 'admin'
+        'role' => 'admin',
     ]);
 
     // Projects
@@ -103,7 +102,7 @@ beforeEach(function () {
         'id' => $this->statusId,
         'name' => 'To Do',
         'slug' => 'to-do',
-        'category' => 'TODO'
+        'category' => 'TODO',
     ]);
 
     $this->priorityId = Str::uuid()->toString();
@@ -112,7 +111,7 @@ beforeEach(function () {
         'name' => 'High',
         'slug' => 'high',
         'color' => '#ff0000',
-        'level' => 1
+        'level' => 1,
     ]);
 
     $this->issueTypeId = Str::uuid()->toString();
@@ -121,7 +120,7 @@ beforeEach(function () {
         'name' => 'Task',
         'slug' => 'task',
         'color' => '#0000ff',
-        'icon' => 'task-icon'
+        'icon' => 'task-icon',
     ]);
 
     $this->issueId = Str::uuid()->toString();
@@ -135,103 +134,103 @@ beforeEach(function () {
         'reporter_id' => $this->internalMemberId,
         'issue_type_id' => $this->issueTypeId,
         'number' => 1,
-        'deleted_at' => null
+        'deleted_at' => null,
     ]);
 });
 
 it('allows Superadmin to see all projects', function () {
-    $getProjectsUseCase = new GetProjectsUseCase();
+    $getProjectsUseCase = new GetProjectsUseCase;
     $projects = $getProjectsUseCase->execute(new GetProjectsInput(
         actorUserId: (string) $this->superadminId,
         workspaceId: $this->workspaceId
     ));
-    
+
     // Harus melihat A dan B (C deleted)
     expect($projects)->toHaveCount(2);
-    $projectNames = array_map(fn($p) => $p->name, $projects);
+    $projectNames = array_map(fn ($p) => $p->name, $projects);
     expect($projectNames)->toContain('Project A', 'Project B');
     expect($projectNames)->not->toContain('Project C');
 });
 
 it('allows Workspace Admin to see all projects in workspace', function () {
-    $getProjectsUseCase = new GetProjectsUseCase();
+    $getProjectsUseCase = new GetProjectsUseCase;
     $projects = $getProjectsUseCase->execute(new GetProjectsInput(
         actorUserId: (string) $this->workspaceAdminId,
         workspaceId: $this->workspaceId
     ));
-    
+
     expect($projects)->toHaveCount(2);
-    $projectNames = array_map(fn($p) => $p->name, $projects);
+    $projectNames = array_map(fn ($p) => $p->name, $projects);
     expect($projectNames)->toContain('Project A', 'Project B');
 });
 
 it('allows Internal Member to see all projects', function () {
-    $getProjectsUseCase = new GetProjectsUseCase();
+    $getProjectsUseCase = new GetProjectsUseCase;
     $projects = $getProjectsUseCase->execute(new GetProjectsInput(
         actorUserId: (string) $this->internalMemberId,
         workspaceId: $this->workspaceId
     ));
-    
+
     expect($projects)->toHaveCount(2);
-    $projectNames = array_map(fn($p) => $p->name, $projects);
+    $projectNames = array_map(fn ($p) => $p->name, $projects);
     expect($projectNames)->toContain('Project A', 'Project B');
 });
 
 it('allows External Lead to see workspace and only Project A', function () {
-    $getProjectsUseCase = new GetProjectsUseCase();
+    $getProjectsUseCase = new GetProjectsUseCase;
     $projects = $getProjectsUseCase->execute(new GetProjectsInput(
         actorUserId: (string) $this->externalLeadId,
         workspaceId: $this->workspaceId
     ));
-    
+
     expect($projects)->toHaveCount(1);
     expect($projects[0]->name)->toBe('Project A');
 
-    $getWorkspacesQuery = new GetWorkspacesByGroupQuery();
+    $getWorkspacesQuery = new GetWorkspacesByGroupQuery;
     $workspaces = $getWorkspacesQuery->execute($this->externalOrgId, $this->externalLeadId);
     expect($workspaces)->toHaveCount(1);
     expect($workspaces[0]->id)->toBe($this->workspaceId);
 });
 
 it('allows External Assignee to see workspace and only Project B', function () {
-    $getProjectsUseCase = new GetProjectsUseCase();
+    $getProjectsUseCase = new GetProjectsUseCase;
     $projects = $getProjectsUseCase->execute(new GetProjectsInput(
         actorUserId: (string) $this->externalAssigneeId,
         workspaceId: $this->workspaceId
     ));
-    
+
     expect($projects)->toHaveCount(1);
     expect($projects[0]->name)->toBe('Project B');
 
-    $getWorkspacesQuery = new GetWorkspacesByGroupQuery();
+    $getWorkspacesQuery = new GetWorkspacesByGroupQuery;
     $workspaces = $getWorkspacesQuery->execute($this->externalOrgId, $this->externalAssigneeId);
     expect($workspaces)->toHaveCount(1);
     expect($workspaces[0]->id)->toBe($this->workspaceId);
 });
 
 it('prevents External Plain from seeing workspace and any project', function () {
-    $getProjectsUseCase = new GetProjectsUseCase();
+    $getProjectsUseCase = new GetProjectsUseCase;
     $projects = $getProjectsUseCase->execute(new GetProjectsInput(
         actorUserId: (string) $this->externalPlainId,
         workspaceId: $this->workspaceId
     ));
-    
+
     expect($projects)->toHaveCount(0);
 
-    $getWorkspacesQuery = new GetWorkspacesByGroupQuery();
+    $getWorkspacesQuery = new GetWorkspacesByGroupQuery;
     $workspaces = $getWorkspacesQuery->execute($this->externalOrgId, $this->externalPlainId);
     expect($workspaces)->toHaveCount(0);
 });
 
 it('ensures Deleted Project C does not appear for anyone', function () {
-    $getProjectsUseCase = new GetProjectsUseCase();
-    
+    $getProjectsUseCase = new GetProjectsUseCase;
+
     // Cek untuk Superadmin
     $projects = $getProjectsUseCase->execute(new GetProjectsInput(
         actorUserId: (string) $this->superadminId,
         workspaceId: $this->workspaceId
     ));
-    $projectNames = array_map(fn($p) => $p->name, $projects);
+    $projectNames = array_map(fn ($p) => $p->name, $projects);
     expect($projectNames)->not->toContain('Project C');
 
     // Cek untuk Internal Member
@@ -239,6 +238,6 @@ it('ensures Deleted Project C does not appear for anyone', function () {
         actorUserId: (string) $this->internalMemberId,
         workspaceId: $this->workspaceId
     ));
-    $projectNames = array_map(fn($p) => $p->name, $projects);
+    $projectNames = array_map(fn ($p) => $p->name, $projects);
     expect($projectNames)->not->toContain('Project C');
 });

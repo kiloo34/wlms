@@ -7,6 +7,7 @@ namespace App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
@@ -15,8 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $author_id
  * @property string $body
  * @property bool $is_edited
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class CommentModel extends Model
 {

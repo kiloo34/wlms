@@ -5,6 +5,7 @@ namespace App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
@@ -54,9 +55,10 @@ class OrgUnitModel extends Model
 
     /**
      * Get all ancestors in order from root to self.
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<OrgUnitModel, $this>
+     *
+     * @return BelongsToMany<OrgUnitModel, $this>
      */
-    public function lineage(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function lineage(): BelongsToMany
     {
         return $this->belongsToMany(
             OrgUnitModel::class,
@@ -64,8 +66,8 @@ class OrgUnitModel extends Model
             'descendant_id',
             'ancestor_id'
         )
-        ->withPivot('depth')
-        ->orderByDesc('org_unit_closures.depth');
+            ->withPivot('depth')
+            ->orderByDesc('org_unit_closures.depth');
     }
 
     /**

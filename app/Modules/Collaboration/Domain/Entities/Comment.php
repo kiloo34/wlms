@@ -15,9 +15,6 @@ final class Comment
     /** @var array<int, object> */
     private array $domainEvents = [];
 
-    /**
-     * @param  string  $authorId
-     */
     private function __construct(
         public readonly CommentId $id,
         public readonly string $issueId,
@@ -29,9 +26,6 @@ final class Comment
         public DateTimeImmutable $updatedAt
     ) {}
 
-    /**
-     * @param  string  $authorId
-     */
     public static function create(
         CommentId $id,
         string $issueId,
@@ -54,9 +48,6 @@ final class Comment
         return $comment;
     }
 
-    /**
-     * @param  string  $authorId
-     */
     public static function reconstruct(
         string $id,
         string $issueId,

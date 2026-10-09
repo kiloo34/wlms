@@ -4,10 +4,11 @@ import { Project, CreateProjectPayload, UpdateProjectPayload } from '../types';
 
 export const PROJECTS_QUERY_KEY = (workspaceId: string) => ['workspaces', workspaceId, 'projects'];
 
-export function useGetProjects(workspaceId: string) {
+export function useGetProjects(workspaceId?: string) {
     return useQuery({
-        queryKey: PROJECTS_QUERY_KEY(workspaceId),
+        queryKey: PROJECTS_QUERY_KEY(workspaceId || ''),
         queryFn: async (): Promise<Project[]> => {
+            if (!workspaceId) return [];
             const response = await axios.get(`/api/workspaces/${workspaceId}/projects`);
             const dataArray = Array.isArray(response.data) ? response.data : (response.data?.data || []);
             
@@ -19,6 +20,10 @@ export function useGetProjects(workspaceId: string) {
                 name: item.name,
                 description: item.description,
                 priority_id: item.priority_id,
+                total_issues_count: item.total_issues_count,
+                completed_issues_count: item.completed_issues_count,
+                start_date: item.start_date,
+                end_date: item.end_date,
                 created_at: item.created_at,
                 updated_at: item.updated_at,
             }));

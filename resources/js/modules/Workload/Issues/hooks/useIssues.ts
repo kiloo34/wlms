@@ -149,3 +149,27 @@ export const useIssueWorklogs = (issueId: string | null) => {
         enabled: !!issueId,
     });
 };
+
+export const useBulkUpdateIssues = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ issueIds, payload }: { issueIds: string[]; payload: Partial<UpdateIssuePayload> }) => {
+            const promises = issueIds.map(id => {
+                if ('status_id' in payload && payload.status_id) {
+                    return axios.post(`/api/issues/${id}/transition`, { to_status_id: payload.status_id });
+                } else if ('assignee_id' in payload) {
+                    return axios.post(`/api/issues/${id}/assign`, { assignee_id: payload.assignee_id === 'unassigned' ? null : payload.assignee_id });
+                }
+                return Promise.resolve();
+            });
+            await Promise.all(promises);
+            return true;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+            queryClient.invalidateQueries({ queryKey: ['sprints'] });
+        },
+    });
+};

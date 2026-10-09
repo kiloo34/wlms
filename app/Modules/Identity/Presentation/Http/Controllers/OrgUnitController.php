@@ -16,17 +16,17 @@ class OrgUnitController extends Controller
     {
         Gate::authorize('manage-rbac');
         $allUnits = OrgUnitModel::with('level')->get();
-        
+
         // Group by parent_id. Laravel groupBy maps null to empty string.
         $grouped = $allUnits->groupBy(fn ($unit) => $unit->parent_id ?: '');
-        
+
         $tree = $this->buildTree($grouped, '');
 
         return response()->json(['data' => $tree]);
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<string, \Illuminate\Database\Eloquent\Collection<int, OrgUnitModel>>  $grouped
+     * @param  \Illuminate\Support\Collection<string, Collection<int, OrgUnitModel>>  $grouped
      * @return array<int, OrgUnitModel>
      */
     private function buildTree(\Illuminate\Support\Collection $grouped, string $parentId = ''): array

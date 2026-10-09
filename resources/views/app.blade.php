@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class([
+    'dark' => ($appearance ?? 'system') == 'dark',
+    'icon-size-'.($icon_size ?? 'md'),
+]) data-icon-size="{{ $icon_size ?? 'md' }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        {{-- Inline script to detect system dark mode preference and apply it immediately --}}
+        {{-- Inline script to detect system dark mode preference and icon size immediately --}}
         <script>
             (function() {
                 const appearance = '{{ $appearance ?? "system" }}';
@@ -16,6 +19,15 @@
                         document.documentElement.classList.add('dark');
                     }
                 }
+
+                try {
+                    const storedIconSize = localStorage.getItem('icon_size') || localStorage.getItem('wlms_projects_icon_size') || '{{ $icon_size ?? "md" }}';
+                    if (['sm', 'md', 'lg'].includes(storedIconSize)) {
+                        document.documentElement.setAttribute('data-icon-size', storedIconSize);
+                        document.documentElement.classList.remove('icon-size-sm', 'icon-size-md', 'icon-size-lg');
+                        document.documentElement.classList.add('icon-size-' + storedIconSize);
+                    }
+                } catch (e) {}
             })();
         </script>
 

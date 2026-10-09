@@ -25,8 +25,10 @@ final class GetWorkspacesController extends Controller
         $limit = (int) $request->query('limit', 50);
         $cursor = $request->query('cursor');
 
+        $isSuperadmin = $request->user()->hasRole('superadmin');
+
         // CQRS: Memanggil Query object langsung dari Controller (Bypass Domain)
-        $workspaces = $this->query->execute($groupId, $userId, $limit, $cursor);
+        $workspaces = $this->query->execute($groupId, $userId, $limit, $cursor, $isSuperadmin);
 
         return response()->json(
             WorkspaceResource::collection($workspaces)->resolve(),

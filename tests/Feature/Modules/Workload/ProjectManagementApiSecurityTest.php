@@ -194,7 +194,7 @@ test('workspace member only sees projects they are explicitly assigned to', func
         'user_id' => $this->normalUser->id,
         'role_id' => $roleId,
         'context_type' => 'PROJECT',
-        'context_id' => $this->projectId
+        'context_id' => $this->projectId,
     ]);
 
     // 3. Fetch again - should now see MAIN project

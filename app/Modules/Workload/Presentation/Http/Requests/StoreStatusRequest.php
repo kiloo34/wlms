@@ -10,7 +10,9 @@ class StoreStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('manage-rbac'); // Or a generic admin permission
+        return ($this->user()?->can('manage-rbac') ?? false)
+            || ($this->user()?->hasPermission('projects:manage') ?? false)
+            || ($this->user()?->hasPermission('workspaces:manage') ?? false);
     }
 
     /**

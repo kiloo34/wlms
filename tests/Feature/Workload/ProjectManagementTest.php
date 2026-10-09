@@ -30,7 +30,7 @@ it('can create a project in a workspace', function () {
         'status' => 'ACTIVE',
     ]);
 
-    \Illuminate\Support\Facades\DB::table('workspace_members')->insert([
+    Illuminate\Support\Facades\DB::table('workspace_members')->insert([
         'workspace_id' => $workspaceId,
         'user_id' => $user->id,
         'role' => 'admin',
@@ -68,7 +68,7 @@ it('can create a project with priority and response does not leak internal field
         'status' => 'ACTIVE',
     ]);
 
-    \Illuminate\Support\Facades\DB::table('workspace_members')->insert([
+    Illuminate\Support\Facades\DB::table('workspace_members')->insert([
         'workspace_id' => $workspaceId,
         'user_id' => $user->id,
         'role' => 'admin',
@@ -112,7 +112,7 @@ it('cannot create project with non-existent priority (Anti-IDOR)', function () {
         'status' => 'ACTIVE',
     ]);
 
-    \Illuminate\Support\Facades\DB::table('workspace_members')->insert([
+    Illuminate\Support\Facades\DB::table('workspace_members')->insert([
         'workspace_id' => $workspaceId,
         'user_id' => $user->id,
         'role' => 'admin',
