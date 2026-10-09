@@ -5,6 +5,7 @@ import { Issue } from "@/types/issue";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useTranslate } from "@/hooks/useTranslate";
+import { useIconSize } from '@/hooks/use-appearance';
 
 interface EstimatePopoverProps {
     issue: Issue;
@@ -13,6 +14,7 @@ interface EstimatePopoverProps {
 
 export const EstimatePopover = ({ issue, updateIssue }: EstimatePopoverProps) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const [open, setOpen] = useState(false);
     const currentOriginal = issue.original_estimate_seconds ? (issue.original_estimate_seconds / 3600).toString() : '';
     const currentRemaining = issue.remaining_estimate_seconds !== undefined && issue.remaining_estimate_seconds !== null ? (issue.remaining_estimate_seconds / 3600).toString() : currentOriginal;
@@ -44,6 +46,13 @@ export const EstimatePopover = ({ issue, updateIssue }: EstimatePopoverProps) =>
         }
     };
 
+    const triggerPillClass =
+        iconSize === 'sm'
+            ? 'text-[10px] px-1 py-0 min-w-[18px]'
+            : iconSize === 'lg'
+            ? 'text-sm px-2 py-0.5 min-w-[24px]'
+            : 'text-xs px-1.5 py-0.5 min-w-[20px]';
+
     return (
         <Popover open={open} onOpenChange={(newOpen) => {
             setOpen(newOpen);
@@ -53,7 +62,7 @@ export const EstimatePopover = ({ issue, updateIssue }: EstimatePopoverProps) =>
             }
         }}>
             <PopoverTrigger asChild>
-                <span className="text-xs font-mono text-muted-foreground bg-muted/50 hover:bg-muted cursor-pointer px-1.5 py-0.5 rounded transition-colors select-none min-w-[20px] text-center inline-block" title={t('Remaining Estimate')}>
+                <span className={`font-mono text-muted-foreground bg-muted/50 hover:bg-muted cursor-pointer rounded transition-colors select-none text-center inline-block ${triggerPillClass}`} title={t('Remaining Estimate')}>
                     {currentRemaining ? currentRemaining : '-'}
                 </span>
             </PopoverTrigger>

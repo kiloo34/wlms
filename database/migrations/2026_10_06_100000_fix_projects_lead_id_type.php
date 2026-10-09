@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 
 return new class extends Migration
 {
@@ -17,7 +17,7 @@ return new class extends Migration
 
             DB::statement('ALTER TABLE projects DROP COLUMN lead_id');
             DB::statement('ALTER TABLE projects ADD COLUMN lead_id bigint NULL');
-            
+
             Schema::table('projects', function (Blueprint $table) {
                 $table->index('lead_id');
             });
@@ -34,7 +34,7 @@ return new class extends Migration
 
             DB::statement('ALTER TABLE projects DROP COLUMN lead_id');
             DB::statement('ALTER TABLE projects ADD COLUMN lead_id uuid NULL');
-            
+
             Schema::table('projects', function (Blueprint $table) {
                 $table->index('lead_id');
             });

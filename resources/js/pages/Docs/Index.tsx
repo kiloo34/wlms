@@ -7,13 +7,13 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 interface DocsProps {
-    page: {
+    page?: {
         id: number;
         title: string;
         slug: string;
         content: Record<string, unknown> | string | null;
         updated_at: string;
-    };
+    } | null;
     menu: {
         id: number;
         name: string;
@@ -26,19 +26,35 @@ interface DocsProps {
 }
 
 export default function DocsIndex({ page, menu }: DocsProps) {
+    const safeContent = page?.content ?? '';
+
     const editor = useEditor({
         extensions: [StarterKit],
-        content: page.content,
+        content: safeContent,
         editable: false,
     });
 
     useEffect(() => {
-        if (editor && page.content) {
-            editor.commands.setContent(page.content);
+        if (editor && safeContent) {
+            editor.commands.setContent(safeContent);
         }
-    }, [page.content, editor]);
+    }, [safeContent, editor]);
 
-    
+    if (!page) {
+        return (
+            <>
+                <Head title="Documentation" />
+                <div className="bg-background min-h-full">
+                    <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8 lg:py-12">
+                        <div className="bg-card border border-border rounded-2xl p-8 md:p-10 shadow-sm mb-8 text-center">
+                            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground mb-4">Belum Ada Dokumentasi</h1>
+                            <p className="text-muted-foreground">Saat ini belum ada halaman dokumentasi yang tersedia.</p>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>

@@ -13,6 +13,7 @@ use App\Modules\Workload\Domain\ValueObjects\ProjectId;
 use App\Modules\Workload\Domain\ValueObjects\ProjectKey;
 use App\Modules\Workload\Domain\ValueObjects\WorkspaceId;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 final class CreateProjectUseCase
 {
@@ -50,7 +51,7 @@ final class CreateProjectUseCase
     private function ensureUserCanCreateProject(string $userId, string $workspaceId): void
     {
         // 1. Superadmin check
-        $isSuperAdmin = \Illuminate\Support\Facades\DB::table('user_roles')
+        $isSuperAdmin = DB::table('user_roles')
             ->join('roles', 'user_roles.role_id', '=', 'roles.id')
             ->where('user_roles.user_id', $userId)
             ->where('roles.name', 'Superadmin')
@@ -59,8 +60,8 @@ final class CreateProjectUseCase
         // 2. Internal Member check
         $isInternalMember = false;
         if (! $isSuperAdmin) {
-            $user = \Illuminate\Support\Facades\DB::table('users')->where('id', $userId)->select('org_unit_id')->first();
-            $workspace = \Illuminate\Support\Facades\DB::table('workspaces')->where('id', $workspaceId)->select('owner_group_id')->first();
+            $user = DB::table('users')->where('id', $userId)->select('org_unit_id')->first();
+            $workspace = DB::table('workspaces')->where('id', $workspaceId)->select('owner_group_id')->first();
             if ($user && $workspace && $user->org_unit_id === $workspace->owner_group_id) {
                 $isInternalMember = true;
             }
@@ -69,7 +70,7 @@ final class CreateProjectUseCase
         // 3. Workspace Admin check
         $isWorkspaceAdmin = false;
         if (! $isSuperAdmin && ! $isInternalMember) {
-            $isWorkspaceAdmin = \Illuminate\Support\Facades\DB::table('workspace_members')
+            $isWorkspaceAdmin = DB::table('workspace_members')
                 ->where('workspace_id', $workspaceId)
                 ->where('user_id', $userId)
                 ->where('role', 'admin')
@@ -77,7 +78,7 @@ final class CreateProjectUseCase
         }
 
         if (! $isSuperAdmin && ! $isInternalMember && ! $isWorkspaceAdmin) {
-            throw new \Exception('Unauthorized: You must be a workspace admin or internal member to create projects.', 403);
+            throw new Exception('Unauthorized: You must be a workspace admin or internal member to create projects.', 403);
         }
     }
 }

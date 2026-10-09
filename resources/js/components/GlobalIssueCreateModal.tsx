@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { usePage } from '@inertiajs/react';
 import { useGlobalIssueModal } from '@/contexts/GlobalIssueModalContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,16 @@ export function GlobalIssueCreateModal() {
     const [workspaceId, setWorkspaceId] = useState<string>('');
     const [projectId, setProjectId] = useState<string>('');
     
+    const { props } = usePage<any>();
+    const activeProject = props.project;
+
+    useEffect(() => {
+        if (isOpen && activeProject?.id && activeProject?.workspace_id) {
+            setWorkspaceId(activeProject.workspace_id);
+            setProjectId(activeProject.id);
+        }
+    }, [isOpen, activeProject]);
+
     // Form fields
     const [title, setTitle] = useState('');
     const [typeId, setTypeId] = useState<string>('');
@@ -78,6 +89,7 @@ export function GlobalIssueCreateModal() {
                         <Label htmlFor="workspace">{t('Workspace')}</Label>
                         <Select 
                             value={workspaceId} 
+                            disabled={!!activeProject?.workspace_id}
                             onValueChange={(val) => {
                                 setWorkspaceId(val);
                                 setProjectId('');
@@ -104,6 +116,7 @@ export function GlobalIssueCreateModal() {
                             <Label htmlFor="project">{t('Project')}</Label>
                             <Select 
                                 value={projectId} 
+                                disabled={!!activeProject?.id}
                                 onValueChange={(val) => {
                                     setProjectId(val);
                                     setTypeId('');

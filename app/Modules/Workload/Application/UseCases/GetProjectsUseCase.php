@@ -19,7 +19,7 @@ final class GetProjectsUseCase
         $query = DB::table('projects')
             ->where('projects.workspace_id', $input->workspaceId)
             ->whereNull('projects.deleted_at')
-            ->select(['id', 'workspace_id', 'key', 'name', 'status', 'priority_id'])
+            ->select(['id', 'workspace_id', 'key', 'name', 'description', 'status', 'priority_id', 'start_date', 'end_date'])
             ->addSelect([
                 'total_issues_count' => DB::table('issues')
                     ->selectRaw('count(*)')
@@ -62,21 +62,21 @@ final class GetProjectsUseCase
                     // 1. User is the Project Lead
                     $q->where('projects.lead_id', $input->actorUserId)
                       // 2. User has a context role in the project
-                      ->orWhereExists(function ($sub) use ($input) {
-                          $sub->select(DB::raw(1))
-                              ->from('user_roles')
-                              ->whereColumn('user_roles.context_id', 'projects.id')
-                              ->where('user_roles.context_type', 'PROJECT')
-                              ->where('user_roles.user_id', $input->actorUserId);
-                      })
+                        ->orWhereExists(function ($sub) use ($input) {
+                            $sub->select(DB::raw(1))
+                                ->from('user_roles')
+                                ->whereColumn('user_roles.context_id', 'projects.id')
+                                ->where('user_roles.context_type', 'PROJECT')
+                                ->where('user_roles.user_id', $input->actorUserId);
+                        })
                       // 3. User is assigned to at least one issue in the project
-                      ->orWhereExists(function ($sub) use ($input) {
-                          $sub->select(DB::raw(1))
-                              ->from('issues')
-                              ->whereColumn('issues.project_id', 'projects.id')
-                              ->whereNull('issues.deleted_at')
-                              ->where('issues.assignee_id', $input->actorUserId);
-                      });
+                        ->orWhereExists(function ($sub) use ($input) {
+                            $sub->select(DB::raw(1))
+                                ->from('issues')
+                                ->whereColumn('issues.project_id', 'projects.id')
+                                ->whereNull('issues.deleted_at')
+                                ->where('issues.assignee_id', $input->actorUserId);
+                        });
                 });
             }
         }
@@ -96,7 +96,10 @@ final class GetProjectsUseCase
                 status: (string) $row->status,
                 priorityId: $row->priority_id ? (string) $row->priority_id : null,
                 totalIssuesCount: (int) ($row->total_issues_count ?? 0),
-                completedIssuesCount: (int) ($row->completed_issues_count ?? 0)
+                completedIssuesCount: (int) ($row->completed_issues_count ?? 0),
+                description: isset($row->description) && $row->description ? (string) $row->description : null,
+                startDate: isset($row->start_date) && $row->start_date ? substr((string) $row->start_date, 0, 10) : null,
+                endDate: isset($row->end_date) && $row->end_date ? substr((string) $row->end_date, 0, 10) : null
             );
         })->all();
     }

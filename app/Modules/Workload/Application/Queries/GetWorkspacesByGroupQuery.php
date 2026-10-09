@@ -12,11 +12,13 @@ final class GetWorkspacesByGroupQuery
     /**
      * @return WorkspaceOutput[]
      */
-    public function execute(string $groupId, int|string $userId, int $limit = 50, ?string $cursor = null): array
+    public function execute(string $groupId, int|string $userId, int $limit = 50, ?string $cursor = null, bool $isSuperadmin = false): array
     {
         // Pragmatic CQRS: Query Builder langsung untuk performa maksimal (Prinsip #3)
-        $query = DB::table('workspaces')
-            ->where(function ($q) use ($groupId, $userId) {
+        $query = DB::table('workspaces');
+
+        if (! $isSuperadmin) {
+            $query->where(function ($q) use ($groupId, $userId) {
                 // 1. Tuan Rumah (Internal Divisi)
                 $q->where('owner_group_id', $groupId)
                     // 2. Diundang langsung sebagai Member Workspace
@@ -53,8 +55,10 @@ final class GetWorkspacesByGroupQuery
                                     });
                             });
                     });
-            })
-            ->whereNull('deleted_at')
+            });
+        }
+
+        $query->whereNull('deleted_at')
             ->select(['id', 'name', 'status', 'owner_group_id'])
             ->orderBy('id', 'asc') // untuk cursor pagination
             ->limit($limit);

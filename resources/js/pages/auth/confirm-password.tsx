@@ -28,7 +28,7 @@ export default function ConfirmPassword() {
                                                     </CardDescription>
                     </CardHeader>
 
-                    <div className="pt-6 px-6 max-w-2xl space-y-8">
+                    <div className="p-6 max-w-2xl space-y-8">
                         <PasskeyVerify
                             routes={{
                                 options: confirmOptions(),

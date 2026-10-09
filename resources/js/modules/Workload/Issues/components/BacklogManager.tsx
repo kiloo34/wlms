@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useIconSize, type IconSize } from '@/hooks/use-appearance';
 
 interface LookupData {
     statuses?: any[];
@@ -57,21 +58,30 @@ const getStatusVariant = (name: string) => {
     return 'secondary';
 };
 
-const getTypeIcon = (name: string) => {
+const getTypeIcon = (name: string, size: IconSize = 'md') => {
     const n = name.toLowerCase();
-    if (n.includes('bug')) return <div className="w-3.5 h-3.5 bg-destructive rounded-sm" />;
-    if (n.includes('task')) return <CheckSquare className="w-3.5 h-3.5 text-info" />;
-    return <Bookmark className="w-3.5 h-3.5 text-success" />;
+    const iconClass = size === 'sm' ? 'w-3 h-3' : size === 'lg' ? 'w-4 h-4' : 'w-3.5 h-3.5';
+    if (n.includes('bug')) return <div className={`${iconClass} bg-destructive rounded-sm`} />;
+    if (n.includes('task')) return <CheckSquare className={`${iconClass} text-info`} />;
+    return <Bookmark className={`${iconClass} text-success`} />;
 };
 
 const StatusDropdown = ({ issue, lookups, updateIssue }: { issue: Issue, lookups?: LookupData, updateIssue: any }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const statusName = lookups?.statuses?.find((s: any) => String(s.id) === String(issue.status_id))?.name || 'To Do';
     
+    const badgeClass =
+        iconSize === 'sm'
+            ? 'text-[9px] font-medium px-1.5 py-0.5 rounded-sm h-4.5 cursor-pointer flex items-center gap-1'
+            : iconSize === 'lg'
+            ? 'text-xs font-medium px-2.5 py-1 rounded-sm h-6 cursor-pointer flex items-center gap-1'
+            : 'text-[10px] font-medium px-2 py-0.5 rounded-sm h-5 cursor-pointer flex items-center gap-1';
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Badge variant={getStatusVariant(statusName) as any} className="text-[10px] font-medium px-2 py-0.5 rounded-sm h-5 cursor-pointer flex items-center gap-1">
+                <Badge variant={getStatusVariant(statusName) as any} className={badgeClass}>
                     {statusName} <ChevronDown className="w-3 h-3 opacity-70" />
                 </Badge>
             </DropdownMenuTrigger>
@@ -102,22 +112,37 @@ import { useTranslate } from "@/hooks/useTranslate";
 
 const AssigneeDropdown = ({ issue, lookups, assignIssue, disabled }: { issue: Issue, lookups?: LookupData, assignIssue: any, disabled: boolean }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const [open, setOpen] = useState(false);
     
     const assigneeName = issue.assignee?.name || lookups?.users?.find((u: any) => String(u.id) === String(issue.assignee_id))?.name || 'Unassigned';
+
+    const avatarClass =
+        iconSize === 'sm'
+            ? 'h-5 w-5'
+            : iconSize === 'lg'
+            ? 'h-8 w-8'
+            : 'h-6 w-6';
+
+    const fallbackTextClass =
+        iconSize === 'sm'
+            ? 'text-[8px]'
+            : iconSize === 'lg'
+            ? 'text-[11px]'
+            : 'text-[9px]';
 
     return (
         <Popover open={open && !disabled} onOpenChange={(val) => !disabled && setOpen(val)}>
             <PopoverTrigger asChild>
                 <div className={`rounded-full transition-all ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:ring-2 hover:ring-primary'}`}>
-                    <Avatar className="h-6 w-6 border border-border/50">
+                    <Avatar className={`${avatarClass} border border-border/50`}>
                         {issue.assignee_id ? (
-                            <AvatarFallback className="text-[9px] font-medium bg-[#DE350B] text-white">
+                            <AvatarFallback className={`${fallbackTextClass} font-medium bg-[#DE350B] text-white`}>
                                 {assigneeName === 'Unassigned' ? '?' : assigneeName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                         ) : (
                             <AvatarFallback className="bg-muted text-muted-foreground">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconSize === 'sm' ? "w-3 h-3" : iconSize === 'lg' ? "w-4 h-4" : "w-3.5 h-3.5"}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             </AvatarFallback>
                         )}
                     </Avatar>
@@ -163,6 +188,7 @@ const AssigneeDropdown = ({ issue, lookups, assignIssue, disabled }: { issue: Is
 
 const DraggableIssue = ({ issue, lookups, updateIssue, assignIssue, isOwner, onIssueClick }: { issue: Issue, lookups?: LookupData, updateIssue: any, assignIssue: any, isOwner: boolean, onIssueClick?: (issue: Issue) => void }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: issue.id,
         data: { type: 'Issue', issue },
@@ -174,8 +200,30 @@ const DraggableIssue = ({ issue, lookups, updateIssue, assignIssue, isOwner, onI
     } : undefined;
 
     const dateFormatted = issue.created_at ? format(new Date(issue.created_at), 'MMM d') : '-';
-    const authorInitials = ((issue as any).author?.name) ? ((issue as any).author.name.substring(0, 2).toUpperCase()) : 'U';
     const typeName = lookups?.issueTypes?.find((t: any) => String(t.id) === String(issue.issue_type_id))?.name || 'Task';
+
+    const rowPaddingClass =
+        iconSize === 'sm'
+            ? 'py-1.5 px-2.5 text-xs'
+            : iconSize === 'lg'
+            ? 'py-3.5 px-4 text-base'
+            : 'py-2 px-3 text-sm';
+
+    const titleClass =
+        iconSize === 'sm'
+            ? 'text-xs font-medium text-foreground truncate flex items-center gap-1.5 cursor-pointer hover:text-primary'
+            : iconSize === 'lg'
+            ? 'text-base font-medium text-foreground truncate flex items-center gap-2.5 cursor-pointer hover:text-primary'
+            : 'text-sm font-medium text-foreground truncate flex items-center gap-2 cursor-pointer hover:text-primary';
+
+    const keyTextClass =
+        iconSize === 'sm' ? 'text-[11px]' : iconSize === 'lg' ? 'text-sm' : 'text-xs';
+
+    const dateTextClass =
+        iconSize === 'sm' ? 'text-[11px]' : iconSize === 'lg' ? 'text-sm' : 'text-xs';
+
+    const actionIconClass =
+        iconSize === 'sm' ? 'w-3 h-3' : iconSize === 'lg' ? 'w-4 h-4' : 'w-3.5 h-3.5';
 
     return (
         <div
@@ -183,29 +231,29 @@ const DraggableIssue = ({ issue, lookups, updateIssue, assignIssue, isOwner, onI
             style={style}
             {...listeners}
             {...attributes}
-            className="group flex items-center justify-between py-2 px-3 bg-card hover:bg-muted/50 border-b border-border/50 cursor-grab active:cursor-grabbing transition-colors"
+            className={`group flex items-center justify-between ${rowPaddingClass} bg-card hover:bg-muted/50 border-b border-border/50 cursor-grab active:cursor-grabbing transition-colors`}
         >
             <div className="flex items-center gap-3 overflow-hidden">
-                <input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-muted-foreground/30 text-primary focus:ring-primary opacity-100 [@media(hover:hover)]:opacity-50 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity" />
-                {getTypeIcon(typeName)}
-                <span onClick={() => onIssueClick?.(issue)} className="text-xs font-medium text-muted-foreground w-16 truncate hover:underline cursor-pointer" title={issue.id}>{t('TES-')}{issue.id.substring(0,3)}</span>
-                <span onClick={() => onIssueClick?.(issue)} className="text-sm font-medium text-foreground truncate flex items-center gap-2 cursor-pointer hover:text-primary">
+                <input type="checkbox" className={`${actionIconClass} rounded-sm border-muted-foreground/30 text-primary focus:ring-primary opacity-100 [@media(hover:hover)]:opacity-50 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity`} />
+                {getTypeIcon(typeName, iconSize)}
+                <span onClick={() => onIssueClick?.(issue)} className={`${keyTextClass} font-medium text-muted-foreground w-16 truncate hover:underline cursor-pointer`} title={issue.id}>{t('TES-')}{issue.id.substring(0,3)}</span>
+                <span onClick={() => onIssueClick?.(issue)} className={titleClass}>
                     {issue.title}
-                    <Pencil className="w-3.5 h-3.5 text-muted-foreground opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity" />
+                    <Pencil className={`${actionIconClass} text-muted-foreground opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity`} />
                 </span>
             </div>
-            <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="flex items-center gap-3.5 flex-shrink-0">
                 <div onPointerDown={(e) => e.stopPropagation()} className="cursor-default">
                     <StatusDropdown issue={issue} lookups={lookups} updateIssue={updateIssue} />
                 </div>
-                <span className="text-xs text-muted-foreground w-12 text-right">{dateFormatted}</span>
+                <span className={`${dateTextClass} text-muted-foreground w-12 text-right`}>{dateFormatted}</span>
                 <div onPointerDown={(e) => e.stopPropagation()} className="cursor-default">
                     <EstimatePopover issue={issue} updateIssue={updateIssue} />
                 </div>
                 <div onPointerDown={(e) => e.stopPropagation()} className="cursor-default">
                     <AssigneeDropdown issue={issue} lookups={lookups} assignIssue={assignIssue} disabled={!isOwner} />
                 </div>
-                <MoreHorizontal className="w-4 h-4 text-muted-foreground opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 cursor-pointer" />
+                <MoreHorizontal className={`${actionIconClass} text-muted-foreground opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 cursor-pointer`} />
             </div>
         </div>
     );
@@ -213,8 +261,16 @@ const DraggableIssue = ({ issue, lookups, updateIssue, assignIssue, isOwner, onI
 
 const InlineCreateIssue = ({ projectId, sprintId, lookups }: { projectId: string, sprintId: string | null, lookups?: LookupData }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const { createIssue } = useIssues(projectId);
     const [title, setTitle] = useState('');
+
+    const inputRowClass =
+        iconSize === 'sm'
+            ? 'px-2.5 py-1.5 text-xs'
+            : iconSize === 'lg'
+            ? 'px-4 py-3 text-base'
+            : 'px-3 py-2 text-sm';
 
     const handleKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && title.trim()) {
@@ -233,7 +289,7 @@ const InlineCreateIssue = ({ projectId, sprintId, lookups }: { projectId: string
     };
 
     return (
-        <div className="flex items-center gap-3 px-3 py-2 bg-card border-b border-border/50 text-sm focus-within:ring-1 focus-within:ring-primary focus-within:border-primary rounded-b-md transition-all">
+        <div className={`flex items-center gap-3 ${inputRowClass} bg-card border-b border-border/50 focus-within:ring-1 focus-within:ring-primary focus-within:border-primary rounded-b-md transition-all`}>
             <Plus className="w-4 h-4 text-muted-foreground" />
             <input 
                 type="text" 
@@ -241,7 +297,7 @@ const InlineCreateIssue = ({ projectId, sprintId, lookups }: { projectId: string
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="flex-1 bg-transparent border-none focus:outline-none text-sm placeholder:text-muted-foreground"
+                className="flex-1 bg-transparent border-none focus:outline-none placeholder:text-muted-foreground"
             />
         </div>
     );
@@ -249,6 +305,7 @@ const InlineCreateIssue = ({ projectId, sprintId, lookups }: { projectId: string
 
 const DroppableSprint = ({ sprint, issues, lookups, onStart, onComplete, projectId, updateIssue, assignIssue, isOwner, onIssueClick, onEditSprint }: { sprint: Sprint, issues: Issue[], lookups?: LookupData, onStart: (id: string) => void, onComplete: (id: string) => void, projectId: string, updateIssue: any, assignIssue: any, isOwner: boolean, onIssueClick?: (issue: Issue) => void, onEditSprint: (sprint: Sprint, mode: 'edit'|'start') => void }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const { setNodeRef, isOver } = useDroppable({
         id: sprint.id,
         data: { type: 'Sprint', sprint },
@@ -256,33 +313,49 @@ const DroppableSprint = ({ sprint, issues, lookups, onStart, onComplete, project
     const [isExpanded, setIsExpanded] = useState(true);
     const { data: workload, isLoading: isLoadingWorkload } = useSprintWorkload(sprint.id);
 
+    const headerPaddingClass =
+        iconSize === 'sm'
+            ? 'py-1.5 px-2 text-xs'
+            : iconSize === 'lg'
+            ? 'py-3 px-3 text-base'
+            : 'py-2 px-2 text-sm';
+
+    const sprintTitleClass =
+        iconSize === 'sm' ? 'font-semibold text-xs' : iconSize === 'lg' ? 'font-bold text-base' : 'font-semibold text-sm';
+
+    const pillBoxClass =
+        iconSize === 'sm' ? 'w-4.5 h-4.5 text-[9px]' : iconSize === 'lg' ? 'w-6 h-6 text-xs font-semibold' : 'w-5 h-5 text-[10px]';
+
+    const sprintBtnClass =
+        iconSize === 'sm' ? 'h-6.5 text-[11px] px-2.5 font-medium' : iconSize === 'lg' ? 'h-8 text-sm px-3.5 font-medium' : 'h-7 text-xs px-3 font-medium';
+
     return (
         <div className={`mb-6 rounded-md transition-colors border ${isOver ? 'border-primary ring-1 ring-primary bg-primary/5' : 'border-border/60 bg-card'} shadow-sm overflow-hidden`}>
-            <div className="flex items-center justify-between py-2 px-2 bg-muted/20 border-b border-border/50">
+            <div className={`flex items-center justify-between ${headerPaddingClass} bg-muted/20 border-b border-border/50`}>
                 <div className="flex items-center gap-2">
                     <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-muted rounded-sm text-muted-foreground">
                         {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
-                    <h3 className="font-semibold text-sm">{sprint.name}</h3>
+                    <h3 className={sprintTitleClass}>{sprint.name}</h3>
                     <span onClick={() => isOwner && onEditSprint(sprint, 'edit')} className={`text-xs text-muted-foreground mx-2 ${isOwner ? "cursor-pointer hover:underline hover:text-foreground" : ""}`}>{sprint.start_date ? `${format(new Date(sprint.start_date), 'd MMM')} - ${format(new Date(sprint.end_date || new Date()), 'd MMM')}` : 'Add dates'}</span>
                     <span className="text-xs text-muted-foreground">({issues.length} work items)</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 mr-2 opacity-70">
-                        <div className="w-5 h-5 rounded-sm bg-secondary flex items-center justify-center text-[10px] font-medium text-secondary-foreground" title={t('To Do')}>0</div>
-                        <div className="w-5 h-5 rounded-sm bg-info flex items-center justify-center text-[10px] font-medium text-info-foreground" title={t('In Progress')}>0</div>
-                        <div className="w-5 h-5 rounded-sm bg-success flex items-center justify-center text-[10px] font-medium text-success-foreground" title={t('Done')}>0</div>
+                        <div className={`${pillBoxClass} rounded-sm bg-secondary flex items-center justify-center font-medium text-secondary-foreground`} title={t('To Do')}>0</div>
+                        <div className={`${pillBoxClass} rounded-sm bg-info flex items-center justify-center font-medium text-info-foreground`} title={t('In Progress')}>0</div>
+                        <div className={`${pillBoxClass} rounded-sm bg-success flex items-center justify-center font-medium text-success-foreground`} title={t('Done')}>0</div>
                     </div>
                     {sprint.state?.toUpperCase() === 'PENDING' && isOwner && (
-                        <Button size="sm" variant="secondary" className="h-7 text-xs px-3 font-medium bg-muted hover:bg-muted/80 text-foreground" onClick={() => onEditSprint(sprint, 'start')}>{t('Start sprint')}</Button>
+                        <Button size="sm" variant="secondary" className={`${sprintBtnClass} bg-muted hover:bg-muted/80 text-foreground`} onClick={() => onEditSprint(sprint, 'start')}>{t('Start sprint')}</Button>
                     )}
                     {sprint.state?.toUpperCase() === 'ACTIVE' && isOwner && (
-                        <Button size="sm" variant="default" className="h-7 text-xs px-3 font-medium" onClick={() => onComplete(sprint.id)}>{t('Complete sprint')}</Button>
+                        <Button size="sm" variant="default" className={sprintBtnClass} onClick={() => onComplete(sprint.id)}>{t('Complete sprint')}</Button>
                     )}
-                                        {isOwner && (
+                    {isOwner && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground"><MoreHorizontal className="w-4 h-4" /></Button>
+                            <Button size="icon" variant="ghost" className={`${iconSize === 'sm' ? 'h-6.5 w-6.5' : iconSize === 'lg' ? 'h-8 w-8' : 'h-7 w-7'} text-muted-foreground`}><MoreHorizontal className="w-4 h-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => onEditSprint(sprint, 'edit')}>{t('Edit sprint')}</DropdownMenuItem>
@@ -305,7 +378,7 @@ const DroppableSprint = ({ sprint, issues, lookups, onStart, onComplete, project
                     ) : (
                         <div className="h-16 border-dashed border-2 border-transparent flex items-center justify-center text-xs text-muted-foreground m-1 rounded bg-muted/10">
                             {t('Plan a sprint by dragging work items into it.')}
-                                                        </div>
+                        </div>
                     )}
                     <InlineCreateIssue projectId={projectId} sprintId={sprint.id} lookups={lookups} />
                 </div>
@@ -316,29 +389,46 @@ const DroppableSprint = ({ sprint, issues, lookups, onStart, onComplete, project
 
 const DroppableBacklog = ({ issues, lookups, projectId, updateIssue, assignIssue, isOwner, onIssueClick, onCreateSprint }: { issues: Issue[], lookups?: LookupData, projectId: string, updateIssue: any, assignIssue: any, isOwner: boolean, onIssueClick?: (issue: Issue) => void, onCreateSprint: () => void }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const { setNodeRef, isOver } = useDroppable({
         id: 'backlog',
         data: { type: 'Backlog' },
     });
     const [isExpanded, setIsExpanded] = useState(true);
 
+    const headerPaddingClass =
+        iconSize === 'sm'
+            ? 'py-1.5 px-2 text-xs'
+            : iconSize === 'lg'
+            ? 'py-3 px-3 text-base'
+            : 'py-2 px-2 text-sm';
+
+    const backlogTitleClass =
+        iconSize === 'sm' ? 'font-semibold text-xs' : iconSize === 'lg' ? 'font-bold text-base' : 'font-semibold text-sm';
+
+    const pillBoxClass =
+        iconSize === 'sm' ? 'w-4.5 h-4.5 text-[9px]' : iconSize === 'lg' ? 'w-6 h-6 text-xs font-semibold' : 'w-5 h-5 text-[10px]';
+
+    const backlogBtnClass =
+        iconSize === 'sm' ? 'h-6.5 text-[11px] px-2.5 font-medium' : iconSize === 'lg' ? 'h-8 text-sm px-3.5 font-medium' : 'h-7 text-xs px-3 font-medium';
+
     return (
         <div className={`mt-8 rounded-md transition-colors border ${isOver ? 'border-primary ring-1 ring-primary bg-primary/5' : 'border-border/60 bg-card'} shadow-sm overflow-hidden`}>
-            <div className="flex items-center justify-between py-2 px-2 bg-muted/20 border-b border-border/50">
+            <div className={`flex items-center justify-between ${headerPaddingClass} bg-muted/20 border-b border-border/50`}>
                 <div className="flex items-center gap-2">
                     <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-muted rounded-sm text-muted-foreground">
                         {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
-                    <h3 className="font-semibold text-sm">{t('Backlog')}</h3>
+                    <h3 className={backlogTitleClass}>{t('Backlog')}</h3>
                     <span className="text-xs text-muted-foreground">({issues.length} work items)</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 mr-2 opacity-70">
-                        <div className="w-5 h-5 rounded-sm bg-secondary flex items-center justify-center text-[10px] font-medium text-secondary-foreground">0</div>
-                        <div className="w-5 h-5 rounded-sm bg-info flex items-center justify-center text-[10px] font-medium text-info-foreground">0</div>
-                        <div className="w-5 h-5 rounded-sm bg-success flex items-center justify-center text-[10px] font-medium text-success-foreground">0</div>
+                        <div className={`${pillBoxClass} rounded-sm bg-secondary flex items-center justify-center font-medium text-secondary-foreground`}>0</div>
+                        <div className={`${pillBoxClass} rounded-sm bg-info flex items-center justify-center font-medium text-info-foreground`}>0</div>
+                        <div className={`${pillBoxClass} rounded-sm bg-success flex items-center justify-center font-medium text-success-foreground`}>0</div>
                     </div>
-                    {isOwner && <Button size="sm" variant="secondary" onClick={onCreateSprint} className="h-7 text-xs px-3 font-medium bg-muted hover:bg-muted/80 text-foreground">{t('Create sprint')}</Button>}
+                    {isOwner && <Button size="sm" variant="secondary" onClick={onCreateSprint} className={`${backlogBtnClass} bg-muted hover:bg-muted/80 text-foreground`}>{t('Create sprint')}</Button>}
                 </div>
             </div>
             
@@ -360,6 +450,7 @@ const DroppableBacklog = ({ issues, lookups, projectId, updateIssue, assignIssue
 
 export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issues, lookups, onIssueClick }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const { sprints, startSprint, completeSprint, createSprint, isLoading, isCompleting } = useSprints(projectId);
     const { auth } = usePage<any>().props;
     const isOwner = auth.user?.roles?.includes('Workspace Owner') || auth.user?.roles?.includes('Superadmin');
@@ -487,43 +578,43 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({ projectId, issue
                                 placeholder={t('Search backlog')}
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
-                                className="h-8 w-48 rounded-md border border-input bg-background pl-8 pr-3 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                className={`${iconSize === 'sm' ? 'h-7.5 w-44 text-xs' : iconSize === 'lg' ? 'h-9.5 w-56 text-sm' : 'h-8 w-48 text-xs'} rounded-md border border-input bg-background pl-8 pr-3 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring`}
                             />
                             <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
                         <div className="flex items-center -space-x-1.5 pl-1">
-                                                        <Avatar 
+                            <Avatar 
                                 onClick={() => setAssigneeFilters(prev => prev.includes('unassigned') ? prev.filter(p => p !== 'unassigned') : [...prev, 'unassigned'])}
-                                className={`h-8 w-8 rounded-full border-2 border-background cursor-pointer transition-all ${assigneeFilters.includes('unassigned') ? 'ring-2 ring-offset-1 ring-primary z-10' : 'hover:z-10 hover:-translate-y-0.5'}`}
+                                className={`${iconSize === 'sm' ? 'h-7 w-7' : iconSize === 'lg' ? 'h-9 w-9' : 'h-8 w-8'} rounded-full border-2 border-background cursor-pointer transition-all ${assigneeFilters.includes('unassigned') ? 'ring-2 ring-offset-1 ring-primary z-10' : 'hover:z-10 hover:-translate-y-0.5'}`}
                                 title={t('Unassigned')}
                             >
                                 <AvatarFallback className="bg-muted text-muted-foreground">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconSize === 'sm' ? "w-3.5 h-3.5" : iconSize === 'lg' ? "w-4.5 h-4.5" : "w-4 h-4"}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 </AvatarFallback>
                             </Avatar>
                             {lookups?.users?.map(u => (
-                                                                <Avatar 
+                                <Avatar 
                                     key={u.id} 
                                     onClick={() => setAssigneeFilters(prev => prev.includes(String(u.id)) ? prev.filter(p => p !== String(u.id)) : [...prev, String(u.id)])}
-                                    className={`h-8 w-8 rounded-full border-2 border-background cursor-pointer transition-all ${assigneeFilters.includes(String(u.id)) ? 'ring-2 ring-offset-1 ring-primary z-10' : 'hover:z-10 hover:-translate-y-0.5'}`}
+                                    className={`${iconSize === 'sm' ? 'h-7 w-7' : iconSize === 'lg' ? 'h-9 w-9' : 'h-8 w-8'} rounded-full border-2 border-background cursor-pointer transition-all ${assigneeFilters.includes(String(u.id)) ? 'ring-2 ring-offset-1 ring-primary z-10' : 'hover:z-10 hover:-translate-y-0.5'}`}
                                     title={u.name}
                                 >
-                                    <AvatarFallback className="text-[11px] font-medium bg-[#DE350B] text-white">{u.name.split(' ').map((n: string)=>n[0]).join('').substring(0, 2).toUpperCase()}</AvatarFallback>
+                                    <AvatarFallback className={`${iconSize === 'sm' ? 'text-[10px]' : iconSize === 'lg' ? 'text-xs' : 'text-[11px]'} font-medium bg-[#DE350B] text-white`}>{u.name.split(' ').map((n: string)=>n[0]).join('').substring(0, 2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                             ))}
                         </div>
-                        <Button variant="outline" size="sm" className={`h-8 text-xs font-medium ${(searchQuery || assigneeFilters.length > 0) ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' : 'text-muted-foreground'}`}>
+                        <Button variant="outline" size="sm" className={`${iconSize === 'sm' ? 'h-7.5 text-xs px-2.5' : iconSize === 'lg' ? 'h-9.5 text-sm px-3.5' : 'h-8 text-xs px-3'} font-medium ${(searchQuery || assigneeFilters.length > 0) ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' : 'text-muted-foreground'}`}>
                             <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5" /> {t('Filter')}
-                                                            {(searchQuery || assigneeFilters.length > 0) && <span className="ml-1.5 bg-primary/20 text-primary rounded-full px-1.5 py-0.5 text-[10px] leading-none">{(searchQuery ? 1 : 0) + assigneeFilters.length}</span>}
+                            {(searchQuery || assigneeFilters.length > 0) && <span className="ml-1.5 bg-primary/20 text-primary rounded-full px-1.5 py-0.5 text-[10px] leading-none">{(searchQuery ? 1 : 0) + assigneeFilters.length}</span>}
                         </Button>
                         {(searchQuery || assigneeFilters.length > 0) && (
                             <button onClick={() => { setSearchQuery(''); setAssigneeFilters([]); }} className="text-xs font-medium text-muted-foreground hover:text-foreground mx-1">{t('Clear filters')}</button>
                         )}
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-muted-foreground"><LineChart className="w-4 h-4" /></Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-muted-foreground"><SlidersHorizontal className="w-4 h-4" /></Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-muted-foreground"><MoreHorizontal className="w-4 h-4" /></Button>
+                        <Button variant="outline" size="icon" className={`${iconSize === 'sm' ? 'h-7.5 w-7.5' : iconSize === 'lg' ? 'h-9.5 w-9.5' : 'h-8 w-8'} text-muted-foreground`}><LineChart className="w-4 h-4" /></Button>
+                        <Button variant="outline" size="icon" className={`${iconSize === 'sm' ? 'h-7.5 w-7.5' : iconSize === 'lg' ? 'h-9.5 w-9.5' : 'h-8 w-8'} text-muted-foreground`}><SlidersHorizontal className="w-4 h-4" /></Button>
+                        <Button variant="outline" size="icon" className={`${iconSize === 'sm' ? 'h-7.5 w-7.5' : iconSize === 'lg' ? 'h-9.5 w-9.5' : 'h-8 w-8'} text-muted-foreground`}><MoreHorizontal className="w-4 h-4" /></Button>
                     </div>
                 </div>
 

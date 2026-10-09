@@ -17,7 +17,7 @@ class DocumentationController
         $menu = $menuQuery->execute();
 
         if ($slug === null) {
-            $firstPage = $menu->first()?->pages->first();
+            $firstPage = $menu->flatMap->pages->first();
 
             if ($firstPage) {
                 return redirect()->route('docs.show', ['slug' => $firstPage->slug]);
