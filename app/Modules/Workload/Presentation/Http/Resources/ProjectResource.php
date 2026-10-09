@@ -23,13 +23,15 @@ final class ProjectResource extends JsonResource
             'workspace_id' => $this->resource->workspaceId,
             'key' => $this->resource->key,
             'name' => $this->resource->name,
-            'description' => null,
+            'description' => $this->resource->description,
             'status' => $this->resource->status,
             'lead_id' => null,
             'workflow_id' => null,
             'priority_id' => $this->resource->priorityId,
             'total_issues_count' => $this->resource->totalIssuesCount,
             'completed_issues_count' => $this->resource->completedIssuesCount,
+            'start_date' => $this->resource->startDate,
+            'end_date' => $this->resource->endDate,
         ];
     }
 }

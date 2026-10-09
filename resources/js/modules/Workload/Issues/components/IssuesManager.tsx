@@ -10,12 +10,14 @@ import { Issue } from '@/types/issue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Search, Activity } from 'lucide-react';
+import { Search, Activity, BarChart2 } from 'lucide-react';
 import { ProjectActivitySheet } from './ProjectActivitySheet';
 import { BacklogManager } from './BacklogManager';
+import { ProjectAnalyticsDashboard } from '@/modules/Workload/Projects/components/ProjectAnalyticsDashboard';
 import { useSprints } from '../hooks/useSprints';
 import { toast } from 'sonner';
 import { useTranslate } from "@/hooks/useTranslate";
+import { useIconSize } from '@/hooks/use-appearance';
 
 interface LookupItem {
     id: string;
@@ -34,6 +36,7 @@ interface IssuesManagerProps {
 
 export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const { 
         issues, 
         isLoading, 
@@ -50,24 +53,25 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
-    const { url } = usePage();
-    const [viewMode, setViewModeState] = useState<'list' | 'board' | 'backlog'>(() => {
+    const { url, props } = usePage<any>();
+    const activeProject = props.project;
+    const [viewMode, setViewModeState] = useState<'list' | 'board' | 'backlog' | 'analytics'>(() => {
         // Safe URL parsing for both SSR and Client
         const search = url.split('?')[1];
         if (search) {
             const params = new URLSearchParams('?' + search);
             const tab = params.get('tab');
-            if (tab === 'list' || tab === 'board' || tab === 'backlog') return tab;
+            if (tab === 'list' || tab === 'board' || tab === 'backlog' || tab === 'analytics') return tab;
         }
         
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem(`project-${projectId}-viewMode`);
-            if (saved === 'list' || saved === 'board' || saved === 'backlog') return saved;
+            if (saved === 'list' || saved === 'board' || saved === 'backlog' || saved === 'analytics') return saved;
         }
         return 'board';
     });
 
-    const setViewMode = (mode: 'list' | 'board' | 'backlog') => {
+    const setViewMode = (mode: 'list' | 'board' | 'backlog' | 'analytics') => {
         setViewModeState(mode);
         if (typeof window !== 'undefined') {
             localStorage.setItem(`project-${projectId}-viewMode`, mode);
@@ -118,6 +122,11 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
             boardFilters.issueTypeIds.includes(String(issue.issue_type_id));
         return matchesAssignee && matchesPriority && matchesType;
     });
+
+    const activeSprint = sprints.find(s => s.state?.toUpperCase() === 'ACTIVE');
+    const kanbanIssues = activeSprint
+        ? boardFilteredIssues.filter(i => i.sprint_id === activeSprint.id)
+        : boardFilteredIssues;
 
     const doneStatusIds = lookups.statuses
         .filter(s => ['done', 'closed', 'resolved'].includes(s.name.toLowerCase()))
@@ -199,67 +208,104 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
         }
     };
 
+    const searchInputClass =
+        iconSize === 'sm' ? 'h-8 text-xs pl-8' : iconSize === 'lg' ? 'h-10 text-sm pl-8' : 'h-9 text-xs pl-8';
+
+    const tabBtnClass =
+        iconSize === 'sm' ? 'h-7.5 px-2.5 text-xs' : iconSize === 'lg' ? 'h-9.5 px-4 text-sm' : 'h-8 px-3 text-xs';
+
+    const progressCardPadding =
+        iconSize === 'sm' ? 'p-3 text-xs' : iconSize === 'lg' ? 'p-5 text-base' : 'p-4 text-sm';
+
+    const progressBarHeight =
+        iconSize === 'sm' ? 'h-1.5' : iconSize === 'lg' ? 'h-2.5' : 'h-2';
+
+    const boardTitleClass =
+        iconSize === 'sm' ? 'text-base font-semibold' : iconSize === 'lg' ? 'text-xl font-bold' : 'text-lg font-medium';
+
+    const createBtnClass =
+        iconSize === 'sm' ? 'h-8 text-xs px-3' : iconSize === 'lg' ? 'h-10 text-sm px-4.5' : 'h-9 text-xs px-3.5';
+
     return (
         <div className="w-full space-y-4">
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
                         <div className="relative w-full sm:w-72">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="search"
                                 placeholder={t('Search issues...')}
-                                className="pl-8"
+                                className={searchInputClass}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => setIsActivityOpen(true)} className="shrink-0 flex items-center gap-2">
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setIsActivityOpen(true)} 
+                            className={`shrink-0 flex items-center gap-2 ${iconSize === 'sm' ? 'h-8 text-xs' : iconSize === 'lg' ? 'h-10 text-sm' : 'h-9 text-xs'}`}
+                        >
                             <Activity className="h-4 w-4" />
                             <span className="hidden sm:inline">{t('Activity History')}</span>
                         </Button>
                     </div>
 
-                    <div className="flex gap-2 bg-muted p-1 rounded-md shrink-0">
-                    <Button 
-                        variant={viewMode === 'board' ? 'default' : 'ghost'} 
-                        size="sm" 
-                        onClick={() => setViewMode('board')}
-                    >
-                        {t('Board')}
-                                                </Button>
-                    <Button 
-                        variant={viewMode === 'list' ? 'default' : 'ghost'} 
-                        size="sm" 
-                        onClick={() => setViewMode('list')}
-                    >
-                        {t('List')}
-                                                </Button>
-                    <Button 
-                        variant={viewMode === 'backlog' ? 'default' : 'ghost'} 
-                        size="sm" 
-                        onClick={() => setViewMode('backlog')}
-                    >
-                        {t('Backlog')}
-                    </Button>
-                </div>
+                    <div className="flex gap-1.5 bg-muted p-1 rounded-lg shrink-0">
+                        <Button 
+                            variant={viewMode === 'board' ? 'default' : 'ghost'} 
+                            size="sm" 
+                            className={tabBtnClass}
+                            onClick={() => setViewMode('board')}
+                        >
+                            {t('Board')}
+                        </Button>
+                        <Button 
+                            variant={viewMode === 'list' ? 'default' : 'ghost'} 
+                            size="sm" 
+                            className={tabBtnClass}
+                            onClick={() => setViewMode('list')}
+                        >
+                            {t('List')}
+                        </Button>
+                        <Button 
+                            variant={viewMode === 'backlog' ? 'default' : 'ghost'} 
+                            size="sm" 
+                            className={tabBtnClass}
+                            onClick={() => setViewMode('backlog')}
+                        >
+                            {t('Backlog')}
+                        </Button>
+                        <Button 
+                            variant={viewMode === 'analytics' ? 'default' : 'ghost'} 
+                            size="sm" 
+                            className={tabBtnClass}
+                            onClick={() => setViewMode('analytics')}
+                        >
+                            <BarChart2 className="h-3.5 w-3.5 mr-1" />
+                            {t('Analytics')}
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-4 bg-card border rounded-lg p-4">
+            <div className={`flex items-center gap-4 bg-card border rounded-lg ${progressCardPadding}`}>
                 <div className="flex-1">
                     <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium">{t('Project Progress')}</span>
-                        <span className="text-sm font-medium">{progressPercentage}%</span>
+                        <span className="font-medium">{t('Project Progress')}</span>
+                        <span className="font-medium">{progressPercentage}%</span>
                     </div>
-                    <Progress value={progressPercentage} className="h-2" />
+                    <Progress value={progressPercentage} className={progressBarHeight} />
                 </div>
-                <div className="text-sm text-muted-foreground text-right min-w-[100px]">
+                <div className="text-muted-foreground text-right min-w-[100px]">
                     {closedIssues} / {totalIssues} {t('Done')}
-                                    </div>
+                </div>
             </div>
 
-            {viewMode === 'list' ? (
+            {viewMode === 'analytics' ? (
+                <ProjectAnalyticsDashboard projectId={projectId} />
+            ) : viewMode === 'list' ? (
                 <IssueList
                     issues={filteredIssues}
                     isLoading={isLoading}
@@ -283,7 +329,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
                 <div className="space-y-4">
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                         <div className="flex items-center gap-3">
-                            <h3 className="text-lg font-medium">{t('Issues Board')}</h3>
+                            <h3 className={boardTitleClass}>{t('Issues Board')}</h3>
                             <BoardFilterBar
                                 users={lookups.users}
                                 priorities={lookups.priorities}
@@ -292,13 +338,13 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
                                 onChange={setBoardFilters}
                             />
                         </div>
-                        <Button onClick={handleCreateClick}>{t('Create Task')}</Button>
+                        <Button onClick={handleCreateClick} className={createBtnClass}>{t('Create Task')}</Button>
                     </div>
                     {isLoading ? (
                         <div className="text-center p-4">{t('Loading board...')}</div>
                     ) : (
                         <KanbanBoard 
-                            issues={sprints.length > 0 ? boardFilteredIssues.filter(i => i.sprint_id && sprints.some(s => s.id === i.sprint_id && s.state === 'ACTIVE')) : boardFilteredIssues}
+                            issues={kanbanIssues}
                             statuses={lookups.statuses}
                             onTransition={handleTransition}
                             onEdit={handleEditClick}
@@ -315,6 +361,8 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({ projectId, lookups
                 onSubmit={handleSubmit}
                 issue={selectedIssue}
                 isLoading={isCreating || isUpdating}
+                projectId={projectId}
+                projects={activeProject ? [{ id: String(activeProject.id), name: activeProject.name }] : []}
                 issueTypes={lookups.issueTypes}
                 priorities={lookups.priorities}
                 statuses={lookups.statuses}

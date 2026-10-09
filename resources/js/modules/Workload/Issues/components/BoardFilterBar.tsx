@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useTranslate } from "@/hooks/useTranslate";
+import { useIconSize } from '@/hooks/use-appearance';
 
 export interface BoardFilterState {
     assigneeIds: string[];
@@ -71,8 +72,16 @@ export const BoardFilterBar: React.FC<BoardFilterBarProps> = ({
     onChange,
 }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     const activeCount =
         filters.priorityIds.length + filters.issueTypeIds.length;
+
+    const avatarSizeClass =
+        iconSize === 'sm' ? 'h-7 w-7' : iconSize === 'lg' ? 'h-9 w-9' : 'h-8 w-8';
+    const avatarFontClass =
+        iconSize === 'sm' ? 'text-[10px]' : iconSize === 'lg' ? 'text-xs' : 'text-[11px]';
+    const buttonHeightClass =
+        iconSize === 'sm' ? 'h-7 text-xs px-2.5' : iconSize === 'lg' ? 'h-9 text-sm px-3.5' : 'h-8 text-xs px-3';
 
     const toggleAssignee = (id: string) => {
         const next = filters.assigneeIds.includes(id)
@@ -120,10 +129,11 @@ export const BoardFilterBar: React.FC<BoardFilterBarProps> = ({
                                     : 'hover:z-10 hover:scale-105 opacity-70 hover:opacity-100'
                             )}
                         >
-                            <Avatar className="h-8 w-8 border-2 border-background">
+                            <Avatar className={cn(avatarSizeClass, "border-2 border-background")}>
                                 <AvatarFallback
                                     className={cn(
-                                        'text-[11px] font-semibold text-white',
+                                        avatarFontClass,
+                                        'font-semibold text-white',
                                         getAvatarColor(String(user.id))
                                     )}
                                 >
@@ -140,7 +150,7 @@ export const BoardFilterBar: React.FC<BoardFilterBarProps> = ({
             {/* Filter popover */}
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1.5 relative">
+                    <Button variant="outline" size="sm" className={cn("gap-1.5 relative", buttonHeightClass)}>
                         <SlidersHorizontal className="h-3.5 w-3.5" />
                         {t('Filter')}
                                                 {activeCount > 0 && (

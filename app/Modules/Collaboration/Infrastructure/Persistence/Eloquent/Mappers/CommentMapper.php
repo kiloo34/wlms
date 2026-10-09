@@ -7,6 +7,7 @@ namespace App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Mappers;
 use App\Modules\Collaboration\Domain\Entities\Comment;
 use App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models\CommentModel;
 use DateTimeImmutable;
+use Illuminate\Support\Carbon;
 
 final class CommentMapper
 {
@@ -29,7 +30,7 @@ final class CommentMapper
         if ($model === null) {
             $model = new CommentModel;
             $model->id = $entity->id->value;
-            $model->created_at = \Illuminate\Support\Carbon::instance($entity->createdAt);
+            $model->created_at = Carbon::instance($entity->createdAt);
         }
 
         $model->issue_id = $entity->issueId;
@@ -37,7 +38,7 @@ final class CommentMapper
         $model->parent_id = $entity->parentId;
         $model->body = $entity->body->value;
         $model->is_edited = $entity->isEdited;
-        $model->updated_at = \Illuminate\Support\Carbon::instance($entity->updatedAt);
+        $model->updated_at = Carbon::instance($entity->updatedAt);
 
         return $model;
     }

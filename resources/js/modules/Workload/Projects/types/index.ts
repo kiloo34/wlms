@@ -8,6 +8,8 @@ export interface Project {
     priority_id?: string | null;
     total_issues_count?: number;
     completed_issues_count?: number;
+    start_date?: string | null;
+    end_date?: string | null;
     created_at?: string;
     updated_at?: string;
 }

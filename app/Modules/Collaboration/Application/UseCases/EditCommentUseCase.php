@@ -10,7 +10,8 @@ use App\Modules\Collaboration\Domain\Repositories\CommentRepositoryInterface;
 use App\Modules\Collaboration\Domain\ValueObjects\CommentBody;
 use App\Modules\Collaboration\Domain\ValueObjects\CommentId;
 use DateTimeImmutable;
-use RuntimeException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class EditCommentUseCase
 {
@@ -24,12 +25,12 @@ final class EditCommentUseCase
         $comment = $this->repository->findById($commentId);
 
         if (! $comment) {
-            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Comment not found.');
+            throw new NotFoundHttpException('Comment not found.');
         }
 
         // Anti-IDOR: Only author can edit
         if ((string) $comment->authorId !== (string) $input->authorId) {
-            throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException('Unauthorized to edit this comment.');
+            throw new AccessDeniedHttpException('Unauthorized to edit this comment.');
         }
 
         $comment->edit(new CommentBody($input->body), new DateTimeImmutable);

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SprintWorkloadMember } from '../hooks/useSprints';
 import { cn } from '@/lib/utils';
 import { useTranslate } from "@/hooks/useTranslate";
+import { useIconSize } from '@/hooks/use-appearance';
 
 interface SprintWorkloadWidgetProps {
     workload: SprintWorkloadMember[];
@@ -12,6 +13,7 @@ interface SprintWorkloadWidgetProps {
 
 export const SprintWorkloadWidget: React.FC<SprintWorkloadWidgetProps> = ({ workload, isLoading }) => {
     const { t } = useTranslate();
+    const { iconSize } = useIconSize();
     if (isLoading) {
         return (
             <div className="space-y-4">
@@ -25,10 +27,17 @@ export const SprintWorkloadWidget: React.FC<SprintWorkloadWidgetProps> = ({ work
         return null;
     }
 
+    const avatarClass =
+        iconSize === 'sm' ? 'h-4.5 w-4.5' : iconSize === 'lg' ? 'h-6 w-6' : 'h-5 w-5';
+    const textClass =
+        iconSize === 'sm' ? 'text-[11px]' : iconSize === 'lg' ? 'text-sm' : 'text-xs';
+    const progressHeight =
+        iconSize === 'sm' ? 'h-1' : iconSize === 'lg' ? 'h-2' : 'h-1.5';
+
     return (
-        <div className="space-y-4 py-2">
-            <h4 className="text-sm font-medium">{t('Sprint Capacity')}</h4>
-            <div className="space-y-3">
+        <div className="space-y-3 py-2">
+            <h4 className={`${iconSize === 'sm' ? 'text-xs' : iconSize === 'lg' ? 'text-base' : 'text-sm'} font-medium`}>{t('Sprint Capacity')}</h4>
+            <div className="space-y-2.5">
                 {workload.map((member) => {
                     const capacityHours = Math.round(member.capacity_seconds / 3600 * 10) / 10;
                     const allocatedHours = Math.round(member.allocated_seconds / 3600 * 10) / 10;
@@ -56,11 +65,11 @@ export const SprintWorkloadWidget: React.FC<SprintWorkloadWidgetProps> = ({ work
 
                     return (
                         <div key={member.user_id} className="space-y-1">
-                            <div className="flex items-center justify-between text-xs">
+                            <div className={`flex items-center justify-between ${textClass}`}>
                                 <div className="flex items-center space-x-2">
-                                    <Avatar className="h-5 w-5">
+                                    <Avatar className={avatarClass}>
                                         <AvatarImage src={member.avatar || undefined} />
-                                        <AvatarFallback className="text-[10px]">{member.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}</AvatarFallback>
+                                        <AvatarFallback className={`${iconSize === 'sm' ? 'text-[8px]' : iconSize === 'lg' ? 'text-[11px]' : 'text-[10px]'}`}>{member.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}</AvatarFallback>
                                     </Avatar>
                                     <span className="font-medium">{member.name}</span>
                                 </div>
@@ -70,7 +79,7 @@ export const SprintWorkloadWidget: React.FC<SprintWorkloadWidgetProps> = ({ work
                             </div>
                             <Progress 
                                 value={Math.min(percentage, 100)} 
-                                className="h-1.5"
+                                className={progressHeight}
                                 indicatorColor={progressColorClass}
                             />
                         </div>

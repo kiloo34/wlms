@@ -17,6 +17,7 @@ class HandleAppearance
     public function handle(Request $request, Closure $next): Response
     {
         View::share('appearance', $request->cookie('appearance') ?? 'system');
+        View::share('icon_size', $request->cookie('icon_size') ?? 'md');
 
         return $next($request);
     }

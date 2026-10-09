@@ -21,7 +21,7 @@ final class GetProjectLookupsController extends Controller
     {
         // Pragmatic: directly fetch project to get workspaceId and workflowId
         $project = ProjectModel::findOrFail($projectId);
-        
+
         $workspace = WorkspaceModel::findOrFail($project->workspace_id);
         if ($request->user()->cannot('view', $workspace)) {
             abort(403, 'Unauthorized action.');

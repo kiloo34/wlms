@@ -24,7 +24,7 @@ beforeEach(function () {
         'org_level_id' => $this->orgLevelId,
         'name' => 'Test Unit',
     ]);
-    
+
     $this->otherOrgUnitId = Str::uuid()->toString();
     DB::table('org_units')->insert([
         'id' => $this->otherOrgUnitId,
@@ -51,7 +51,7 @@ beforeEach(function () {
     $this->normalUser = UserModel::factory()->create([
         'org_unit_id' => $this->orgUnitId,
     ]);
-    
+
     $this->otherUser = UserModel::factory()->create([
         'org_unit_id' => $this->otherOrgUnitId,
     ]);
@@ -75,11 +75,11 @@ test('guest cannot access any identity endpoints', function () {
 
 test('user cannot update other user details (IDOR)', function () {
     $this->actingAs($this->normalUser);
-    
-    $response = $this->putJson('/api/rbac/users/' . $this->otherUser->id, [
+
+    $response = $this->putJson('/api/rbac/users/'.$this->otherUser->id, [
         'name' => 'Hacked Name',
     ]);
-    
+
     $response->assertStatus(403);
 });
 
@@ -92,56 +92,56 @@ test('cross-division access is prevented for normal users', function () {
 
 test('rbac edge cases - normal user cannot assign roles to another user', function () {
     $this->actingAs($this->normalUser);
-    
+
     $response = $this->postJson('/api/rbac/user-roles/assign', [
         'user_id' => $this->otherUser->id,
         'role_id' => $this->superAdminRole->id,
     ]);
-    
+
     $response->assertStatus(403);
 });
 
 test('rbac edge cases - normal user cannot create roles', function () {
     $this->actingAs($this->normalUser);
-    
+
     $response = $this->postJson('/api/rbac/roles', [
         'name' => 'Hacker Role',
-        'scope' => 'GLOBAL'
+        'scope' => 'GLOBAL',
     ]);
-    
+
     $response->assertStatus(403);
 });
 
 test('rbac edge cases - superadmin can assign roles across divisions', function () {
     $this->actingAs($this->superAdmin);
-    
+
     $response = $this->postJson('/api/rbac/user-roles/assign', [
         'user_id' => $this->otherUser->id,
         'role_id' => $this->superAdminRole->id,
     ]);
-    
+
     $response->assertSuccessful();
 });
 
 test('rbac edge cases - superadmin can view users across divisions', function () {
     $this->actingAs($this->superAdmin);
-    
+
     $response = $this->getJson('/api/rbac/users');
-    
+
     $response->assertSuccessful();
     $response->assertJsonFragment(['id' => $this->otherUser->id]);
 });
 
 test('rbac edge cases - superadmin can update other users', function () {
     $this->actingAs($this->superAdmin);
-    
-    $response = $this->putJson('/api/rbac/users/' . $this->otherUser->id, [
+
+    $response = $this->putJson('/api/rbac/users/'.$this->otherUser->id, [
         'name' => 'Updated Name',
     ]);
-    
+
     $response->assertSuccessful();
     $this->assertDatabaseHas('users', [
         'id' => $this->otherUser->id,
-        'name' => 'Updated Name'
+        'name' => 'Updated Name',
     ]);
 });

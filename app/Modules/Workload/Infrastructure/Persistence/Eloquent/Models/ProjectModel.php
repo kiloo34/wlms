@@ -21,6 +21,8 @@ use Illuminate\Support\Carbon;
  * @property string|null $description
  * @property string $status
  * @property string|null $lead_id
+ * @property Carbon|null $start_date
+ * @property Carbon|null $end_date
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -45,6 +47,13 @@ final class ProjectModel extends Model
         'description',
         'status',
         'lead_id',
+        'start_date',
+        'end_date',
+    ];
+
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     /**

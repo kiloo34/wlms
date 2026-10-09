@@ -1,18 +1,19 @@
 <?php
 
-use App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models\CommentModel;
 use App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models\AuditLogModel;
+use App\Modules\Collaboration\Infrastructure\Persistence\Eloquent\Models\CommentModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
+use App\Modules\Workload\Domain\Events\IssueCreated;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\SprintModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
-use App\Modules\Workload\Domain\Events\IssueCreated;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -73,11 +74,10 @@ beforeEach(function () {
 });
 
 test('user can add comment to issue', function () {
-    \Illuminate\Support\Facades\Event::fake();
+    Event::fake();
     $response = $this->actingAs($this->user)->postJson(route('collaboration.issues.comments.add', ['issueId' => $this->issue->id]), [
         'body' => 'This is a test comment.',
     ]);
-
 
     $response->assertStatus(201)
         ->assertJsonPath('data.body', 'This is a test comment.')
@@ -115,7 +115,7 @@ test('user can edit own comment', function () {
 
 test('prevents IDOR when editing another users comment', function () {
     $otherUser = UserModel::factory()->create();
-    
+
     $comment = CommentModel::create([
         'id' => Str::uuid()->toString(),
         'issue_id' => $this->issue->id,
@@ -128,7 +128,7 @@ test('prevents IDOR when editing another users comment', function () {
         'body' => 'Malicious edit',
     ]);
 
-    $response->assertStatus(403); 
+    $response->assertStatus(403);
 });
 
 test('cannot edit soft deleted comment', function () {
@@ -158,7 +158,7 @@ test('audit log created when issue created event dispatched', function () {
         '1',
         'New Issue',
         (string) $this->user->id,
-        new \DateTimeImmutable
+        new DateTimeImmutable
     );
 
     event($event);

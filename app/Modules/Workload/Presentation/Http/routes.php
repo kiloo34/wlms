@@ -11,13 +11,15 @@ use App\Modules\Workload\Presentation\Http\Controllers\CreateWorkspaceController
 use App\Modules\Workload\Presentation\Http\Controllers\GetBacklogController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetBoardController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetIssueWorklogsController;
+use App\Modules\Workload\Presentation\Http\Controllers\GetProjectAnalyticsController;
+use App\Modules\Workload\Presentation\Http\Controllers\GetProjectLookupsController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetProjectsController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetProjectSprintsController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetSprintWorkloadController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetValidTransitionsController;
+use App\Modules\Workload\Presentation\Http\Controllers\GetWorkspaceAnalyticsController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetWorkspaceIssuesController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetWorkspacesController;
-use App\Modules\Workload\Presentation\Http\Controllers\IssueCommentController;
 use App\Modules\Workload\Presentation\Http\Controllers\IssueController;
 use App\Modules\Workload\Presentation\Http\Controllers\LogWorkController;
 use App\Modules\Workload\Presentation\Http\Controllers\ProjectActivityController;
@@ -39,6 +41,7 @@ Route::middleware(['auth:sanctum'])->prefix('workspaces')->group(function () {
     Route::delete('/{id}', ArchiveWorkspaceController::class);
     Route::get('/{workspaceId}/projects', GetProjectsController::class);
     Route::get('/{workspaceId}/issues', GetWorkspaceIssuesController::class);
+    Route::get('/{id}/analytics', GetWorkspaceAnalyticsController::class);
 
     // Workspace Members
     Route::get('/{workspace_id}/members', [WorkspaceMemberController::class, 'index']);
@@ -57,7 +60,8 @@ Route::middleware(['auth:sanctum'])->prefix('projects')->group(function () {
     Route::post('/{project_id}/issues', [IssueController::class, 'store']);
     Route::get('/{project_id}/activity', [ProjectActivityController::class, 'index']);
     Route::get('/{id}/sprints', GetProjectSprintsController::class);
-    Route::get('/{id}/lookups', \App\Modules\Workload\Presentation\Http\Controllers\GetProjectLookupsController::class);
+    Route::get('/{id}/lookups', GetProjectLookupsController::class);
+    Route::get('/{id}/analytics', GetProjectAnalyticsController::class);
 });
 
 Route::middleware(['auth:sanctum'])->prefix('sprints')->group(function () {

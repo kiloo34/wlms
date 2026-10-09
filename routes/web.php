@@ -10,6 +10,7 @@ use App\Modules\Identity\Presentation\Http\Controllers\RBAC\UserController;
 use App\Modules\Identity\Presentation\Http\Controllers\RBAC\UserRoleController;
 use App\Modules\KnowledgeBase\Presentation\Http\Controllers\Admin\AdminDocPageController;
 use App\Modules\KnowledgeBase\Presentation\Http\Controllers\DocumentationController;
+use App\Modules\Workload\Presentation\Http\Controllers\ImportWorkloadController;
 use App\Modules\Workload\Presentation\Http\Controllers\ProjectIndexPageController;
 use App\Modules\Workload\Presentation\Http\Controllers\ShowProjectPageController;
 use App\Modules\Workload\Presentation\Http\Controllers\WorkspaceIssuesPageController;
@@ -77,5 +78,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/docs', [AdminDocPageController::class, 'index'])->name('admin.docs.index');
         Route::get('/admin/docs/{id}/edit', [AdminDocPageController::class, 'edit'])->name('admin.docs.edit');
         Route::put('/admin/docs/{id}', [AdminDocPageController::class, 'update'])->name('admin.docs.update');
+
+        Route::get('/admin/import-workload', [ImportWorkloadController::class, 'index'])->name('admin.import-workload.index');
+        Route::post('/admin/import-workload', [ImportWorkloadController::class, 'store'])->name('admin.import-workload.store');
     });
 });
