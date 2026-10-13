@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\LocaleController;
+use App\Shared\Presentation\Http\Controllers\LocaleController;
 use App\Modules\Identity\Presentation\Http\Controllers\OrgLevelController;
 use App\Modules\Identity\Presentation\Http\Controllers\OrgUnitController;
 use App\Modules\Identity\Presentation\Http\Controllers\RBAC\MenuController;
@@ -27,7 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/projects', ProjectIndexPageController::class)->name('projects.index');
     Route::get('/projects/{project}', ShowProjectPageController::class)->name('projects.show');
     Route::get('/issues', fn () => inertia('Issues/Index'))->name('issues.index');
-    Route::get('/users', fn () => inertia('coming-soon', ['title' => 'Users']))->name('users.index');
+    Route::get('/users', fn () => redirect('/settings/rbac'))->name('users.index');
 
     // Modul RBAC (Khusus Superadmin)
     Route::middleware('can:manage-rbac')->prefix('api/rbac')->group(function () {

@@ -11,7 +11,7 @@ final class NotifyAssigneeMailListener
 {
     public function handle(IssueAssigned $event): void
     {
-        // TODO: Dispatch Mailable to assignee email
+        // shortcut: log-only notification until production SMTP mailer is configured, upgrade to queued Mailable when MAIL_MAILER is enabled in production
         // Mail::to($assigneeEmail)->queue(new IssueAssignedMail($event));
         Log::info("MAIL_NOTIFICATION: Issue {$event->issueNumber} assigned to {$event->assigneeId}");
     }

@@ -52,10 +52,20 @@ final class ImportIssuesUseCase
                 }
                 $matchedUsers = $usersQuery->get(['id', 'name']);
                 foreach ($picNames as $picName) {
+                    $trimmedPic = trim((string) $picName);
                     foreach ($matchedUsers as $u) {
-                        if (stripos($u->name, $picName) !== false) {
+                        if (strcasecmp(trim((string) $u->name), $trimmedPic) === 0) {
                             $usersMap[$picName] = $u->id;
                             break;
+                        }
+                    }
+                    if (! isset($usersMap[$picName])) {
+                        // shortcut: partial name fallback when spreadsheet uses first name only, upgrade to email/NIP lookup if duplicate first names occur
+                        foreach ($matchedUsers as $u) {
+                            if (stripos($u->name, $trimmedPic) !== false) {
+                                $usersMap[$picName] = $u->id;
+                                break;
+                            }
                         }
                     }
                 }

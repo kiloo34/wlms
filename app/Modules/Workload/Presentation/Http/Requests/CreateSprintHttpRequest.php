@@ -11,7 +11,15 @@ final class CreateSprintHttpRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasRole('Workspace Owner') || $this->user()?->hasRole('Superadmin');
+        $user = $this->user();
+
+        return $user !== null && (
+            $user->hasRole('Workspace Owner')
+            || $user->hasRole('Workspace Admin')
+            || $user->hasRole('Superadmin')
+            || $user->hasPermission('sprints:manage')
+            || $user->hasPermission('projects:manage')
+        );
     }
 
     /**

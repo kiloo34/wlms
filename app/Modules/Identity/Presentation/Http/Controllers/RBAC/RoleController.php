@@ -50,6 +50,10 @@ class RoleController extends Controller
     {
         $role = RoleModel::findOrFail($id);
 
+        if (strtolower($role->name) === 'superadmin' && strtolower((string) ($request->input('name') ?? '')) !== 'superadmin') {
+            return response()->json(['message' => 'Cannot rename Superadmin system role.'], 422);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:50|unique:roles,name,'.$role->id,
             'scope' => 'required|string|in:GLOBAL,WORKSPACE,PROJECT',
@@ -65,6 +69,10 @@ class RoleController extends Controller
     public function destroy(string $id): JsonResponse
     {
         $role = RoleModel::findOrFail($id);
+
+        if (strtolower($role->name) === 'superadmin') {
+            return response()->json(['message' => 'Cannot delete Superadmin system role.'], 422);
+        }
 
         DB::transaction(function () use ($role) {
             $role->permissions()->detach();

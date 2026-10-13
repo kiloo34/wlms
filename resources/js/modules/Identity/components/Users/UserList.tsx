@@ -15,12 +15,14 @@ interface UserListProps {
     roles: Role[];
     orgUnits: { id: string; name: string }[];
     isAssigning: boolean;
+    isRevoking?: boolean;
     isUpdating?: boolean;
-    onAssignRole: (payload: { user_id: string; role_id: string }) => Promise<void>;
+    onAssignRole: (payload: { user_id: string; role_id: string; context_type?: string | null; context_id?: string | null }) => Promise<void>;
+    onRevokeRole?: (payload: { user_id: string; role_id: string; context_type?: string | null; context_id?: string | null }) => Promise<void>;
     onUpdateUser?: (payload: { id: string; org_unit_id: string | null }) => Promise<void>;
 }
 
-export function UserList({ users, roles, orgUnits, isAssigning, isUpdating = false, onAssignRole, onUpdateUser }: UserListProps) {
+export function UserList({ users, roles, orgUnits, isAssigning, isRevoking = false, isUpdating = false, onAssignRole, onRevokeRole, onUpdateUser }: UserListProps) {
     const { t } = useTranslate();
     const columns = useMemo<ColumnDef<User>[]>(
         () => [
@@ -64,6 +66,36 @@ export function UserList({ users, roles, orgUnits, isAssigning, isUpdating = fal
                 accessorKey: 'roles',
                 header: 'Roles',
                 cell: ({ row }) => {
+                    if (row.original.user_roles?.length) {
+                        return (
+                            <div className="flex flex-wrap gap-1">
+                                {row.original.user_roles.map((ur, idx) => (
+                                    <Badge key={`${ur.role_id}-${ur.context_type ?? ''}-${ur.context_id ?? idx}`} variant="secondary" className="text-xs flex items-center gap-1">
+                                        <span>
+                                            {ur.role_name}
+                                            {ur.context_type && ur.context_type !== 'GLOBAL' ? ` (${ur.context_type})` : ''}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            disabled={isRevoking}
+                                            onClick={() =>
+                                                onRevokeRole?.({
+                                                    user_id: String(row.original.id),
+                                                    role_id: ur.role_id,
+                                                    context_type: ur.context_type,
+                                                    context_id: ur.context_id,
+                                                })
+                                            }
+                                            className="ml-0.5 hover:text-destructive focus:outline-none disabled:opacity-50"
+                                            title={t('Revoke role')}
+                                        >
+                                            ×
+                                        </button>
+                                    </Badge>
+                                ))}
+                            </div>
+                        );
+                    }
                     const userRoles: string[] = row.original.roles ?? [];
                     if (userRoles.length === 0) {
                         return <span className="text-muted-foreground text-xs">{t('No role')}</span>;
@@ -105,7 +137,7 @@ export function UserList({ users, roles, orgUnits, isAssigning, isUpdating = fal
                 },
             },
         ],
-        [roles, orgUnits, isAssigning, isUpdating, onAssignRole, onUpdateUser]
+        [roles, orgUnits, isAssigning, isRevoking, isUpdating, onAssignRole, onRevokeRole, onUpdateUser]
     );
 
     return (

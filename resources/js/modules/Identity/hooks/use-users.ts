@@ -9,6 +9,7 @@ export type User = {
     org_unit_id?: string | null;
     org_unit_name?: string | null;
     roles: string[];
+    user_roles?: { role_id: string; role_name: string; context_type?: string | null; context_id?: string | null }[];
     created_at: string;
     updated_at: string;
 };
@@ -52,13 +53,25 @@ export function useUpdateUser() {
 export function useAssignRole() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (payload: { user_id: string; role_id: string }) => {
+        mutationFn: async (payload: { user_id: string; role_id: string; context_type?: string | null; context_id?: string | null }) => {
             const { data } = await axios.post('/api/rbac/user-roles/assign', payload);
             return data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] });
-            // Potentially also invalidate roles or specific user roles, but 'users' is safe.
+        },
+    });
+}
+
+export function useRevokeRole() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (payload: { user_id: string; role_id: string; context_type?: string | null; context_id?: string | null }) => {
+            const { data } = await axios.post('/api/rbac/user-roles/revoke', payload);
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
         },
     });
 }

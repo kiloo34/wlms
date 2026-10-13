@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
-use App\Modules\Workload\Application\UseCases\GetBacklogIssuesQuery;
+use App\Modules\Workload\Application\Queries\GetBacklogIssuesQuery;
 use Illuminate\Http\JsonResponse;
 
 final class GetBacklogController

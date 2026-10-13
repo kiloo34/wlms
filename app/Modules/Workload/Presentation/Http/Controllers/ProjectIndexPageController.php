@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
-use App\Modules\Workload\Application\UseCases\GetProjectLookupsQuery;
-use App\Modules\Workload\Application\UseCases\GetWorkspaceLookupsQuery;
+use App\Modules\Workload\Application\Queries\GetProjectLookupsQuery;
+use App\Modules\Workload\Application\Queries\GetWorkspaceLookupsQuery;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Response;

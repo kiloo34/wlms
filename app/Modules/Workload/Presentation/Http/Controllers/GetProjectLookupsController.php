@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
-use App\Modules\Workload\Application\UseCases\GetProjectLookupsQuery;
+use App\Modules\Workload\Application\Queries\GetProjectLookupsQuery;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
 use Illuminate\Http\JsonResponse;

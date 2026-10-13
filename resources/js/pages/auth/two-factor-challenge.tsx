@@ -25,20 +25,18 @@ export default function TwoFactorChallenge() {
     }>(() => {
         if (showRecoveryInput) {
             return {
-                title: 'Recovery code',
-                description:
-                    'Please confirm access to your account by entering one of your emergency recovery codes.',
-                toggleText: 'login using an authentication code',
+                title: t('Recovery code'),
+                description: t('Please confirm access to your account by entering one of your emergency recovery codes.'),
+                toggleText: t('login using an authentication code'),
             };
         }
 
         return {
-            title: 'Authentication code',
-            description:
-                'Enter the authentication code provided by your authenticator application.',
-            toggleText: 'login using a recovery code',
+            title: t('Authentication code'),
+            description: t('Enter the authentication code provided by your authenticator application.'),
+            toggleText: t('login using a recovery code'),
         };
-    }, [showRecoveryInput]);
+    }, [showRecoveryInput, t]);
 
     setLayoutProps({
         title: authConfigContent.title,

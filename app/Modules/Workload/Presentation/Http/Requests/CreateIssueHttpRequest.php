@@ -30,6 +30,7 @@ final class CreateIssueHttpRequest extends FormRequest
             'issue_type_id' => ['required', 'uuid'],
             'priority_id' => ['required', 'uuid'],
             'sprint_id' => ['nullable', 'uuid'],
+            'assignee_id' => ['nullable'],
             'original_estimate_seconds' => ['nullable', 'integer', 'min:0'],
         ];
     }

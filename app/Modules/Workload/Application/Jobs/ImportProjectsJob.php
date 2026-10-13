@@ -42,7 +42,11 @@ final class ImportProjectsJob implements ShouldQueue
         };
 
         if (Storage::disk('local')->exists($this->filePath)) {
-            Excel::import($import, Storage::disk('local')->path($this->filePath));
+            try {
+                Excel::import($import, Storage::disk('local')->path($this->filePath));
+            } finally {
+                Storage::disk('local')->delete($this->filePath);
+            }
         } else {
             Log::warning("ImportProjectsJob: File not found {$this->filePath}");
         }

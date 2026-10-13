@@ -84,10 +84,15 @@ class UserModel extends Authenticatable implements PasskeyUser
         return $this->hasMany(UserRoleModel::class, 'user_id');
     }
 
-    public function hasRole(string $roleName): bool
+    public function hasRole(string $roleName, ?string $contextType = null, ?string $contextId = null): bool
     {
         $this->loadMissing('userRoles.role');
         foreach ($this->userRoles as $userRole) {
+            $isGlobal = $userRole->context_type === null || strtoupper((string) $userRole->context_type) === 'GLOBAL';
+            $matchesContext = $contextType !== null && $contextId !== null && strcasecmp((string) $userRole->context_type, $contextType) === 0 && (string) $userRole->context_id === (string) $contextId;
+            if (! $isGlobal && ! $matchesContext) {
+                continue;
+            }
             if ($userRole->role && strtolower($userRole->role->name) === strtolower($roleName)) {
                 return true;
             }
@@ -96,10 +101,15 @@ class UserModel extends Authenticatable implements PasskeyUser
         return false;
     }
 
-    public function hasPermission(string $permissionName): bool
+    public function hasPermission(string $permissionName, ?string $contextType = null, ?string $contextId = null): bool
     {
         $this->loadMissing('userRoles.role.permissions');
         foreach ($this->userRoles as $userRole) {
+            $isGlobal = $userRole->context_type === null || strtoupper((string) $userRole->context_type) === 'GLOBAL';
+            $matchesContext = $contextType !== null && $contextId !== null && strcasecmp((string) $userRole->context_type, $contextType) === 0 && (string) $userRole->context_id === (string) $contextId;
+            if (! $isGlobal && ! $matchesContext) {
+                continue;
+            }
             if ($userRole->role) {
                 // Return true if Superadmin is detected or exact permission matches
                 if (strtolower($userRole->role->name) === 'superadmin') {

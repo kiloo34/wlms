@@ -15,6 +15,7 @@ final class CreateIssueInput
         public readonly string $priorityId,
         public readonly ?string $sprintId,
         public readonly string $reporterUserId,
-        public readonly ?int $originalEstimateSeconds = null
+        public readonly ?int $originalEstimateSeconds = null,
+        public readonly ?string $assigneeId = null,
     ) {}
 }

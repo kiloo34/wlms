@@ -9,6 +9,8 @@ class AssignRoleToUserCommand
 {
     public function execute(string $userId, string $roleId, ?string $contextType = null, ?string $contextId = null): void
     {
+        $contextType = $contextType !== null && $contextType !== '' ? strtoupper($contextType) : null;
+
         DB::transaction(function () use ($userId, $roleId, $contextType, $contextId) {
             // Check if already assigned
             $exists = DB::table('user_roles')

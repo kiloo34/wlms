@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { usePage } from '@inertiajs/react';
 import { Project, CreateProjectPayload, UpdateProjectPayload } from '../types';
 import {
     useGetProjects,
@@ -21,17 +20,18 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useTranslate } from "@/hooks/useTranslate";
+import { usePermission } from "@/hooks/usePermission";
 
 interface ProjectsManagerProps {
     workspaceId: string;
     priorities?: { id: string; name: string; category: string }[];
+    canManage?: boolean;
 }
 
-export function ProjectsManager({ workspaceId, priorities = [] }: ProjectsManagerProps) {
+export function ProjectsManager({ workspaceId, priorities = [], canManage }: ProjectsManagerProps) {
     const { t } = useTranslate();
-    const { props } = usePage<any>();
-    const permissions = props.auth?.user?.permissions || [];
-    const canManageProjects = permissions.includes('projects:manage') || permissions.includes('*');
+    const { can } = usePermission();
+    const canManageProjects = canManage ?? can('projects:manage');
 
     const { data: projects = [], isLoading, isError } = useGetProjects(workspaceId);
     

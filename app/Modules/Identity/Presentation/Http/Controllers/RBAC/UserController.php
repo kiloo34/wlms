@@ -40,6 +40,17 @@ class UserController extends Controller
                     ->map(fn (UserRoleModel $ur) => $ur->role?->name)
                     ->filter()
                     ->values(),
+                'user_roles' => $user->userRoles
+                    ->toBase()
+                    ->filter(fn (UserRoleModel $ur) => $ur->role !== null)
+                    ->map(fn (UserRoleModel $ur) => [
+                        'role_id' => (string) $ur->role_id,
+                        'role_name' => (string) $ur->role?->name,
+                        'context_type' => $ur->context_type,
+                        'context_id' => $ur->context_id,
+                    ])
+                    ->values()
+                    ->all(),
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ]);

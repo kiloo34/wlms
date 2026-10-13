@@ -13,6 +13,7 @@ import axios from '@/lib/axios';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslate } from '@/hooks/useTranslate';
+import { usePermission } from '@/hooks/usePermission';
 import { useIconSize } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
 import { Project } from '@/modules/Workload/Projects/types';
@@ -25,6 +26,7 @@ interface WorkspaceTasksTableProps {
     projects: Project[];
     lookups?: any;
     currentUserId?: string;
+    canManageIssues?: boolean;
 }
 
 export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
@@ -32,8 +34,11 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
     projects,
     lookups,
     currentUserId,
+    canManageIssues,
 }) => {
     const { t } = useTranslate();
+    const { can } = usePermission();
+    const canCreateTask = canManageIssues ?? can('issues:manage');
     const { iconSize, updateIconSize } = useIconSize();
     const queryClient = useQueryClient();
 
@@ -278,10 +283,12 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                         </Button>
                     </div>
 
-                    <Button size="sm" className="h-9 text-xs shrink-0" onClick={handleOpenCreate}>
-                        <Plus className="mr-1.5 h-4 w-4" />
-                        {t('Create Task')}
-                    </Button>
+                    {canCreateTask && (
+                        <Button size="sm" className="h-9 text-xs shrink-0" onClick={handleOpenCreate}>
+                            <Plus className="mr-1.5 h-4 w-4" />
+                            {t('Create Task')}
+                        </Button>
+                    )}
                 </div>
             </div>
 

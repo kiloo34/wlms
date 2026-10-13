@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use App\Modules\Workload\Application\DTOs\AssignIssueInput;
 use App\Modules\Workload\Application\DTOs\CreateIssueInput;
+use App\Modules\Workload\Application\DTOs\TransitionIssueInput;
+use App\Modules\Workload\Application\UseCases\AssignIssueUseCase;
 use App\Modules\Workload\Application\UseCases\CreateIssueUseCase;
 use App\Modules\Workload\Application\UseCases\DeleteIssueUseCase;
-use App\Modules\Workload\Application\UseCases\UpdateIssueUseCase;
+use App\Modules\Workload\Application\UseCases\TransitionIssueStatusUseCase;
+use App\Modules\Workload\Domain\Exceptions\InvalidTransitionException;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
+use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\StatusModel;
 use App\Modules\Workload\Presentation\Http\Requests\CreateIssueHttpRequest;
 use App\Modules\Workload\Presentation\Http\Requests\DeleteIssueHttpRequest;
 use App\Modules\Workload\Presentation\Http\Requests\UpdateIssueHttpRequest;
@@ -21,8 +26,9 @@ final class IssueController
 {
     public function __construct(
         private readonly CreateIssueUseCase $createUseCase,
-        // private readonly UpdateIssueUseCase $updateUseCase,
         private readonly DeleteIssueUseCase $deleteUseCase,
+        private readonly TransitionIssueStatusUseCase $transitionUseCase,
+        private readonly AssignIssueUseCase $assignUseCase,
     ) {}
 
     public function index(Request $request, string $projectId): JsonResponse
@@ -45,7 +51,15 @@ final class IssueController
             $query->where('assignee_id', $request->query('assignee_id'));
         }
 
-        $issues = $query->paginate(15);
+        if ($request->boolean('exclude_archived_done')) {
+            $query->where(function ($q): void {
+                $q->whereDoesntHave('status', fn ($s) => $s->where('category', 'DONE'))
+                    ->orWhere('updated_at', '>=', now()->subDays(30));
+            });
+        }
+
+        $perPage = min(500, max(1, (int) $request->query('per_page', $request->query('limit', 15))));
+        $issues = $query->paginate($perPage);
 
         return response()->json(IssueResource::collection($issues)->response()->getData(true));
     }
@@ -63,7 +77,8 @@ final class IssueController
             priorityId: $v['priority_id'],
             sprintId: $v['sprint_id'] ?? null,
             reporterUserId: $request->getActorId(),
-            originalEstimateSeconds: $v['original_estimate_seconds'] ?? null
+            originalEstimateSeconds: $v['original_estimate_seconds'] ?? null,
+            assigneeId: isset($v['assignee_id']) && $v['assignee_id'] !== '' ? (string) $v['assignee_id'] : null,
         ));
 
         // Load eloquent model to return with Resource
@@ -88,16 +103,41 @@ final class IssueController
     public function update(UpdateIssueHttpRequest $request, string $id): JsonResponse
     {
         $v = $request->validated();
+        $actorId = (string) $request->user()?->id;
 
-        // Bypass Domain Events for direct edits (admin/manager edit)
         $issueModel = IssueModel::findOrFail($id);
+
+        if ((string) $v['status_id'] !== (string) $issueModel->status_id) {
+            try {
+                $this->transitionUseCase->execute(new TransitionIssueInput(
+                    issueId: $id,
+                    toStatusId: (string) $v['status_id'],
+                    actorUserId: $actorId,
+                ));
+            } catch (InvalidTransitionException $e) {
+                $fromName = $e->fromStatusId ? (StatusModel::find($e->fromStatusId)->name ?? 'Unknown') : 'Start';
+                $toName = $e->toStatusId ? (StatusModel::find($e->toStatusId)->name ?? 'Unknown') : 'Unknown';
+
+                return response()->json([
+                    'message' => "Transisi tiket dari status '$fromName' ke '$toName' tidak diizinkan oleh sistem Workflow Anda.",
+                    'code' => 'INVALID_TRANSITION',
+                ], 422);
+            }
+        }
+
+        if (array_key_exists('assignee_id', $v) && (string) ($v['assignee_id'] ?? '') !== (string) ($issueModel->assignee_id ?? '')) {
+            $this->assignUseCase->execute(new AssignIssueInput(
+                issueId: $id,
+                assigneeId: $v['assignee_id'] !== null ? (string) $v['assignee_id'] : null,
+                actorUserId: $actorId,
+            ));
+        }
+
         $issueModel->update([
             'title' => $v['title'],
             'description' => $v['description'] ?? null,
             'issue_type_id' => $v['issue_type_id'],
-            'status_id' => $v['status_id'],
             'priority_id' => $v['priority_id'],
-            'assignee_id' => $v['assignee_id'] ?? null,
             'sprint_id' => $v['sprint_id'] ?? null,
             'original_estimate_seconds' => $v['original_estimate_seconds'] ?? null,
             'remaining_estimate_seconds' => array_key_exists('remaining_estimate_seconds', $v) ? $v['remaining_estimate_seconds'] : $issueModel->remaining_estimate_seconds,

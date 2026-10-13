@@ -48,7 +48,7 @@ export default function WorkflowsIndex() {
                 <Card>
                     <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="space-y-1">
-                            <CardTitle>Workflows & Statuses</CardTitle>
+                            <CardTitle>{t('Workflows & Statuses')}</CardTitle>
                             <CardDescription>
                                 {t('Manage statuses and workflows for your organization.')}
                                                             </CardDescription>

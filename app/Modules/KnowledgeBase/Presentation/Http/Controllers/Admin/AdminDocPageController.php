@@ -2,40 +2,38 @@
 
 namespace App\Modules\KnowledgeBase\Presentation\Http\Controllers\Admin;
 
-use App\Modules\KnowledgeBase\Infrastructure\Persistence\Eloquent\Models\DocPageModel;
+use App\Modules\KnowledgeBase\Application\UseCases\DocPageAdminService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Response;
 
 class AdminDocPageController
 {
+    public function __construct(
+        private readonly DocPageAdminService $docPageAdminService
+    ) {}
+
     public function index(): Response
     {
-        $pages = DocPageModel::with('category')->orderBy('order')->get();
-
-        return inertia('Admin/Docs/Index', ['pages' => $pages]);
+        return inertia('Admin/Docs/Index', [
+            'pages' => $this->docPageAdminService->listAllPages(),
+        ]);
     }
 
     public function edit(string $id): Response
     {
-        $page = DocPageModel::findOrFail($id);
-
         return inertia('Admin/Docs/Edit', [
-            'page' => $page,
+            'page' => $this->docPageAdminService->findPageOrFail($id),
         ]);
     }
 
     public function update(Request $request, string $id): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'content' => 'required|array',
         ]);
 
-        /** @var DocPageModel $page */
-        $page = DocPageModel::findOrFail($id);
-        $page->update([
-            'content' => $request->input('content'),
-        ]);
+        $this->docPageAdminService->updatePageContent($id, $validated['content']);
 
         return back()->with('success', 'Tersimpan');
     }

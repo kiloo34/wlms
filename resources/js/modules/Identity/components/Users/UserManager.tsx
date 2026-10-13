@@ -1,4 +1,4 @@
-import { useUsers, useCreateUser, useAssignRole, useUpdateUser } from '../../hooks/use-users';
+import { useUsers, useCreateUser, useAssignRole, useRevokeRole, useUpdateUser } from '../../hooks/use-users';
 import { useRoles } from '../../hooks/use-roles';
 import { useOrgUnits } from '../../hooks/use-org-units';
 import { Users, Loader2 } from 'lucide-react';
@@ -17,6 +17,7 @@ export function UserManager() {
     
     const createUser = useCreateUser();
     const assignRole = useAssignRole();
+    const revokeRole = useRevokeRole();
     const updateUser = useUpdateUser();
 
     if (isLoadingUsers || isLoadingRoles || isLoadingOrgUnits) {
@@ -37,12 +38,22 @@ export function UserManager() {
         }
     };
 
-    const handleAssignRole = async (payload: { user_id: string; role_id: string }) => {
+    const handleAssignRole = async (payload: { user_id: string; role_id: string; context_type?: string | null; context_id?: string | null }) => {
         try {
             await assignRole.mutateAsync(payload);
             toast.success(t('Role assigned to user successfully'));
         } catch (error) {
             toast.error(t('Failed to assign role'));
+            throw error;
+        }
+    };
+
+    const handleRevokeRole = async (payload: { user_id: string; role_id: string; context_type?: string | null; context_id?: string | null }) => {
+        try {
+            await revokeRole.mutateAsync(payload);
+            toast.success(t('Role revoked from user successfully'));
+        } catch (error) {
+            toast.error(t('Failed to revoke role'));
             throw error;
         }
     };
@@ -78,8 +89,10 @@ export function UserManager() {
                 roles={roles || []}
                 orgUnits={flatOrgUnits}
                 isAssigning={assignRole.isPending}
+                isRevoking={revokeRole.isPending}
                 isUpdating={updateUser.isPending}
                 onAssignRole={handleAssignRole}
+                onRevokeRole={handleRevokeRole}
                 onUpdateUser={handleUpdateUser}
             />
         </div>

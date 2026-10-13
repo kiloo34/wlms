@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
-use App\Modules\Workload\Application\UseCases\GetBoardIssuesQuery;
+use App\Modules\Workload\Application\Queries\GetBoardIssuesQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,6 +19,8 @@ final class GetBoardController
             return response()->json(['message' => 'sprint_id is required'], 422);
         }
 
-        return response()->json(['data' => $this->query->execute($projectId, $sprintId)]);
+        return response()->json([
+            'data' => $this->query->execute($projectId, (string) $sprintId, $request->boolean('include_archived')),
+        ]);
     }
 }

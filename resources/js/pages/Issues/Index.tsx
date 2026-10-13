@@ -3,11 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { index as projectsIndex } from '@/routes/projects';
 import { ArrowRight, LayoutList } from 'lucide-react';
+import { useTranslate } from '@/hooks/useTranslate';
 
 export default function IssuesIndex() {
+    const { t } = useTranslate();
     return (
         <>
-            <Head title="Global Issues" />
+            <Head title={t('Global Issues')} />
             
             <div className="flex h-full w-full flex-col gap-6 p-6 items-center justify-center min-h-[60vh]">
                 <Card className="w-full max-w-md text-center border-dashed border-2">
@@ -17,10 +19,9 @@ export default function IssuesIndex() {
                                 <LayoutList className="w-8 h-8 text-primary" />
                             </div>
                         </div>
-                        <CardTitle className="text-2xl">Project-Based Ticketing</CardTitle>
+                        <CardTitle className="text-2xl">{t('Project-Based Ticketing')}</CardTitle>
                         <CardDescription className="mt-2 text-base">
-                            Sistem tiket (Issues) dikelola secara spesifik di dalam sebuah Project. 
-                            Silakan masuk ke direktori Project Anda terlebih dahulu untuk mengelola tiket.
+                            {t('Issues are managed specifically within a Project. Please go to your Project directory first to manage issues.')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -29,7 +30,7 @@ export default function IssuesIndex() {
                             className="w-full"
                             size="lg"
                         >
-                            Ke Direktori Projects
+                            {t('Go to Projects Directory')}
                             <ArrowRight className="ml-2 w-4 h-4" />
                         </Button>
                     </CardContent>

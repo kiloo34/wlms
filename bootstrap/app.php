@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Middleware\SetLocale;
 use App\Shared\Presentation\Http\Middleware\HandleAppearance;
 use App\Shared\Presentation\Http\Middleware\HandleInertiaRequests;
+use App\Shared\Presentation\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;

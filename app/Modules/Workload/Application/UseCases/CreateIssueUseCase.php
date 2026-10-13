@@ -10,6 +10,7 @@ use App\Modules\Workload\Domain\Entities\Issue;
 use App\Modules\Workload\Domain\Repositories\IssueRepositoryInterface;
 use App\Modules\Workload\Domain\Repositories\ProjectRepositoryInterface;
 use App\Modules\Workload\Domain\Repositories\WorkflowRepositoryInterface;
+use App\Modules\Workload\Domain\ValueObjects\AssigneeId;
 use App\Modules\Workload\Domain\ValueObjects\IssueId;
 use App\Modules\Workload\Domain\ValueObjects\IssueNumber;
 use App\Modules\Workload\Domain\ValueObjects\IssueTypeId;
@@ -61,6 +62,10 @@ final class CreateIssueUseCase
                 $input->reporterUserId,
                 $input->originalEstimateSeconds
             );
+
+            if ($input->assigneeId !== null && $input->assigneeId !== '') {
+                $issue->assign(new AssigneeId($input->assigneeId), $input->reporterUserId);
+            }
 
             $this->issueRepository->save($issue);
 

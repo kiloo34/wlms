@@ -91,6 +91,7 @@ export function RoleList({ roles, onDelete }: RoleListProps) {
                                         size="sm" 
                                         className="text-destructive hover:text-destructive"
                                         title={t('Delete Role')}
+                                        disabled={role.name.toLowerCase() === 'superadmin'}
                                     >
                                         <Trash2 className="w-4 h-4" />
                                         <span className="sr-only">{t('Delete Role')}</span>

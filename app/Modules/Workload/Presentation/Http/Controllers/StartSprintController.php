@@ -20,7 +20,14 @@ final class StartSprintController
 
     public function __invoke(string $id, Request $request): JsonResponse
     {
-        if (! ($request->user()?->hasRole('Workspace Owner') || $request->user()?->hasRole('Superadmin'))) {
+        $user = $request->user();
+        if (! $user || ! (
+            $user->hasRole('Workspace Owner')
+            || $user->hasRole('Workspace Admin')
+            || $user->hasRole('Superadmin')
+            || $user->hasPermission('sprints:manage')
+            || $user->hasPermission('projects:manage')
+        )) {
             return response()->json(['error' => 'Forbidden'], 403);
         }
 

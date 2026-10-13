@@ -13,9 +13,11 @@ import { WorkspaceMembersDialog } from '@/modules/Workload/Workspaces/components
 import { Users, FolderKanban, CheckSquare, BarChart2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslate } from "@/hooks/useTranslate";
+import { usePermission } from "@/hooks/usePermission";
 
 export default function ProjectsIndex() {
     const { t } = useTranslate();
+    const { can } = usePermission();
     const { url, props } = usePage<any>();
     const urlParams = new URLSearchParams(url.split('?')[1] || '');
     const workspaceId = urlParams.get('workspace_id');
@@ -30,7 +32,9 @@ export default function ProjectsIndex() {
     
     const { auth, lookups } = props;
     const priorities = lookups?.priorities || [];
-    const hasManagePermission = auth.user.permissions.includes('workspaces:manage') || auth.user.permissions.includes('*');
+    const hasManagePermission = can('workspaces:manage');
+    const canManageProjects = can('projects:manage');
+    const canManageIssues = can('issues:manage');
     const [membersOpen, setMembersOpen] = useState(false);
     
     const activeWorkspace = workspaces.find((w: any) => w.id === workspaceId);
@@ -145,7 +149,7 @@ export default function ProjectsIndex() {
 
                         {/* Active Tab Content */}
                         {activeTab === 'overview' && (
-                            <ProjectsManager workspaceId={workspaceId} priorities={priorities} />
+                            <ProjectsManager workspaceId={workspaceId} priorities={priorities} canManage={canManageProjects} />
                         )}
 
                         {activeTab === 'tasks' && (
@@ -154,6 +158,7 @@ export default function ProjectsIndex() {
                                 projects={projects}
                                 lookups={lookups}
                                 currentUserId={auth?.user?.id}
+                                canManageIssues={canManageIssues}
                             />
                         )}
 

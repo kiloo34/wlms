@@ -77,13 +77,10 @@ final class WorkspacePolicy
     }
 
     /**
-     * Helper sementara untuk validasi bypass RBAC.
-     * Nantinya akan dihubungkan dengan tabel `roles` dan `permissions` secara utuh.
+     * Determine whether the user has global Superadmin privileges.
      */
     private function isSuperadmin(UserModel $user): bool
     {
-        // Mencontohkan Anti-Enum, kita hanya cek email spesifik atau UUID superadmin,
-        // atau mengecek relasi $user->roles()->where('name', 'Superadmin')->exists();
-        return $user->email === 'superadmin@wlms.com';
+        return $user->email === 'superadmin@wlms.com' || $user->hasRole('Superadmin');
     }
 }

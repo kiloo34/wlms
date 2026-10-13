@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
-use App\Modules\Workload\Application\UseCases\GetWorkspaceIssuesQuery;
+use App\Modules\Workload\Application\Queries\GetWorkspaceIssuesQuery;
 use App\Modules\Workload\Presentation\Http\Resources\IssueResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -26,7 +26,7 @@ final class GetWorkspaceIssuesController
             'limit',
         ]);
 
-        $issues = $this->query->execute($workspaceId, $filters);
+        $issues = $this->query->execute($workspaceId, $filters, (string) $request->user()?->id);
 
         return IssueResource::collection($issues);
     }

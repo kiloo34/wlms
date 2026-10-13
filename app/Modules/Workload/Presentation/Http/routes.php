@@ -3,6 +3,7 @@
 use App\Modules\Workload\Presentation\Http\Controllers\ArchiveProjectController;
 use App\Modules\Workload\Presentation\Http\Controllers\ArchiveWorkspaceController;
 use App\Modules\Workload\Presentation\Http\Controllers\AssignIssueController;
+use App\Modules\Workload\Presentation\Http\Controllers\BulkUpdateIssuesController;
 use App\Modules\Workload\Presentation\Http\Controllers\CompleteSprintController;
 use App\Modules\Workload\Presentation\Http\Controllers\CreateIssueController;
 use App\Modules\Workload\Presentation\Http\Controllers\CreateProjectController;
@@ -73,6 +74,7 @@ Route::middleware(['auth:sanctum'])->prefix('sprints')->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->prefix('issues')->group(function () {
+    Route::post('/bulk-update', BulkUpdateIssuesController::class);
     Route::get('/{id}', [IssueController::class, 'show']);
     Route::put('/{id}', [IssueController::class, 'update']);
     Route::delete('/{id}', [IssueController::class, 'destroy']);

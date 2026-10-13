@@ -1,4 +1,4 @@
-<?php
+/pony<?php
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
@@ -138,3 +138,77 @@ test('dispatches ImportIssuesJob for issues', function () {
         return (string) $job->reporterId === (string) $userId;
     });
 });
+
+test('ImportIssuesUseCase prioritizes exact PIC match over partial substring match and ImportProjectsJob deletes file after import', function () {
+    $karina = UserModel::factory()->create(['name' => 'Karina Putri']);
+    $ari = UserModel::factory()->create(['name' => 'Ari']);
+
+    $workspaceId = Str::uuid()->toString();
+    DB::table('workspaces')->insert([
+        'id' => $workspaceId,
+        'owner_group_id' => Str::uuid()->toString(),
+        'name' => 'Import WS',
+        'status' => 'ACTIVE',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $projectId = Str::uuid()->toString();
+    DB::table('projects')->insert([
+        'id' => $projectId,
+        'workspace_id' => $workspaceId,
+        'key' => 'IMP',
+        'name' => 'Import Project',
+        'status' => 'ACTIVE',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    DB::table('issue_types')->insert([
+        'id' => Str::uuid()->toString(),
+        'name' => 'Task',
+        'slug' => 'task-imp',
+        'icon' => 'check',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    DB::table('priorities')->insert([
+        'id' => Str::uuid()->toString(),
+        'name' => 'Medium',
+        'slug' => 'med-imp',
+        'level' => 2,
+        'color' => '#fbbf24',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    DB::table('statuses')->insert([
+        'id' => Str::uuid()->toString(),
+        'name' => 'To Do',
+        'slug' => 'todo-imp',
+        'category' => 'TODO',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $useCase = app(\App\Modules\Workload\Application\UseCases\ImportIssuesUseCase::class);
+    $useCase->execute(collect([
+        [
+            'project' => 'Import Project',
+            'task' => 'Task for Ari',
+            'pic' => 'Ari',
+        ],
+    ]), (string) $this->user->id);
+
+    $imported = DB::table('issues')->where('title', 'Task for Ari')->first();
+    expect($imported)->not->toBeNull()
+        ->and((int) $imported->assignee_id)->toBe((int) $ari->id)
+        ->and((int) $imported->assignee_id)->not->toBe((int) $karina->id);
+
+    \Illuminate\Support\Facades\Storage::fake('local');
+    \Illuminate\Support\Facades\Storage::disk('local')->put('imports/temp-projects.csv', "Project Name,Project Status\nClean Project,ACTIVE\n");
+    expect(\Illuminate\Support\Facades\Storage::disk('local')->exists('imports/temp-projects.csv'))->toBeTrue();
+
+    $job = new ImportProjectsJob('imports/temp-projects.csv', $workspaceId);
+    $job->handle(app(\App\Modules\Workload\Application\UseCases\ImportProjectsUseCase::class));
+
+    expect(\Illuminate\Support\Facades\Storage::disk('local')->exists('imports/temp-projects.csv'))->toBeFalse();
+});
+

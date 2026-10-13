@@ -13,6 +13,7 @@ export const useWorkspaceIssues = (workspaceId: string | undefined, filters?: Wo
         queryKey: ['workspaces', workspaceId, 'issues', filters],
         queryFn: async () => {
             const params = new URLSearchParams();
+            params.set('limit', '500');
             if (filters?.status_category) {
                 filters.status_category.forEach(cat => params.append('status_category[]', cat));
             }

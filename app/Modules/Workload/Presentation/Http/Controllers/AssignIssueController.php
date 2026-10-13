@@ -18,7 +18,7 @@ final class AssignIssueController
     public function __invoke(AssignIssueHttpRequest $request, string $id): JsonResponse
     {
         $user = $request->user();
-        if (! $user || ! ($user->hasRole('Workspace Owner') || $user->hasRole('Superadmin'))) {
+        if (! $user || ! ($user->hasRole('Workspace Owner') || $user->hasRole('Workspace Admin') || $user->hasRole('Superadmin') || $user->hasPermission('issues:assign'))) {
             abort(403, 'Unauthorized. Only Workspace Owners can assign issues for now.');
         }
 

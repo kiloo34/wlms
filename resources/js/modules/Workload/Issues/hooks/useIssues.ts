@@ -29,7 +29,7 @@ export const useIssues = (projectId: string) => {
     const { data: issues = [], isLoading, error } = useQuery<Issue[]>({
         queryKey,
         queryFn: async () => {
-            const { data } = await axios.get(`/api/projects/${projectId}/issues`);
+            const { data } = await axios.get(`/api/projects/${projectId}/issues`, { params: { per_page: 500 } });
             // Handle both Laravel resource format { data: [...] } and raw array [...]
             return data.data ? data.data : data; 
         },
@@ -155,15 +155,13 @@ export const useBulkUpdateIssues = () => {
 
     return useMutation({
         mutationFn: async ({ issueIds, payload }: { issueIds: string[]; payload: Partial<UpdateIssuePayload> }) => {
-            const promises = issueIds.map(id => {
-                if ('status_id' in payload && payload.status_id) {
-                    return axios.post(`/api/issues/${id}/transition`, { to_status_id: payload.status_id });
-                } else if ('assignee_id' in payload) {
-                    return axios.post(`/api/issues/${id}/assign`, { assignee_id: payload.assignee_id === 'unassigned' ? null : payload.assignee_id });
-                }
-                return Promise.resolve();
+            await axios.post('/api/issues/bulk-update', {
+                issue_ids: issueIds,
+                ...payload,
+                ...('assignee_id' in payload
+                    ? { assignee_id: payload.assignee_id === 'unassigned' ? null : payload.assignee_id }
+                    : {}),
             });
-            await Promise.all(promises);
             return true;
         },
         onSuccess: () => {

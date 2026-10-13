@@ -1,4 +1,4 @@
-import { Head, usePage, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useGetWorkspaces, useUpdateWorkspace, useArchiveWorkspace } from '@/modules/Workload/Workspaces/hooks/useWorkspaces';
 import { WorkspaceList } from '@/modules/Workload/Workspaces/components/WorkspaceList';
 import { CreateWorkspaceModal } from '@/modules/Workload/Workspaces/components/CreateWorkspaceModal';
@@ -7,15 +7,16 @@ import { Plus } from 'lucide-react';
 import { index as projectsIndex } from '@/routes/projects';
 import { toast } from 'sonner';
 import { useTranslate } from '@/hooks/useTranslate';
+import { usePermission } from '@/hooks/usePermission';
 
 export default function WorkspacesIndex() {
     const { t } = useTranslate();
     const { data: workspaces = [], isLoading, error } = useGetWorkspaces();
     const { mutateAsync: updateWorkspace } = useUpdateWorkspace();
     const { mutateAsync: archiveWorkspace } = useArchiveWorkspace();
-    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const { can } = usePermission();
     
-    const hasManagePermission = auth.user.permissions.includes('workspaces:manage') || auth.user.permissions.includes('*');
+    const hasManagePermission = can('workspaces:manage');
 
     const handleUpdate = async (id: string, name: string) => {
         try {
