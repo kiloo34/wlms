@@ -27,6 +27,7 @@ interface WorkspaceTasksTableProps {
     lookups?: any;
     currentUserId?: string;
     canManageIssues?: boolean;
+    initialAssigneeFilter?: string;
 }
 
 export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
@@ -35,6 +36,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
     lookups,
     currentUserId,
     canManageIssues,
+    initialAssigneeFilter,
 }) => {
     const { t } = useTranslate();
     const { can } = usePermission();
@@ -44,7 +46,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
 
     // Filters State
     const [selectedProject, setSelectedProject] = useState<string>('all');
-    const [selectedAssignee, setSelectedAssignee] = useState<string>('all');
+    const [selectedAssignee, setSelectedAssignee] = useState<string>(initialAssigneeFilter || 'all');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState<string>('');
 

@@ -459,3 +459,118 @@ it('enforces context-scoped permissions without global leakage and protects Supe
     )->toBe(1);
 });
 
+it('serves real user-scoped metrics and tasks on /dashboard and workspace lookups on /issues', function () {
+    $groupId = (string) Str::uuid();
+    $user = UserModel::factory()->create(['org_unit_id' => $groupId]);
+    $otherUser = UserModel::factory()->create(['org_unit_id' => $groupId]);
+
+    $workspace = WorkspaceModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Dashboard Workspace',
+        'owner_group_id' => $groupId,
+        'status' => 'ACTIVE',
+    ]);
+    $project = ProjectModel::create([
+        'id' => (string) Str::uuid(),
+        'workspace_id' => $workspace->id,
+        'key' => 'DSH',
+        'name' => 'Dashboard Project',
+        'status' => 'ACTIVE',
+    ]);
+    $todoStatus = StatusModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'To Do',
+        'slug' => 'to-do-dsh',
+        'category' => 'TODO',
+    ]);
+    $doneStatus = StatusModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Done',
+        'slug' => 'done-dsh',
+        'category' => 'DONE',
+    ]);
+    $typeId = (string) Str::uuid();
+    DB::table('issue_types')->insert([
+        'id' => $typeId,
+        'name' => 'Task',
+        'slug' => 'task-dsh',
+        'icon' => 'check',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $priorityId = (string) Str::uuid();
+    DB::table('priorities')->insert([
+        'id' => $priorityId,
+        'name' => 'High',
+        'slug' => 'high-dsh',
+        'level' => 3,
+        'color' => '#ef4444',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $myOpenIssueId = (string) Str::uuid();
+    DB::table('issues')->insert([
+        [
+            'id' => $myOpenIssueId,
+            'project_id' => $project->id,
+            'issue_type_id' => $typeId,
+            'status_id' => $todoStatus->id,
+            'priority_id' => $priorityId,
+            'number' => 1,
+            'title' => 'My Overdue Task',
+            'reporter_id' => $user->id,
+            'assignee_id' => $user->id,
+            'due_date' => now()->subDay()->toDateString(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+        [
+            'id' => (string) Str::uuid(),
+            'project_id' => $project->id,
+            'issue_type_id' => $typeId,
+            'status_id' => $doneStatus->id,
+            'priority_id' => $priorityId,
+            'number' => 2,
+            'title' => 'Other User Done Task',
+            'reporter_id' => $otherUser->id,
+            'assignee_id' => $otherUser->id,
+            'due_date' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+    ]);
+
+    DB::table('issue_histories')->insert([
+        'id' => (string) Str::uuid(),
+        'issue_id' => $myOpenIssueId,
+        'actor_id' => $user->id,
+        'field_changed' => 'status_id',
+        'old_value' => 'Backlog',
+        'new_value' => 'To Do',
+        'created_at' => now(),
+    ]);
+
+    $dashboardResponse = $this->actingAs($user)->get('/dashboard');
+    $dashboardResponse->assertStatus(200);
+    $dashboardProps = $dashboardResponse->viewData('page')['props'];
+
+    expect($dashboardProps['stats']['active_projects'])->toBe(1);
+    expect($dashboardProps['stats']['total_issues'])->toBe(2);
+    expect($dashboardProps['stats']['completed_issues'])->toBe(1);
+    expect($dashboardProps['stats']['completion_rate'])->toBe(50);
+    expect($dashboardProps['stats']['my_open_tasks'])->toBe(1);
+    expect($dashboardProps['stats']['overdue_tasks'])->toBe(1);
+    expect($dashboardProps['my_tasks'])->toHaveCount(1);
+    expect($dashboardProps['my_tasks'][0]['key'])->toBe('DSH-1');
+    expect($dashboardProps['my_tasks'][0]['urgency'])->toBe('overdue');
+    expect($dashboardProps['recent_activities'])->toHaveCount(1);
+    expect($dashboardProps['recent_activities'][0]['action_type'])->toBe('status_id');
+
+    $issuesResponse = $this->actingAs($user)->get('/issues');
+    $issuesResponse->assertStatus(200);
+    $issuesProps = $issuesResponse->viewData('page')['props'];
+
+    expect($issuesProps['workspace_id'])->toBe($workspace->id);
+    expect($issuesProps['lookups'])->toHaveKeys(['projects', 'issueTypes', 'priorities', 'statuses', 'users']);
+});

@@ -8,16 +8,16 @@ Dokumen ini merangkum peta jalan pengembangan fitur masa depan (**Product Roadma
 
 ## Bagian 1: Product Roadmap (Pengembangan Kedepan)
 
-### 1. Real Executive & Personal Dashboard (`/dashboard`)
-- **Kondisi Saat Ini:** Halaman `resources/js/pages/dashboard.tsx` masih menggunakan *skeleton* `<PlaceholderPattern />`.
-- **Target Pengembangan:**
+### 1. [DONE] Real Executive & Personal Dashboard (`/dashboard`)
+- **Status:** Sudah diselesaikan (`DashboardPageController`, `GetDashboardDataQuery`, dan `resources/js/pages/dashboard.tsx`).
+- **Fitur yang Diimplementasikan:**
   - **My Assigned Tasks Widget:** Daftar tugas lintas *workspace* milik pengguna yang sedang login, dikelompokkan berdasarkan urgensi (*Overdue*, *Due Today*, *Upcoming*).
-  - **Executive Summary Cards:** Metrik agregat meliputi total proyek aktif, *completion rate* mingguan, distribusi beban kerja (*workload*), dan total *worklog* (jam kerja).
+  - **Executive Summary Cards:** Metrik agregat meliputi total proyek aktif, *completion rate*, tugas terbuka saya (*my open tasks*), dan tugas terlambat (*overdue tasks*).
   - **Recent Activity & Audit Stream:** Linimasa aktivitas kolaborasi terbaru dari proyek-proyek yang diikuti pengguna.
 
-### 2. Global "My Tasks" Hub (`/issues`)
-- **Kondisi Saat Ini:** Halaman `resources/js/pages/Issues/Index.tsx` hanya menampilkan kartu statis pengalihan ke direktori `/projects`.
-- **Target Pengembangan:**
+### 2. [DONE] Global "My Tasks" Hub (`/issues`)
+- **Status:** Sudah diselesaikan (`GlobalIssuesPageController` dan `resources/js/pages/Issues/Index.tsx`).
+- **Fitur yang Diimplementasikan:**
   - Mengubah `/issues` menjadi agregator tugas lintas *workspace* (**Global Issue Explorer / My Tasks**).
   - Menyediakan filter terpadu berdasarkan *Workspace*, *Project*, *Status*, *Priority*, *Assignee*, dan rentang *Due Date* dengan dukungan *Bulk Actions* serta *Pagination* (10/20/50/100).
 

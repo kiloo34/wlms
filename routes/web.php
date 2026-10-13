@@ -10,6 +10,8 @@ use App\Modules\Identity\Presentation\Http\Controllers\RBAC\UserController;
 use App\Modules\Identity\Presentation\Http\Controllers\RBAC\UserRoleController;
 use App\Modules\KnowledgeBase\Presentation\Http\Controllers\Admin\AdminDocPageController;
 use App\Modules\KnowledgeBase\Presentation\Http\Controllers\DocumentationController;
+use App\Modules\Workload\Presentation\Http\Controllers\DashboardPageController;
+use App\Modules\Workload\Presentation\Http\Controllers\GlobalIssuesPageController;
 use App\Modules\Workload\Presentation\Http\Controllers\ImportWorkloadController;
 use App\Modules\Workload\Presentation\Http\Controllers\ProjectIndexPageController;
 use App\Modules\Workload\Presentation\Http\Controllers\ShowProjectPageController;
@@ -19,14 +21,14 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/dashboard', DashboardPageController::class)->name('dashboard');
     Route::inertia('/workspaces', 'Workspaces/Index')->name('workspaces.index');
     Route::get('/workspaces/{workspace_id}/issues', WorkspaceIssuesPageController::class)->name('workspaces.issues');
 
     // Placeholder routes untuk fitur yang belum di-build UI-nya (DRY Principle)
     Route::get('/projects', ProjectIndexPageController::class)->name('projects.index');
     Route::get('/projects/{project}', ShowProjectPageController::class)->name('projects.show');
-    Route::get('/issues', fn () => inertia('Issues/Index'))->name('issues.index');
+    Route::get('/issues', GlobalIssuesPageController::class)->name('issues.index');
     Route::get('/users', fn () => redirect('/settings/rbac'))->name('users.index');
 
     // Modul RBAC (Khusus Superadmin)
