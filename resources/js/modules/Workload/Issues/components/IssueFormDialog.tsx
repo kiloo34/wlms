@@ -69,16 +69,16 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
 
     useEffect(() => {
         if (!isEdit && selectedProjectId && dynamicLookups) {
-            if (activeIssueTypes.length > 0 && !activeIssueTypes.find((t: any) => String(t.id) === issueTypeId)) {
+            if (activeIssueTypes.length > 0 && !activeIssueTypes.find((t: SelectOption) => String(t.id) === issueTypeId)) {
                 setIssueTypeId(String(activeIssueTypes[0].id));
             }
-            if (activePriorities.length > 0 && !activePriorities.find((p: any) => String(p.id) === priorityId)) {
+            if (activePriorities.length > 0 && !activePriorities.find((p: SelectOption) => String(p.id) === priorityId)) {
                 setPriorityId(String(activePriorities[0].id));
             }
-            if (activeStatuses.length > 0 && !activeStatuses.find((s: any) => String(s.id) === statusId)) {
+            if (activeStatuses.length > 0 && !activeStatuses.find((s: SelectOption) => String(s.id) === statusId)) {
                 setStatusId(String(activeStatuses[0].id));
             }
-            if (assigneeId !== 'unassigned' && activeAssignees.length > 0 && !activeAssignees.find((u: any) => String(u.id) === assigneeId)) {
+            if (assigneeId !== 'unassigned' && activeAssignees.length > 0 && !activeAssignees.find((u: SelectOption) => String(u.id) === assigneeId)) {
                 setAssigneeId('unassigned');
             }
         }
@@ -205,7 +205,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                     <Label htmlFor="issue_type">{t('Type')}</Label>
                     <Combobox 
                         id="issue_type"
-                        options={(activeIssueTypes || []).map((type: any) => ({ value: String(type.id), label: type.name }))}
+                        options={(activeIssueTypes || []).map((type: SelectOption) => ({ value: String(type.id), label: type.name }))}
                         value={issueTypeId}
                         onChange={setIssueTypeId}
                         placeholder={t('Search type...')}
@@ -217,7 +217,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                     <Label htmlFor="priority">{t('Priority')}</Label>
                     <Combobox 
                         id="priority"
-                        options={(activePriorities || []).map((p: any) => ({ value: String(p.id), label: p.name }))}
+                        options={(activePriorities || []).map((p: SelectOption) => ({ value: String(p.id), label: p.name }))}
                         value={priorityId}
                         onChange={setPriorityId}
                         placeholder={t('Search priority...')}
@@ -231,7 +231,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                     <Label htmlFor="status">{t('Status')} {isEdit ? '*' : '(Optional)'}</Label>
                     <Combobox 
                         id="status"
-                        options={(activeStatuses || []).map((s: any) => ({ value: String(s.id), label: s.name }))}
+                        options={(activeStatuses || []).map((s: SelectOption) => ({ value: String(s.id), label: s.name }))}
                         value={statusId}
                         onChange={setStatusId}
                         placeholder={t('Search status...')}
@@ -245,7 +245,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                         id="assignee"
                         options={[
                             { value: 'unassigned', label: 'Unassigned' },
-                            ...(activeAssignees || []).map((a: any) => ({ value: String(a.id), label: a.name }))
+                            ...(activeAssignees || []).map((a: SelectOption) => ({ value: String(a.id), label: a.name }))
                         ]}
                         value={assigneeId}
                         onChange={setAssigneeId}

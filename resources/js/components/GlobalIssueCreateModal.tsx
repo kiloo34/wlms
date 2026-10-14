@@ -10,6 +10,32 @@ import { useMyWorkspaces, useWorkspaceProjects, useProjectLookups, useCreateIssu
 import { useTranslate } from '@/hooks/useTranslate';
 
 
+interface LookupItem {
+    id: string | number;
+    name?: string;
+    user?: { name?: string };
+}
+
+interface WorkspaceItem {
+    id: string | number;
+    name: string;
+}
+
+interface ProjectItem {
+    id: string | number;
+    name: string;
+}
+
+interface ProjectContext {
+    id?: string;
+    workspace_id?: string;
+}
+
+interface PagePropsWithProject {
+    project?: ProjectContext;
+    [key: string]: unknown;
+}
+
 export function GlobalIssueCreateModal() {
     const { t } = useTranslate();
 
@@ -17,7 +43,7 @@ export function GlobalIssueCreateModal() {
     const [workspaceId, setWorkspaceId] = useState<string>('');
     const [projectId, setProjectId] = useState<string>('');
     
-    const { props } = usePage<any>();
+    const { props } = usePage<PagePropsWithProject>();
     const activeProject = props.project;
 
     useEffect(() => {
@@ -42,13 +68,13 @@ export function GlobalIssueCreateModal() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
-        if (!projectId || !title) return;
+        if (!projectId || !title || !typeId || !priorityId) return;
 
         createIssueMutation.mutate({
             project_id: projectId,
             title,
-            type_id: typeId || null,
-            priority_id: priorityId || null,
+            issue_type_id: typeId,
+            priority_id: priorityId,
             assignee_id: assigneeId || null,
         }, {
             onSuccess: () => {
@@ -102,7 +128,7 @@ export function GlobalIssueCreateModal() {
                                 <SelectValue placeholder={isLoadingWorkspaces ? "Loading workspaces..." : "Select Workspace"} />
                             </SelectTrigger>
                             <SelectContent>
-                                {workspaces?.map((ws: any) => (
+                                {workspaces?.map((ws: WorkspaceItem) => (
                                     <SelectItem key={ws.id} value={ws.id.toString()}>
                                         {ws.name}
                                     </SelectItem>
@@ -128,7 +154,7 @@ export function GlobalIssueCreateModal() {
                                     <SelectValue placeholder={isLoadingProjects ? "Loading projects..." : "Select Project"} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {projects?.map((proj: any) => (
+                                    {projects?.map((proj: ProjectItem) => (
                                         <SelectItem key={proj.id} value={proj.id.toString()}>
                                             {proj.name}
                                         </SelectItem>
@@ -151,64 +177,70 @@ export function GlobalIssueCreateModal() {
                                 />
                             </div>
 
-                            {!isLoadingLookups && lookups && (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="type">{t('Type')}</Label>
-                                        <Select value={typeId} onValueChange={setTypeId}>
-                                            <SelectTrigger id="type">
-                                                <SelectValue placeholder={t('Select Type')} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {lookups.types?.map((type: any) => (
-                                                    <SelectItem key={type.id} value={type.id.toString()}>
-                                                        {type.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                            {!isLoadingLookups && lookups && (() => {
+                                const issueTypes: LookupItem[] = lookups.issueTypes || lookups.types || [];
+                                const priorities: LookupItem[] = lookups.priorities || [];
+                                const assignees: LookupItem[] = lookups.users || lookups.members || [];
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="priority">{t('Priority')}</Label>
-                                        <Select value={priorityId} onValueChange={setPriorityId}>
-                                            <SelectTrigger id="priority">
-                                                <SelectValue placeholder={t('Select Priority')} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {lookups.priorities?.map((priority: any) => (
-                                                    <SelectItem key={priority.id} value={priority.id.toString()}>
-                                                        {priority.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                return (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="type">{t('Type')} *</Label>
+                                            <Select value={typeId} onValueChange={setTypeId}>
+                                                <SelectTrigger id="type">
+                                                    <SelectValue placeholder={t('Select Type')} />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {issueTypes.map((type: LookupItem) => (
+                                                        <SelectItem key={type.id} value={type.id.toString()}>
+                                                            {type.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
 
-                                    <div className="space-y-2 col-span-2">
-                                        <Label htmlFor="assignee">{t('Assignee')}</Label>
-                                        <Select value={assigneeId} onValueChange={setAssigneeId}>
-                                            <SelectTrigger id="assignee">
-                                                <SelectValue placeholder={t('Select Assignee')} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {lookups.members?.map((member: any) => (
-                                                    <SelectItem key={member.id} value={member.id.toString()}>
-                                                        {member.name || member.user?.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="priority">{t('Priority')} *</Label>
+                                            <Select value={priorityId} onValueChange={setPriorityId}>
+                                                <SelectTrigger id="priority">
+                                                    <SelectValue placeholder={t('Select Priority')} />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {priorities.map((priority: LookupItem) => (
+                                                        <SelectItem key={priority.id} value={priority.id.toString()}>
+                                                            {priority.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div className="space-y-2 col-span-2">
+                                            <Label htmlFor="assignee">{t('Assignee')}</Label>
+                                            <Select value={assigneeId} onValueChange={setAssigneeId}>
+                                                <SelectTrigger id="assignee">
+                                                    <SelectValue placeholder={t('Select Assignee')} />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {assignees.map((member: LookupItem) => (
+                                                        <SelectItem key={member.id} value={member.id.toString()}>
+                                                            {member.name || member.user?.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
 
                             <div className="flex justify-end pt-4">
                                 <Button 
                                     type="submit" 
-                                    disabled={!title || createIssueMutation.isPending}
+                                    disabled={!title || !projectId || !typeId || !priorityId || createIssueMutation.isPending}
                                 >
-                                    {createIssueMutation.isPending ? "Creating..." : "Create Issue"}
+                                    {createIssueMutation.isPending ? t("Creating...") : t("Create Issue")}
                                 </Button>
                             </div>
                         </>

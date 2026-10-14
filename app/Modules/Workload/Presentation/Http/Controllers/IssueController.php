@@ -8,6 +8,7 @@ use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Workload\Application\DTOs\AssignIssueInput;
 use App\Modules\Workload\Application\DTOs\CreateIssueInput;
 use App\Modules\Workload\Application\DTOs\TransitionIssueInput;
+use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
 use App\Modules\Workload\Application\UseCases\AssignIssueUseCase;
 use App\Modules\Workload\Application\UseCases\CreateIssueUseCase;
 use App\Modules\Workload\Application\UseCases\DeleteIssueUseCase;
@@ -36,6 +37,10 @@ final class IssueController
         /** @var UserModel|null $user */
         $user = $request->user();
         if (! $user || ! $user->hasPermission('issues:view')) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if (! WorkloadAccessChecker::canViewProject($user->id, $projectId)) {
             abort(403, 'Unauthorized.');
         }
 
@@ -96,6 +101,10 @@ final class IssueController
         }
 
         $issue = IssueModel::with(['assignee', 'reporter', 'status'])->findOrFail($id);
+
+        if (! WorkloadAccessChecker::canViewProject($user->id, (string) $issue->project_id)) {
+            abort(403, 'Unauthorized.');
+        }
 
         return response()->json(['data' => new IssueResource($issue)]);
     }

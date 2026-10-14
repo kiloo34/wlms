@@ -7,8 +7,10 @@ namespace App\Modules\Collaboration\Presentation\Http\Controllers;
 use App\Modules\Collaboration\Application\DTOs\AddCommentInput;
 use App\Modules\Collaboration\Application\UseCases\AddCommentToIssueUseCase;
 use App\Modules\Collaboration\Presentation\Http\Requests\AddCommentHttpRequest;
+use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AddCommentController extends Controller
@@ -19,6 +21,12 @@ class AddCommentController extends Controller
 
     public function __invoke(AddCommentHttpRequest $request, string $issueId): JsonResponse
     {
+        $user = $request->user();
+        $projectId = DB::table('issues')->where('id', $issueId)->value('project_id');
+        if (! $user || ! $projectId || ! WorkloadAccessChecker::canViewProject($user->id, (string) $projectId)) {
+            abort(403, 'Unauthorized.');
+        }
+
         $input = new AddCommentInput(
             commentId: Str::uuid()->toString(),
             issueId: $issueId,

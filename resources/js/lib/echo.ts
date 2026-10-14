@@ -28,18 +28,18 @@ export const initEcho = () => {
             forceTLS: false,
             enabledTransports: ['ws', 'wss'],
             // Enable sanctum authorizer for private channels
-            authorizer: (channel: any, options: any) => {
+            authorizer: (channel: { name: string }) => {
                 return {
-                    authorize: (socketId: any, callback: any) => {
+                    authorize: (socketId: string, callback: (error: Error | null, authData: any) => void) => {
                         axios.post('/broadcasting/auth', {
                             socket_id: socketId,
                             channel_name: channel.name
                         })
-                        .then((response: any) => {
-                            callback(false, response.data);
+                        .then((response) => {
+                            callback(null, response.data);
                         })
-                        .catch((error: any) => {
-                            callback(true, error);
+                        .catch((error: unknown) => {
+                            callback(error instanceof Error ? error : new Error(String(error)), null);
                         });
                     }
                 };
@@ -53,8 +53,8 @@ export const initEcho = () => {
 // Types for window
 declare global {
     interface Window {
-        Pusher: any;
-        Echo: any;
-        axios: any;
+        Pusher: typeof Pusher;
+        Echo: InstanceType<typeof Echo>;
+        axios: typeof axios;
     }
 }

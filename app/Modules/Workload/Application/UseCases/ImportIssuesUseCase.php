@@ -48,19 +48,37 @@ final class ImportIssuesUseCase
             if (! empty($picNames)) {
                 $usersQuery = DB::table('users');
                 foreach ($picNames as $picName) {
-                    $usersQuery->orWhere('name', 'LIKE', "%{$picName}%");
+                    $trimmedPic = trim((string) $picName);
+                    $usersQuery->orWhere('name', 'LIKE', "%{$trimmedPic}%")
+                        ->orWhere('email', '=', $trimmedPic)
+                        ->orWhere('employee_id', '=', $trimmedPic);
                 }
-                $matchedUsers = $usersQuery->get(['id', 'name']);
+                $matchedUsers = $usersQuery->get(['id', 'name', 'email', 'employee_id']);
                 foreach ($picNames as $picName) {
                     $trimmedPic = trim((string) $picName);
                     foreach ($matchedUsers as $u) {
-                        if (strcasecmp(trim((string) $u->name), $trimmedPic) === 0) {
+                        if (! empty($u->employee_id) && strcasecmp(trim((string) $u->employee_id), $trimmedPic) === 0) {
                             $usersMap[$picName] = $u->id;
                             break;
                         }
                     }
                     if (! isset($usersMap[$picName])) {
-                        // shortcut: partial name fallback when spreadsheet uses first name only, upgrade to email/NIP lookup if duplicate first names occur
+                        foreach ($matchedUsers as $u) {
+                            if (! empty($u->email) && strcasecmp(trim((string) $u->email), $trimmedPic) === 0) {
+                                $usersMap[$picName] = $u->id;
+                                break;
+                            }
+                        }
+                    }
+                    if (! isset($usersMap[$picName])) {
+                        foreach ($matchedUsers as $u) {
+                            if (strcasecmp(trim((string) $u->name), $trimmedPic) === 0) {
+                                $usersMap[$picName] = $u->id;
+                                break;
+                            }
+                        }
+                    }
+                    if (! isset($usersMap[$picName])) {
                         foreach ($matchedUsers as $u) {
                             if (stripos($u->name, $trimmedPic) !== false) {
                                 $usersMap[$picName] = $u->id;

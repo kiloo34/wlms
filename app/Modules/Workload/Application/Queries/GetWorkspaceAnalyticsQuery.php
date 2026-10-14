@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 final class GetWorkspaceAnalyticsQuery
 {
@@ -272,8 +273,8 @@ final class GetWorkspaceAnalyticsQuery
                 if ($start->lte($end)) {
                     return [$start, $end, 'custom'];
                 }
-            } catch (\Throwable) {
-                // fallback to 30d
+            } catch (\Throwable $e) {
+                Log::debug("Workspace analytics date range parse failed for from: '{$from}', to: '{$to}': ".$e->getMessage());
             }
         }
 

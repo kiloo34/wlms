@@ -21,10 +21,18 @@ import { Issue } from '@/types/issue';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useBulkUpdateIssues } from '@/modules/Workload/Issues/hooks/useIssues';
 
+interface WorkspaceTasksLookups {
+    users?: SelectOption[];
+    statuses?: SelectOption[];
+    priorities?: SelectOption[];
+    issueTypes?: SelectOption[];
+    [key: string]: unknown;
+}
+
 interface WorkspaceTasksTableProps {
     workspaceId: string;
     projects: Project[];
-    lookups?: any;
+    lookups?: WorkspaceTasksLookups;
     currentUserId?: string;
     canManageIssues?: boolean;
     initialAssigneeFilter?: string;
@@ -75,7 +83,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
 
     // Filter Logic
     const filteredIssues = useMemo(() => {
-        return issues.filter((issue: any) => {
+        return issues.filter((issue: Issue) => {
             // Project filter
             if (selectedProject !== 'all' && String(issue.project_id) !== String(selectedProject)) {
                 return false;
@@ -119,7 +127,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
     }, [filteredIssues, safeCurrentPage, perPage]);
 
     // Reset pagination to page 1 on filter change
-    const handleFilterChange = (setter: (val: any) => void, val: any) => {
+    const handleFilterChange = (setter: (val: string) => void, val: string) => {
         setter(val);
         setCurrentPage(1);
     };
@@ -159,8 +167,11 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
             queryClient.invalidateQueries({ queryKey: ['workspaces', workspaceId, 'issues'] });
             setIsFormOpen(false);
             setEditingIssue(null);
-        } catch (error: any) {
-            toast.error(error?.response?.data?.message || t('Failed to save task'));
+        } catch (error: unknown) {
+            const message = error && typeof error === 'object' && 'response' in error
+                ? ((error as { response?: { data?: { message?: string } } }).response?.data?.message)
+                : undefined;
+            toast.error(message || t('Failed to save task'));
         } finally {
             setIsSubmitting(false);
         }
@@ -301,13 +312,13 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                         <TableRow>
                             <TableHead className="w-[40px] px-4">
                                 <Checkbox 
-                                    checked={paginatedIssues.length > 0 && paginatedIssues.every((i: any) => selectedIssueIds.includes(String(i.id)))}
+                                    checked={paginatedIssues.length > 0 && paginatedIssues.every((i: Issue) => selectedIssueIds.includes(String(i.id)))}
                                     onCheckedChange={(checked) => {
                                         if (checked) {
-                                            const ids = new Set([...selectedIssueIds, ...paginatedIssues.map((i: any) => String(i.id))]);
+                                            const ids = new Set([...selectedIssueIds, ...paginatedIssues.map((i: Issue) => String(i.id))]);
                                             setSelectedIssueIds(Array.from(ids));
                                         } else {
-                                            const idsToRemove = new Set(paginatedIssues.map((i: any) => String(i.id)));
+                                            const idsToRemove = new Set(paginatedIssues.map((i: Issue) => String(i.id)));
                                             setSelectedIssueIds(selectedIssueIds.filter(id => !idsToRemove.has(id)));
                                         }
                                     }}
@@ -336,7 +347,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            paginatedIssues.map((issue: any) => {
+                            paginatedIssues.map((issue: Issue) => {
                                 const proj = projects.find((p) => p.id === issue.project_id) || issue.project;
 
                                 return (
@@ -516,7 +527,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                             <SelectValue placeholder={t('Update Status')} />
                         </SelectTrigger>
                         <SelectContent side="top">
-                            {lookups?.statuses?.map((s: any) => (
+                            {lookups?.statuses?.map((s: SelectOption) => (
                                 <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
                             ))}
                         </SelectContent>
@@ -536,7 +547,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                         </SelectTrigger>
                         <SelectContent side="top">
                             <SelectItem value="unassigned">{t('Unassigned')}</SelectItem>
-                            {users.map((u: any) => (
+                            {users.map((u: SelectOption) => (
                                 <SelectItem key={u.id} value={String(u.id)}>{u.name}</SelectItem>
                             ))}
                         </SelectContent>

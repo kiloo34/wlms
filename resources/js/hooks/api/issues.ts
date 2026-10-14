@@ -28,7 +28,7 @@ export function useProjectLookups(projectId: string | number | null) {
         queryKey: ['project', projectId, 'lookups'],
         queryFn: async () => {
             const { data } = await axios.get(`/api/projects/${projectId}/lookups`);
-            return data; // Maybe it returns multiple keys
+            return data.data || data;
         },
         enabled: !!projectId,
     });

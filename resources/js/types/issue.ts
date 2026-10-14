@@ -9,6 +9,8 @@ export interface Issue {
   sprint_id: string | null;
   assignee_id: string | null;
   status?: { id: string; name: string; category: string; color?: string; };
+  priority?: { id: string; name: string; category?: string; color?: string; level?: number; };
+  project?: { id: string; name: string; key?: string; workspace_id?: string; };
   assignee?: { id: string; name: string; avatar?: string; };
   original_estimate_seconds?: number | null;
   remaining_estimate_seconds?: number | null;

@@ -3,10 +3,15 @@
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
+use App\Modules\Workload\Application\UseCases\ImportIssuesUseCase;
+use App\Modules\Workload\Domain\Events\IssueAssigned;
+use App\Modules\Workload\Infrastructure\Mail\IssueAssignedMail;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\StatusModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
@@ -574,3 +579,187 @@ it('serves real user-scoped metrics and tasks on /dashboard and workspace lookup
     expect($issuesProps['workspace_id'])->toBe($workspace->id);
     expect($issuesProps['lookups'])->toHaveKeys(['projects', 'issueTypes', 'priorities', 'statuses', 'users']);
 });
+
+it('matches PIC by employee_id and email during import and queues notification mail on issue assignment', function () {
+    Mail::fake();
+
+    $reporter = UserModel::factory()->create();
+    $userByNip = UserModel::factory()->create([
+        'employee_id' => 'EMP-998877',
+        'email' => 'nip_user@example.com',
+        'name' => 'John NIP',
+    ]);
+    $userByEmail = UserModel::factory()->create([
+        'employee_id' => 'EMP-112233',
+        'email' => 'email_user@example.com',
+        'name' => 'Jane Email',
+    ]);
+
+    $workspace = WorkspaceModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Multi Identifier Workspace',
+        'owner_group_id' => (string) Str::uuid(),
+        'status' => 'ACTIVE',
+    ]);
+    ProjectModel::create([
+        'id' => (string) Str::uuid(),
+        'workspace_id' => $workspace->id,
+        'key' => 'MID',
+        'name' => 'Multi ID Project',
+        'status' => 'ACTIVE',
+    ]);
+
+    DB::table('issue_types')->insert([
+        'id' => (string) Str::uuid(),
+        'name' => 'Task',
+        'slug' => 'task-mid',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    DB::table('priorities')->insert([
+        'id' => (string) Str::uuid(),
+        'name' => 'Medium',
+        'slug' => 'med-mid',
+        'level' => 1,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    DB::table('statuses')->insert([
+        'id' => (string) Str::uuid(),
+        'name' => 'To Do',
+        'slug' => 'todo-mid',
+        'category' => 'TODO',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $useCase = app(ImportIssuesUseCase::class);
+    $useCase->execute(collect([
+        [
+            'project' => 'Multi ID Project',
+            'task' => 'NIP Task',
+            'pic' => 'EMP-998877',
+        ],
+        [
+            'project' => 'Multi ID Project',
+            'task' => 'Email Task',
+            'pic' => 'email_user@example.com',
+        ],
+    ]), (string) $reporter->id);
+
+    $nipIssue = DB::table('issues')->where('title', 'NIP Task')->first();
+    $emailIssue = DB::table('issues')->where('title', 'Email Task')->first();
+
+    expect($nipIssue)->not->toBeNull()
+        ->and((int) $nipIssue->assignee_id)->toBe((int) $userByNip->id);
+    expect($emailIssue)->not->toBeNull()
+        ->and((int) $emailIssue->assignee_id)->toBe((int) $userByEmail->id);
+
+    event(new IssueAssigned(
+        issueId: (string) $nipIssue->id,
+        issueNumber: 'MID-1',
+        assigneeId: $userByNip->id,
+        actorId: $reporter->id,
+        occurredAt: new DateTimeImmutable()
+    ));
+
+    Mail::assertQueued(IssueAssignedMail::class, function (IssueAssignedMail $mail) use ($userByNip) {
+        return $mail->hasTo($userByNip->email)
+            && $mail->issueNumber === 'MID-1'
+            && $mail->assigneeName === $userByNip->name;
+    });
+});
+
+it('forbids user from Division B without access from viewing Division A project and issue sub-endpoints', function () {
+    $divA = (string) Str::uuid();
+    $divB = (string) Str::uuid();
+
+    $userB = UserModel::factory()->create(['org_unit_id' => $divB]);
+
+    $role = RoleModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Member-DivB',
+        'scope' => 'GLOBAL',
+    ]);
+    $permId = (string) Str::uuid();
+    DB::table('permissions')->insert([
+        'id' => $permId,
+        'name' => 'issues:view',
+        'description' => 'View Issues',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    DB::table('role_permissions')->insert([
+        'role_id' => $role->id,
+        'permission_id' => $permId,
+    ]);
+    UserRoleModel::create([
+        'user_id' => $userB->id,
+        'role_id' => $role->id,
+    ]);
+
+    $userA = UserModel::factory()->create(['org_unit_id' => $divA]);
+
+    $workspaceA = WorkspaceModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Division A Workspace',
+        'owner_group_id' => $divA,
+        'status' => 'ACTIVE',
+    ]);
+    $projectA = ProjectModel::create([
+        'id' => (string) Str::uuid(),
+        'workspace_id' => $workspaceA->id,
+        'key' => 'DIVA',
+        'name' => 'Division A Project',
+        'status' => 'ACTIVE',
+    ]);
+
+    $issueId = (string) Str::uuid();
+    $typeId = (string) Str::uuid();
+    DB::table('issue_types')->insert([
+        'id' => $typeId,
+        'name' => 'Task',
+        'slug' => 'task-diva',
+        'icon' => 'check',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $statusId = (string) Str::uuid();
+    DB::table('statuses')->insert([
+        'id' => $statusId,
+        'name' => 'To Do',
+        'slug' => 'todo-diva',
+        'category' => 'TODO',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $priorityId = (string) Str::uuid();
+    DB::table('priorities')->insert([
+        'id' => $priorityId,
+        'name' => 'Medium',
+        'slug' => 'med-diva',
+        'level' => 2,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    DB::table('issues')->insert([
+        'id' => $issueId,
+        'project_id' => $projectA->id,
+        'issue_type_id' => $typeId,
+        'status_id' => $statusId,
+        'priority_id' => $priorityId,
+        'number' => 1,
+        'title' => 'Project A Issue',
+        'reporter_id' => $userA->id,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $this->actingAs($userB)->getJson("/api/projects/{$projectA->id}/board")->assertStatus(403);
+    $this->actingAs($userB)->getJson("/api/projects/{$projectA->id}/backlog")->assertStatus(403);
+    $this->actingAs($userB)->getJson("/api/projects/{$projectA->id}/issues")->assertStatus(403);
+    $this->actingAs($userB)->getJson("/api/issues/{$issueId}")->assertStatus(403);
+    $this->actingAs($userB)->getJson("/api/issues/{$issueId}/timeline")->assertStatus(403);
+});
+
+
