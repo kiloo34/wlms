@@ -15,7 +15,10 @@ export type OrgUnit = {
     updated_at?: string;
 };
 
-type CreateOrgUnitPayload = Omit<OrgUnit, 'id' | 'level' | 'children' | 'created_at' | 'updated_at'>;
+type CreateOrgUnitPayload = Omit<
+    OrgUnit,
+    'id' | 'level' | 'children' | 'created_at' | 'updated_at'
+>;
 type UpdateOrgUnitPayload = Partial<CreateOrgUnitPayload> & { id: string };
 
 export function useOrgUnits() {
@@ -66,4 +69,3 @@ export function useDeleteOrgUnit() {
         },
     });
 }
-

@@ -3,9 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { StatusList } from './StatusList';
 import { StatusFormDialog } from './StatusFormDialog';
-import { useStatuses, useCreateStatus, useUpdateStatus, useDeleteStatus } from '../../hooks/useStatuses';
+import {
+    useStatuses,
+    useCreateStatus,
+    useUpdateStatus,
+    useDeleteStatus,
+} from '../../hooks/useStatuses';
 import type { Status, CreateStatusDto, UpdateStatusDto } from '../../types';
-import { useTranslate } from "@/hooks/useTranslate";
+import { useTranslate } from '@/hooks/useTranslate';
 
 export function StatusManager() {
     const { t } = useTranslate();
@@ -28,19 +33,24 @@ export function StatusManager() {
     };
 
     const handleDelete = (status: Status) => {
-        if (confirm(`Are you sure you want to delete status "${status.name}"?`)) {
+        if (
+            confirm(`Are you sure you want to delete status "${status.name}"?`)
+        ) {
             deleteStatus.mutate(status.id);
         }
     };
 
     const handleSubmit = (payload: CreateStatusDto | UpdateStatusDto) => {
         if (selectedStatus) {
-            updateStatus.mutate({ id: selectedStatus.id, payload }, {
-                onSuccess: () => setIsFormOpen(false)
-            });
+            updateStatus.mutate(
+                { id: selectedStatus.id, payload },
+                {
+                    onSuccess: () => setIsFormOpen(false),
+                },
+            );
         } else {
             createStatus.mutate(payload as CreateStatusDto, {
-                onSuccess: () => setIsFormOpen(false)
+                onSuccess: () => setIsFormOpen(false),
             });
         }
     };
@@ -53,15 +63,15 @@ export function StatusManager() {
         <div className="space-y-4">
             <div className="flex justify-end">
                 <Button onClick={handleOpenCreate}>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="mr-2 h-4 w-4" />
                     {t('Create Status')}
-                                    </Button>
+                </Button>
             </div>
-            
-            <StatusList 
-                statuses={statuses} 
-                onEdit={handleOpenEdit} 
-                onDelete={handleDelete} 
+
+            <StatusList
+                statuses={statuses}
+                onEdit={handleOpenEdit}
+                onDelete={handleDelete}
             />
 
             <StatusFormDialog

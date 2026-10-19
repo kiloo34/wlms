@@ -1,4 +1,4 @@
-/pony<?php
+<?php
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
@@ -8,11 +8,13 @@ use App\Modules\Workload\Application\Jobs\ImportProjectsJob;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    Storage::fake('local');
     $this->user = UserModel::factory()->create();
 
     // Create Superadmin role to bypass 'manage-rbac' gate
@@ -211,4 +213,56 @@ test('ImportIssuesUseCase prioritizes exact PIC match over partial substring mat
 
     expect(\Illuminate\Support\Facades\Storage::disk('local')->exists('imports/temp-projects.csv'))->toBeFalse();
 });
+
+test('tracks import observability in import_logs table with counts and errors', function () {
+    Bus::fake();
+
+    UserRoleModel::create([
+        'id' => Str::uuid(),
+        'user_id' => $this->user->id,
+        'role_id' => $this->adminRole->id,
+    ]);
+
+    $file = UploadedFile::fake()->create('projects_batch.xlsx', 10);
+    $workspaceId = Str::uuid()->toString();
+    DB::table('workspaces')->insert([
+        'id' => $workspaceId,
+        'owner_group_id' => Str::uuid()->toString(),
+        'name' => 'Obs WS',
+        'status' => 'ACTIVE',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $response = $this->actingAs($this->user)->post('/admin/import-workload', [
+        'type' => 'projects',
+        'workspace_id' => $workspaceId,
+        'file' => $file,
+    ]);
+
+    $response->assertSessionHas('success');
+
+    $log = DB::table('import_logs')->where('filename', 'projects_batch.xlsx')->first();
+    expect($log)->not->toBeNull()
+        ->and($log->type)->toBe('projects')
+        ->and($log->status)->toBe('PENDING');
+
+    // Simulate Job execution with valid and invalid rows
+    $useCase = app(\App\Modules\Workload\Application\UseCases\ImportProjectsUseCase::class);
+    $result = $useCase->execute(collect([
+        ['project_name' => 'Project Alpha', 'project_status' => 'ACTIVE'],
+        ['project_name' => '', 'project_status' => 'ACTIVE'], // skipped
+    ]), $workspaceId);
+
+    expect($result['total_rows'])->toBe(2)
+        ->and($result['success_count'])->toBe(1)
+        ->and($result['skipped_count'])->toBe(1)
+        ->and($result['errors'])->toHaveCount(1);
+
+    // Verify index returns import logs
+    $indexResponse = $this->actingAs($this->user)->get('/admin/import-workload');
+    $indexResponse->assertStatus(200);
+    $indexResponse->assertInertia(fn ($page) => $page->has('importLogs'));
+});
+
 

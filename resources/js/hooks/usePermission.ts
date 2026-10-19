@@ -16,4 +16,3 @@ export function usePermission() {
 
     return { can, hasRole, permissions, roles };
 }
-

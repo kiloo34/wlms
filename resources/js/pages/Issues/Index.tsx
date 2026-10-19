@@ -1,5 +1,11 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
 import { index as issuesIndex } from '@/routes/issues';
@@ -18,7 +24,11 @@ export default function IssuesIndex() {
     const urlParams = new URLSearchParams(url.split('?')[1] || '');
     const { data: workspaces = [], isLoading } = useGetWorkspaces();
 
-    const workspaceId = urlParams.get('workspace_id') || props.workspace_id || workspaces[0]?.id || '';
+    const workspaceId =
+        urlParams.get('workspace_id') ||
+        props.workspace_id ||
+        workspaces[0]?.id ||
+        '';
     const { data: projects = [] } = useGetProjects(workspaceId || undefined);
 
     const handleWorkspaceChange = (value: string) => {
@@ -33,20 +43,27 @@ export default function IssuesIndex() {
             <Head title={t('My Tasks & Global Issues')} />
 
             <div className="flex h-full w-full flex-col gap-6 p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">{t('My Tasks & Global Issues')}</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            {t('My Tasks & Global Issues')}
+                        </h1>
                         <p className="text-muted-foreground mt-1">
-                            {t('View, filter, and update tasks across your workspaces.')}
+                            {t(
+                                'View, filter, and update tasks across your workspaces.',
+                            )}
                         </p>
                     </div>
 
-                    <div className="w-full sm:w-auto flex items-center gap-3">
-                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                    <div className="flex w-full items-center gap-3 sm:w-auto">
+                        <span className="text-muted-foreground text-sm font-medium whitespace-nowrap">
                             {t('Active Workspace')}:
                         </span>
                         <Combobox
-                            options={workspaces.map((ws: any) => ({ value: ws.id, label: ws.name }))}
+                            options={workspaces.map((ws: any) => ({
+                                value: ws.id,
+                                label: ws.name,
+                            }))}
                             value={workspaceId}
                             onChange={handleWorkspaceChange}
                             disabled={isLoading}
@@ -60,11 +77,18 @@ export default function IssuesIndex() {
                         <CardHeader>
                             <CardTitle>{t('No Workspace Selected')}</CardTitle>
                             <CardDescription>
-                                {t('Please select or create a workspace to view and manage your tasks.')}
+                                {t(
+                                    'Please select or create a workspace to view and manage your tasks.',
+                                )}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Button onClick={() => router.visit(workspacesIndex().url)} variant="outline">
+                            <Button
+                                onClick={() =>
+                                    router.visit(workspacesIndex().url)
+                                }
+                                variant="outline"
+                            >
                                 {t('Go to Workspaces Directory')}
                             </Button>
                         </CardContent>

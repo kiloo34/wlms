@@ -14,9 +14,9 @@ final class GetWorkspaceIssuesQuery
 {
     /**
      * @param  array<string, mixed>  $filters
-     * @return Paginator<int, IssueModel>
+     * @return Builder<IssueModel>
      */
-    public function execute(string $workspaceId, array $filters = [], ?string $actorUserId = null): Paginator
+    public function buildQuery(string $workspaceId, array $filters = [], ?string $actorUserId = null): Builder
     {
         $query = IssueModel::with(['project', 'assignee', 'reporter', 'status', 'type', 'priority', 'sprint'])
             ->whereHas('project', fn (Builder $q) => $q->where('workspace_id', $workspaceId));
@@ -47,8 +47,16 @@ final class GetWorkspaceIssuesQuery
             $query->whereHas('status', fn (Builder $q) => $q->where('category', $filters['status_category']));
         }
 
+        if (! empty($filters['status_id'])) {
+            $query->where('status_id', $filters['status_id']);
+        }
+
         if (! empty($filters['assignee_id'])) {
-            $query->where('assignee_id', $filters['assignee_id']);
+            if ($filters['assignee_id'] === 'unassigned') {
+                $query->whereNull('assignee_id');
+            } else {
+                $query->where('assignee_id', $filters['assignee_id']);
+            }
         }
 
         if (! empty($filters['sprint_id'])) {
@@ -74,8 +82,19 @@ final class GetWorkspaceIssuesQuery
             });
         }
 
+        return $query;
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return Paginator<int, IssueModel>
+     */
+    public function execute(string $workspaceId, array $filters = [], ?string $actorUserId = null): Paginator
+    {
         $perPage = min(500, max(1, (int) ($filters['per_page'] ?? $filters['limit'] ?? 15)));
 
-        return $query->orderBy('created_at', 'desc')->simplePaginate($perPage);
+        return $this->buildQuery($workspaceId, $filters, $actorUserId)
+            ->orderBy('created_at', 'desc')
+            ->simplePaginate($perPage);
     }
 }

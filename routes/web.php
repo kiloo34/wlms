@@ -77,9 +77,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/docs/{slug?}', [DocumentationController::class, 'show'])->name('docs.show');
 
     Route::middleware('can:manage-rbac')->group(function () {
-        Route::get('/admin/docs', [AdminDocPageController::class, 'index'])->name('admin.docs.index');
-        Route::get('/admin/docs/{id}/edit', [AdminDocPageController::class, 'edit'])->name('admin.docs.edit');
-        Route::put('/admin/docs/{id}', [AdminDocPageController::class, 'update'])->name('admin.docs.update');
+        Route::redirect('/admin/docs', '/settings/docs');
 
         Route::get('/admin/import-workload', [ImportWorkloadController::class, 'index'])->name('admin.import-workload.index');
         Route::post('/admin/import-workload', [ImportWorkloadController::class, 'store'])->name('admin.import-workload.store');

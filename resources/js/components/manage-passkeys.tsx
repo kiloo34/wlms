@@ -5,7 +5,13 @@ import PasskeyItem from '@/components/passkey-item';
 import PasskeyRegistration from '@/components/passkey-register';
 import type { Passkey } from '@/types/auth';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 
 export type Props = {
     canManagePasskeys?: boolean;
@@ -53,8 +59,8 @@ export default function ManagePasskeys(props: Props) {
                 </CardDescription>
             </CardHeader>
 
-            <CardContent >
-                <div className="border-border overflow-hidden rounded-lg border max-w-2xl mb-6">
+            <CardContent>
+                <div className="border-border mb-6 max-w-2xl overflow-hidden rounded-lg border">
                     {passkeys.length > 0 ? (
                         passkeys.map((passkey) => (
                             <PasskeyItem

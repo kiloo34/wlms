@@ -23,4 +23,3 @@ export interface WorkspaceCollectionResource {
 export interface UpdateWorkspacePayload {
     name: string;
 }
-

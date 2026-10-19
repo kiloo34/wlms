@@ -16,7 +16,9 @@ export function useWorkspaceProjects(workspaceId: string | number | null) {
     return useQuery({
         queryKey: ['workspace', workspaceId, 'projects'],
         queryFn: async () => {
-            const { data } = await axios.get(`/api/workspaces/${workspaceId}/projects`);
+            const { data } = await axios.get(
+                `/api/workspaces/${workspaceId}/projects`,
+            );
             return data.data || data;
         },
         enabled: !!workspaceId,
@@ -27,7 +29,9 @@ export function useProjectLookups(projectId: string | number | null) {
     return useQuery({
         queryKey: ['project', projectId, 'lookups'],
         queryFn: async () => {
-            const { data } = await axios.get(`/api/projects/${projectId}/lookups`);
+            const { data } = await axios.get(
+                `/api/projects/${projectId}/lookups`,
+            );
             return data.data || data;
         },
         enabled: !!projectId,
@@ -44,6 +48,6 @@ export function useCreateIssue() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['issues'] });
             toast.success('Issue created successfully');
-        }
+        },
     });
 }

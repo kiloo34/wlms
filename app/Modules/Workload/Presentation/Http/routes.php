@@ -3,12 +3,14 @@
 use App\Modules\Workload\Presentation\Http\Controllers\ArchiveProjectController;
 use App\Modules\Workload\Presentation\Http\Controllers\ArchiveWorkspaceController;
 use App\Modules\Workload\Presentation\Http\Controllers\AssignIssueController;
+use App\Modules\Workload\Presentation\Http\Controllers\AttachmentController;
 use App\Modules\Workload\Presentation\Http\Controllers\BulkUpdateIssuesController;
 use App\Modules\Workload\Presentation\Http\Controllers\CompleteSprintController;
 use App\Modules\Workload\Presentation\Http\Controllers\CreateIssueController;
 use App\Modules\Workload\Presentation\Http\Controllers\CreateProjectController;
 use App\Modules\Workload\Presentation\Http\Controllers\CreateSprintController;
 use App\Modules\Workload\Presentation\Http\Controllers\CreateWorkspaceController;
+use App\Modules\Workload\Presentation\Http\Controllers\ExportIssuesController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetBacklogController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetBoardController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetIssueWorklogsController;
@@ -42,6 +44,7 @@ Route::middleware(['auth:sanctum'])->prefix('workspaces')->group(function () {
     Route::delete('/{id}', ArchiveWorkspaceController::class);
     Route::get('/{workspaceId}/projects', GetProjectsController::class);
     Route::get('/{workspaceId}/issues', GetWorkspaceIssuesController::class);
+    Route::get('/{workspaceId}/issues/export', [ExportIssuesController::class, 'exportWorkspace']);
     Route::get('/{id}/analytics', GetWorkspaceAnalyticsController::class);
 
     // Workspace Members
@@ -58,6 +61,7 @@ Route::middleware(['auth:sanctum'])->prefix('projects')->group(function () {
     Route::get('/{id}/board', GetBoardController::class);
     Route::get('/{id}/backlog', GetBacklogController::class);
     Route::get('/{project_id}/issues', [IssueController::class, 'index']);
+    Route::get('/{projectId}/issues/export', [ExportIssuesController::class, 'exportProject']);
     Route::post('/{project_id}/issues', [IssueController::class, 'store']);
     Route::get('/{project_id}/activity', [ProjectActivityController::class, 'index']);
     Route::get('/{id}/sprints', GetProjectSprintsController::class);
@@ -84,7 +88,13 @@ Route::middleware(['auth:sanctum'])->prefix('issues')->group(function () {
     Route::get('/{id}/transitions', GetValidTransitionsController::class);
     Route::post('/{id}/worklogs', LogWorkController::class);
     Route::get('/{id}/worklogs', GetIssueWorklogsController::class);
+    Route::get('/{id}/attachments', [AttachmentController::class, 'index']);
+    Route::post('/{id}/attachments', [AttachmentController::class, 'store']);
+});
 
+Route::middleware(['auth:sanctum'])->prefix('attachments')->group(function () {
+    Route::get('/{id}/download', [AttachmentController::class, 'download']);
+    Route::delete('/{id}', [AttachmentController::class, 'destroy']);
 });
 
 Route::middleware(['auth:sanctum'])->prefix('statuses')->group(function () {

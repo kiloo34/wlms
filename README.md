@@ -29,14 +29,14 @@ app/Modules/
 
 - **Context-Aware RBAC**: Granular roles scoped globally (`GLOBAL`), per workspace (`WORKSPACE`), or per project (`PROJECT`) with anti-IDOR isolation.
 - **Multi-View Project Management**:
-  - Interactive **Kanban Board** with drag-and-drop workflow status transitions.
-  - **Backlog Manager** and Sprint lifecycle (`Create`, `Start`, `Complete`).
-  - **All Tasks Explorer** with search, filters, inline edit, bulk updates, and 10/20/50/100 pagination.
-  - **Global S/M/L UI Density** settings (`Settings > Appearance`).
+    - Interactive **Kanban Board** with drag-and-drop workflow status transitions.
+    - **Backlog Manager** and Sprint lifecycle (`Create`, `Start`, `Complete`).
+    - **All Tasks Explorer** with search, filters, inline edit, bulk updates, and 10/20/50/100 pagination.
+    - **Global S/M/L UI Density** settings (`Settings > Appearance`).
 - **Executive & Personal Dashboard (`/dashboard`)**:
-  - 4 Key Performance Indicators (Active Projects, Completion Rate, Open Tasks, Overdue alerts).
-  - Urgency-categorized personal tasks (*Overdue*, *Due Today*, *Upcoming*).
-  - Recent activity and audit trail stream.
+    - 4 Key Performance Indicators (Active Projects, Completion Rate, Open Tasks, Overdue alerts).
+    - Urgency-categorized personal tasks (_Overdue_, _Due Today_, _Upcoming_).
+    - Recent activity and audit trail stream.
 - **Global My Tasks Hub (`/issues`)**: Cross-workspace issue explorer with one-click workspace switching.
 - **Asynchronous Spreadsheet Importer**: High-performance chunked background import for projects and issues with automatic multi-attribute PIC matching (NIP, email, and full name).
 - **Asynchronous Mail Notifications**: Queued `IssueAssignedMail` Mailable dispatched upon issue assignment.
@@ -152,4 +152,3 @@ npm run types:check
 - All RBAC administrative routes (`/api/rbac/*`, `/admin/*`) require the `can:manage-rbac` gate.
 - Division boundaries and project access are strictly enforced via `WorkloadAccessChecker::canViewProject()` and `WorkloadAccessChecker::canViewWorkspace()`.
 - System role `Superadmin` is protected at the database and application levels from deletion and renaming.
-

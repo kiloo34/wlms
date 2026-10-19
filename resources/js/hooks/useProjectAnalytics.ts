@@ -104,7 +104,14 @@ export function useProjectAnalytics({
     sprintId,
 }: ProjectAnalyticsParams) {
     return useQuery<ProjectAnalyticsResponse>({
-        queryKey: ['project-analytics', projectId, dateRange, from, to, sprintId],
+        queryKey: [
+            'project-analytics',
+            projectId,
+            dateRange,
+            from,
+            to,
+            sprintId,
+        ],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (dateRange) params.append('date_range', dateRange);
@@ -113,7 +120,7 @@ export function useProjectAnalytics({
             if (sprintId) params.append('sprint_id', sprintId);
 
             const response = await axios.get<ProjectAnalyticsResponse>(
-                `/api/projects/${projectId}/analytics?${params.toString()}`
+                `/api/projects/${projectId}/analytics?${params.toString()}`,
             );
             return response.data;
         },
@@ -121,4 +128,3 @@ export function useProjectAnalytics({
         staleTime: 60 * 1000,
     });
 }
-

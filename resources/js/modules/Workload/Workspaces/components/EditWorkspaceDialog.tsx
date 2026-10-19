@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { 
-    Dialog, 
-    DialogContent, 
-    DialogDescription, 
-    DialogFooter, 
-    DialogHeader, 
-    DialogTitle 
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,12 +20,12 @@ interface EditWorkspaceDialogProps {
     isPending?: boolean;
 }
 
-export function EditWorkspaceDialog({ 
-    open, 
-    onOpenChange, 
-    initialName, 
-    onSubmit, 
-    isPending = false 
+export function EditWorkspaceDialog({
+    open,
+    onOpenChange,
+    initialName,
+    onSubmit,
+    isPending = false,
 }: EditWorkspaceDialogProps) {
     const { t } = useTranslate();
     const [name, setName] = useState(initialName);
@@ -58,10 +58,12 @@ export function EditWorkspaceDialog({
                             {t('Change the name of your workspace.')}
                         </DialogDescription>
                     </DialogHeader>
-                    
+
                     <div className="grid gap-4 py-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="edit-name">{t('Workspace Name')}</Label>
+                            <Label htmlFor="edit-name">
+                                {t('Workspace Name')}
+                            </Label>
                             <Input
                                 id="edit-name"
                                 value={name}
@@ -72,17 +74,24 @@ export function EditWorkspaceDialog({
                             />
                         </div>
                     </div>
-                    
+
                     <DialogFooter>
-                        <Button 
-                            type="button" 
-                            variant="outline" 
+                        <Button
+                            type="button"
+                            variant="outline"
                             onClick={() => onOpenChange(false)}
                             disabled={isPending}
                         >
                             {t('Cancel')}
                         </Button>
-                        <Button type="submit" disabled={isPending || !name.trim() || name === initialName}>
+                        <Button
+                            type="submit"
+                            disabled={
+                                isPending ||
+                                !name.trim() ||
+                                name === initialName
+                            }
+                        >
                             {isPending ? t('Saving...') : t('Save Changes')}
                         </Button>
                     </DialogFooter>

@@ -19,8 +19,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useTranslate } from "@/hooks/useTranslate";
-import { usePermission } from "@/hooks/usePermission";
+import { useTranslate } from '@/hooks/useTranslate';
+import { usePermission } from '@/hooks/usePermission';
 
 interface ProjectsManagerProps {
     workspaceId: string;
@@ -28,22 +28,34 @@ interface ProjectsManagerProps {
     canManage?: boolean;
 }
 
-export function ProjectsManager({ workspaceId, priorities = [], canManage }: ProjectsManagerProps) {
+export function ProjectsManager({
+    workspaceId,
+    priorities = [],
+    canManage,
+}: ProjectsManagerProps) {
     const { t } = useTranslate();
     const { can } = usePermission();
     const canManageProjects = canManage ?? can('projects:manage');
 
-    const { data: projects = [], isLoading, isError } = useGetProjects(workspaceId);
-    
+    const {
+        data: projects = [],
+        isLoading,
+        isError,
+    } = useGetProjects(workspaceId);
+
     const createProject = useCreateProject();
     const updateProject = useUpdateProject();
     const deleteProject = useDeleteProject();
 
     const [formOpen, setFormOpen] = useState(false);
-    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const [selectedProject, setSelectedProject] = useState<Project | null>(
+        null,
+    );
 
     const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
-    const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+    const [projectToDelete, setProjectToDelete] = useState<Project | null>(
+        null,
+    );
 
     const handleCreateClick = () => {
         setSelectedProject(null);
@@ -60,10 +72,16 @@ export function ProjectsManager({ workspaceId, priorities = [], canManage }: Pro
         setDeleteAlertOpen(true);
     };
 
-    const handleFormSubmit = (payload: CreateProjectPayload | UpdateProjectPayload) => {
+    const handleFormSubmit = (
+        payload: CreateProjectPayload | UpdateProjectPayload,
+    ) => {
         if (selectedProject) {
             updateProject.mutate(
-                { id: selectedProject.id, workspaceId, payload: payload as UpdateProjectPayload },
+                {
+                    id: selectedProject.id,
+                    workspaceId,
+                    payload: payload as UpdateProjectPayload,
+                },
                 {
                     onSuccess: () => {
                         toast.success(t('Project updated successfully.'));
@@ -72,7 +90,7 @@ export function ProjectsManager({ workspaceId, priorities = [], canManage }: Pro
                     onError: () => {
                         toast.error(t('Failed to update project.'));
                     },
-                }
+                },
             );
         } else {
             createProject.mutate(payload as CreateProjectPayload, {
@@ -89,7 +107,7 @@ export function ProjectsManager({ workspaceId, priorities = [], canManage }: Pro
 
     const handleConfirmDelete = () => {
         if (!projectToDelete) return;
-        
+
         deleteProject.mutate(
             { id: projectToDelete.id, workspaceId },
             {
@@ -101,16 +119,24 @@ export function ProjectsManager({ workspaceId, priorities = [], canManage }: Pro
                 onError: () => {
                     toast.error(t('Failed to delete project.'));
                 },
-            }
+            },
         );
     };
 
     if (isLoading) {
-        return <div className="p-4 text-sm text-muted-foreground">{t('Loading projects...')}</div>;
+        return (
+            <div className="text-muted-foreground p-4 text-sm">
+                {t('Loading projects...')}
+            </div>
+        );
     }
 
     if (isError) {
-        return <div className="p-4 text-sm text-destructive">{t('Failed to load projects.')}</div>;
+        return (
+            <div className="text-destructive p-4 text-sm">
+                {t('Failed to load projects.')}
+            </div>
+        );
     }
 
     return (
@@ -134,16 +160,25 @@ export function ProjectsManager({ workspaceId, priorities = [], canManage }: Pro
                 isPending={createProject.isPending || updateProject.isPending}
             />
 
-            <AlertDialog open={deleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
+            <AlertDialog
+                open={deleteAlertOpen}
+                onOpenChange={setDeleteAlertOpen}
+            >
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>{t('Are you absolutely sure?')}</AlertDialogTitle>
+                        <AlertDialogTitle>
+                            {t('Are you absolutely sure?')}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently delete the project "{projectToDelete?.name}" and remove its data from our servers.
+                            This will permanently delete the project "
+                            {projectToDelete?.name}" and remove its data from
+                            our servers.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleteProject.isPending}>{t('Cancel')}</AlertDialogCancel>
+                        <AlertDialogCancel disabled={deleteProject.isPending}>
+                            {t('Cancel')}
+                        </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleConfirmDelete}
                             disabled={deleteProject.isPending}

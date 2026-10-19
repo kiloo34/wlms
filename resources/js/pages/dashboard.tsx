@@ -1,6 +1,12 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslate } from '@/hooks/useTranslate';
@@ -76,7 +82,9 @@ export default function Dashboard() {
     const myTasks: DashboardTask[] = props.my_tasks ?? [];
     const recentActivities: DashboardActivity[] = props.recent_activities ?? [];
 
-    const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'overdue' | 'today' | 'upcoming'>('all');
+    const [urgencyFilter, setUrgencyFilter] = useState<
+        'all' | 'overdue' | 'today' | 'upcoming'
+    >('all');
 
     const filteredTasks = useMemo(() => {
         if (urgencyFilter === 'all') return myTasks;
@@ -89,19 +97,30 @@ export default function Dashboard() {
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">{t('Dashboard')}</h1>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            {t('Overview of your workspace health, personal tasks, and recent activity.')}
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            {t('Dashboard')}
+                        </h1>
+                        <p className="text-muted-foreground mt-1 text-sm">
+                            {t(
+                                'Overview of your workspace health, personal tasks, and recent activity.',
+                            )}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => router.visit('/issues')}>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => router.visit('/issues')}
+                        >
                             <ListTodo className="mr-1.5 h-4 w-4" />
                             {t('My Tasks')}
                         </Button>
-                        <Button size="sm" onClick={() => router.visit('/projects')}>
+                        <Button
+                            size="sm"
+                            onClick={() => router.visit('/projects')}
+                        >
                             <FolderKanban className="mr-1.5 h-4 w-4" />
                             {t('Projects')}
                         </Button>
@@ -111,52 +130,81 @@ export default function Dashboard() {
                 {/* 4 Executive Summary Cards */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                            <CardTitle className="text-sm font-medium">{t('Active Projects')}</CardTitle>
-                            <FolderKanban className="h-4 w-4 text-muted-foreground" />
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                {t('Active Projects')}
+                            </CardTitle>
+                            <FolderKanban className="text-muted-foreground h-4 w-4" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats.active_projects}</div>
-                            <p className="text-xs text-muted-foreground mt-1">{t('In accessible workspaces')}</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                            <CardTitle className="text-sm font-medium">{t('Completion Rate')}</CardTitle>
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.completion_rate}%</div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                                {stats.completed_issues}/{stats.total_issues} {t('completed')}
+                            <div className="text-2xl font-bold">
+                                {stats.active_projects}
+                            </div>
+                            <p className="text-muted-foreground mt-1 text-xs">
+                                {t('In accessible workspaces')}
                             </p>
                         </CardContent>
                     </Card>
 
                     <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                            <CardTitle className="text-sm font-medium">{t('My Open Tasks')}</CardTitle>
-                            <ListTodo className="h-4 w-4 text-primary" />
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                {t('Completion Rate')}
+                            </CardTitle>
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats.my_open_tasks}</div>
-                            <p className="text-xs text-muted-foreground mt-1">{t('Assigned to you')}</p>
+                            <div className="text-2xl font-bold">
+                                {stats.completion_rate}%
+                            </div>
+                            <p className="text-muted-foreground mt-1 text-xs">
+                                {stats.completed_issues}/{stats.total_issues}{' '}
+                                {t('completed')}
+                            </p>
                         </CardContent>
                     </Card>
 
-                    <Card className={stats.overdue_tasks > 0 ? 'border-destructive/50 bg-destructive/5' : ''}>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                            <CardTitle className="text-sm font-medium">{t('Overdue Tasks')}</CardTitle>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                {t('My Open Tasks')}
+                            </CardTitle>
+                            <ListTodo className="text-primary h-4 w-4" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {stats.my_open_tasks}
+                            </div>
+                            <p className="text-muted-foreground mt-1 text-xs">
+                                {t('Assigned to you')}
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card
+                        className={
+                            stats.overdue_tasks > 0
+                                ? 'border-destructive/50 bg-destructive/5'
+                                : ''
+                        }
+                    >
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                {t('Overdue Tasks')}
+                            </CardTitle>
                             <AlertTriangle
                                 className={`h-4 w-4 ${stats.overdue_tasks > 0 ? 'text-destructive' : 'text-muted-foreground'}`}
                             />
                         </CardHeader>
                         <CardContent>
-                            <div className={`text-2xl font-bold ${stats.overdue_tasks > 0 ? 'text-destructive' : ''}`}>
+                            <div
+                                className={`text-2xl font-bold ${stats.overdue_tasks > 0 ? 'text-destructive' : ''}`}
+                            >
                                 {stats.overdue_tasks}
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">{t('Require immediate attention')}</p>
+                            <p className="text-muted-foreground mt-1 text-xs">
+                                {t('Require immediate attention')}
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
@@ -164,69 +212,118 @@ export default function Dashboard() {
                 {/* Main 2-Column Grid */}
                 <div className="grid gap-6 lg:grid-cols-3">
                     {/* Left 2 Columns: My Assigned Tasks */}
-                    <Card className="lg:col-span-2 flex flex-col">
-                        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
+                    <Card className="flex flex-col lg:col-span-2">
+                        <CardHeader className="flex flex-col justify-between gap-3 border-b pb-4 sm:flex-row sm:items-center">
                             <div>
-                                <CardTitle className="text-base">{t('My Assigned Tasks')}</CardTitle>
-                                <CardDescription>{t('Your open tasks ordered by due date')}</CardDescription>
+                                <CardTitle className="text-base">
+                                    {t('My Assigned Tasks')}
+                                </CardTitle>
+                                <CardDescription>
+                                    {t('Your open tasks ordered by due date')}
+                                </CardDescription>
                             </div>
-                            <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg border">
-                                {(['all', 'overdue', 'today', 'upcoming'] as const).map((tab) => (
+                            <div className="bg-muted/60 flex items-center gap-1 rounded-lg border p-1">
+                                {(
+                                    [
+                                        'all',
+                                        'overdue',
+                                        'today',
+                                        'upcoming',
+                                    ] as const
+                                ).map((tab) => (
                                     <Button
                                         key={tab}
-                                        variant={urgencyFilter === tab ? 'default' : 'ghost'}
+                                        variant={
+                                            urgencyFilter === tab
+                                                ? 'default'
+                                                : 'ghost'
+                                        }
                                         size="sm"
                                         className="h-7 px-2.5 text-xs capitalize"
                                         onClick={() => setUrgencyFilter(tab)}
                                     >
-                                        {t(tab === 'all' ? 'All' : tab === 'overdue' ? 'Overdue' : tab === 'today' ? 'Today' : 'Upcoming')}
+                                        {t(
+                                            tab === 'all'
+                                                ? 'All'
+                                                : tab === 'overdue'
+                                                  ? 'Overdue'
+                                                  : tab === 'today'
+                                                    ? 'Today'
+                                                    : 'Upcoming',
+                                        )}
                                     </Button>
                                 ))}
                             </div>
                         </CardHeader>
-                        <CardContent className="p-0 flex-1">
+                        <CardContent className="flex-1 p-0">
                             {filteredTasks.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-12 px-4 text-center text-muted-foreground text-sm">
-                                    <CheckCircle2 className="h-8 w-8 mb-2 text-muted-foreground/50" />
-                                    <p>{t('No open tasks matching this filter.')}</p>
+                                <div className="text-muted-foreground flex flex-col items-center justify-center px-4 py-12 text-center text-sm">
+                                    <CheckCircle2 className="text-muted-foreground/50 mb-2 h-8 w-8" />
+                                    <p>
+                                        {t(
+                                            'No open tasks matching this filter.',
+                                        )}
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="divide-y">
                                     {filteredTasks.map((task) => (
                                         <div
                                             key={task.id}
-                                            onClick={() => router.visit(`/projects/${task.project.id}`)}
-                                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 hover:bg-muted/40 transition-colors cursor-pointer"
+                                            onClick={() =>
+                                                router.visit(
+                                                    `/projects/${task.project.id}`,
+                                                )
+                                            }
+                                            className="hover:bg-muted/40 flex cursor-pointer flex-col justify-between gap-2 p-4 transition-colors sm:flex-row sm:items-center"
                                         >
-                                            <div className="space-y-1 min-w-0">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <Badge variant="outline" className="font-mono text-[11px]">
+                                            <div className="min-w-0 space-y-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="font-mono text-[11px]"
+                                                    >
                                                         {task.key}
                                                     </Badge>
-                                                    <span className="font-medium text-sm truncate">{task.title}</span>
+                                                    <span className="truncate text-sm font-medium">
+                                                        {task.title}
+                                                    </span>
                                                 </div>
-                                                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                                                    <span>{task.project.name}</span>
+                                                <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                                                    <span>
+                                                        {task.project.name}
+                                                    </span>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                                                <Badge variant="secondary" className="text-xs font-normal">
+                                            <div className="flex shrink-0 flex-wrap items-center gap-2">
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="text-xs font-normal"
+                                                >
                                                     {task.priority.name}
                                                 </Badge>
-                                                <Badge variant="outline" className="text-xs font-normal">
+                                                <Badge
+                                                    variant="outline"
+                                                    className="text-xs font-normal"
+                                                >
                                                     {task.status.name}
                                                 </Badge>
                                                 {task.due_date && (
                                                     <Badge
-                                                        variant={task.urgency === 'overdue' ? 'destructive' : 'outline'}
-                                                        className="text-xs font-normal flex items-center gap-1"
+                                                        variant={
+                                                            task.urgency ===
+                                                            'overdue'
+                                                                ? 'destructive'
+                                                                : 'outline'
+                                                        }
+                                                        className="flex items-center gap-1 text-xs font-normal"
                                                     >
                                                         <Calendar className="h-3 w-3" />
                                                         {task.due_date}
                                                     </Badge>
                                                 )}
-                                                <ArrowRight className="h-4 w-4 text-muted-foreground hidden sm:inline" />
+                                                <ArrowRight className="text-muted-foreground hidden h-4 w-4 sm:inline" />
                                             </div>
                                         </div>
                                     ))}
@@ -236,43 +333,64 @@ export default function Dashboard() {
                     </Card>
 
                     {/* Right 1 Column: Recent Activity */}
-                    <Card className="lg:col-span-1 flex flex-col">
+                    <Card className="flex flex-col lg:col-span-1">
                         <CardHeader className="border-b pb-4">
                             <div className="flex items-center justify-between">
-                                <CardTitle className="text-base">{t('Recent Activity')}</CardTitle>
-                                <Activity className="h-4 w-4 text-muted-foreground" />
+                                <CardTitle className="text-base">
+                                    {t('Recent Activity')}
+                                </CardTitle>
+                                <Activity className="text-muted-foreground h-4 w-4" />
                             </div>
-                            <CardDescription>{t('Latest updates across your projects')}</CardDescription>
+                            <CardDescription>
+                                {t('Latest updates across your projects')}
+                            </CardDescription>
                         </CardHeader>
-                        <CardContent className="p-0 flex-1">
+                        <CardContent className="flex-1 p-0">
                             {recentActivities.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-12 px-4 text-center text-muted-foreground text-sm">
-                                    <Activity className="h-8 w-8 mb-2 text-muted-foreground/50" />
-                                    <p>{t('No recent activity recorded yet.')}</p>
+                                <div className="text-muted-foreground flex flex-col items-center justify-center px-4 py-12 text-center text-sm">
+                                    <Activity className="text-muted-foreground/50 mb-2 h-8 w-8" />
+                                    <p>
+                                        {t('No recent activity recorded yet.')}
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="divide-y">
                                     {recentActivities.map((act) => (
                                         <div
                                             key={act.id}
-                                            onClick={() => router.visit(`/projects/${act.project_id}`)}
-                                            className="p-4 hover:bg-muted/40 transition-colors cursor-pointer space-y-1"
+                                            onClick={() =>
+                                                router.visit(
+                                                    `/projects/${act.project_id}`,
+                                                )
+                                            }
+                                            className="hover:bg-muted/40 cursor-pointer space-y-1 p-4 transition-colors"
                                         >
                                             <div className="flex items-center justify-between gap-2 text-xs">
-                                                <span className="font-semibold text-foreground">
-                                                    {act.actor_name || t('System')}
+                                                <span className="text-foreground font-semibold">
+                                                    {act.actor_name ||
+                                                        t('System')}
                                                 </span>
                                                 <span className="text-muted-foreground">
-                                                    {new Date(act.created_at).toLocaleDateString()}
+                                                    {new Date(
+                                                        act.created_at,
+                                                    ).toLocaleDateString()}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                <span className="capitalize">{act.action_type.replace(/_/g, ' ')}</span>
-                                                {act.new_value ? ` → ${act.new_value}` : ''}
+                                            <p className="text-muted-foreground text-xs">
+                                                <span className="capitalize">
+                                                    {act.action_type.replace(
+                                                        /_/g,
+                                                        ' ',
+                                                    )}
+                                                </span>
+                                                {act.new_value
+                                                    ? ` → ${act.new_value}`
+                                                    : ''}
                                             </p>
-                                            <div className="text-xs font-medium text-foreground truncate">
-                                                <span className="font-mono text-primary mr-1.5">
-                                                    {act.project_key}-{act.issue_number}
+                                            <div className="text-foreground truncate text-xs font-medium">
+                                                <span className="text-primary mr-1.5 font-mono">
+                                                    {act.project_key}-
+                                                    {act.issue_number}
                                                 </span>
                                                 {act.issue_title}
                                             </div>

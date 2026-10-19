@@ -44,9 +44,18 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
 }) => {
     const { t } = useTranslate();
     const { iconSize } = useIconSize();
-    const { sprints, startSprint, completeSprint, createSprint, isLoading, isCompleting } = useSprints(projectId);
+    const {
+        sprints,
+        startSprint,
+        completeSprint,
+        createSprint,
+        isLoading,
+        isCompleting,
+    } = useSprints(projectId);
     const { auth } = usePage<any>().props;
-    const isOwner = auth?.user?.roles?.includes('Workspace Owner') || auth?.user?.roles?.includes('Superadmin');
+    const isOwner =
+        auth?.user?.roles?.includes('Workspace Owner') ||
+        auth?.user?.roles?.includes('Superadmin');
     const [searchQuery, setSearchQuery] = useState('');
     const [assigneeFilters, setAssigneeFilters] = useState<string[]>([]);
 
@@ -55,20 +64,30 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
             let matchesSearch = true;
             if (searchQuery) {
                 const query = searchQuery.toLowerCase();
-                const key = (issue as any).issue_key ? String((issue as any).issue_key).toLowerCase() : '';
-                matchesSearch = issue.title.toLowerCase().includes(query) || key.includes(query);
+                const key = (issue as any).issue_key
+                    ? String((issue as any).issue_key).toLowerCase()
+                    : '';
+                matchesSearch =
+                    issue.title.toLowerCase().includes(query) ||
+                    key.includes(query);
             }
 
             let matchesAssignee = true;
             if (assigneeFilters.length > 0) {
                 if (assigneeFilters.includes('unassigned')) {
-                    matchesAssignee = !issue.assignee_id || assigneeFilters.includes(String(issue.assignee_id));
+                    matchesAssignee =
+                        !issue.assignee_id ||
+                        assigneeFilters.includes(String(issue.assignee_id));
                 } else {
-                    matchesAssignee = assigneeFilters.includes(String(issue.assignee_id || ''));
+                    matchesAssignee = assigneeFilters.includes(
+                        String(issue.assignee_id || ''),
+                    );
                 }
             }
 
-            const isDone = issue.status?.category === 'DONE' || issue.status?.name?.toLowerCase() === 'done';
+            const isDone =
+                issue.status?.category === 'DONE' ||
+                issue.status?.name?.toLowerCase() === 'done';
             if (isDone) return false;
 
             return matchesSearch && matchesAssignee;
@@ -78,7 +97,10 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
     const handleCreateSprint = async () => {
         const num = sprints ? sprints.length + 1 : 1;
         try {
-            await createSprint({ project_id: projectId, name: `Sprint ${num}` });
+            await createSprint({
+                project_id: projectId,
+                name: `Sprint ${num}`,
+            });
         } catch (err) {
             console.error('Failed to create sprint', err);
         }
@@ -86,8 +108,13 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
 
     const { updateIssue, assignIssue } = useIssues(projectId);
     const [activeIssue, setActiveIssue] = React.useState<Issue | null>(null);
-    const [sprintDialog, setSprintDialog] = useState<{ sprint: Sprint; mode: 'edit' | 'start' } | null>(null);
-    const [sprintToComplete, setSprintToComplete] = useState<Sprint | null>(null);
+    const [sprintDialog, setSprintDialog] = useState<{
+        sprint: Sprint;
+        mode: 'edit' | 'start';
+    } | null>(null);
+    const [sprintToComplete, setSprintToComplete] = useState<Sprint | null>(
+        null,
+    );
     const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
 
     const sensors = useSensors(
@@ -101,23 +128,39 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
                 delay: 250,
                 tolerance: 5,
             },
-        })
+        }),
     );
 
     const sortedSprints = useMemo(() => {
         if (!sprints) return [];
-        return [...sprints].filter((s) => s.state !== 'COMPLETED').sort((a, b) => {
-            if (a.state?.toUpperCase() === 'ACTIVE' && b.state?.toUpperCase() !== 'ACTIVE') return -1;
-            if (b.state?.toUpperCase() === 'ACTIVE' && a.state?.toUpperCase() !== 'ACTIVE') return 1;
-            return 0;
-        });
+        return [...sprints]
+            .filter((s) => s.state !== 'COMPLETED')
+            .sort((a, b) => {
+                if (
+                    a.state?.toUpperCase() === 'ACTIVE' &&
+                    b.state?.toUpperCase() !== 'ACTIVE'
+                )
+                    return -1;
+                if (
+                    b.state?.toUpperCase() === 'ACTIVE' &&
+                    a.state?.toUpperCase() !== 'ACTIVE'
+                )
+                    return 1;
+                return 0;
+            });
     }, [sprints]);
 
     const backlogIssues = useMemo(() => {
         return filteredIssues.filter((i) => {
             if (i.sprint_id) return false;
-            const status = lookups?.statuses?.find((s: any) => s.id === i.status_id);
-            if (status && (status.category === 'DONE' || status.name.toLowerCase() === 'done')) {
+            const status = lookups?.statuses?.find(
+                (s: any) => s.id === i.status_id,
+            );
+            if (
+                status &&
+                (status.category === 'DONE' ||
+                    status.name.toLowerCase() === 'done')
+            ) {
                 return false;
             }
             return true;
@@ -140,13 +183,16 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
         const activeIssueData = active.data.current?.issue as Issue;
         if (!activeIssueData) return;
 
-        const targetSprintId = over.id === 'backlog' ? null : (over.id as string);
+        const targetSprintId =
+            over.id === 'backlog' ? null : (over.id as string);
 
         if (activeIssueData.sprint_id !== targetSprintId) {
             try {
                 await updateIssue({
                     id: activeIssueData.id,
-                    payload: getFullPayload(activeIssueData, { sprint_id: targetSprintId }) as any,
+                    payload: getFullPayload(activeIssueData, {
+                        sprint_id: targetSprintId,
+                    }) as any,
                 });
             } catch (error) {
                 console.error('Failed to update issue sprint', error);
@@ -158,54 +204,156 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
 
     return (
         <>
-            <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+            >
                 <div className="flex flex-col py-2">
                     {/* Top Action Bar matching Jira Mockup */}
-                    <div className="flex justify-between items-center mb-6 px-1">
+                    <div className="mb-6 flex items-center justify-between px-1">
                         <div className="flex items-center gap-3">
                             <div className="relative">
                                 <input
                                     type="text"
                                     placeholder={t('Search backlog')}
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className={`${iconSize === 'sm' ? 'h-7.5 w-44 text-xs' : iconSize === 'lg' ? 'h-9.5 w-56 text-sm' : 'h-8 w-48 text-xs'} rounded-md border border-input bg-background pl-8 pr-3 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring`}
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
+                                    className={`${iconSize === 'sm' ? 'h-7.5 w-44 text-xs' : iconSize === 'lg' ? 'h-9.5 w-56 text-sm' : 'h-8 w-48 text-xs'} border-input bg-background focus-visible:ring-ring rounded-md border pr-3 pl-8 shadow-sm focus-visible:ring-1 focus-visible:outline-none`}
                                 />
-                                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="text-muted-foreground absolute top-2 left-2.5 h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                    />
+                                </svg>
                             </div>
                             <div className="flex items-center -space-x-1.5 pl-1">
                                 <Avatar
-                                    onClick={() => setAssigneeFilters((prev) => prev.includes('unassigned') ? prev.filter((p) => p !== 'unassigned') : [...prev, 'unassigned'])}
-                                    className={`${iconSize === 'sm' ? 'h-7 w-7' : iconSize === 'lg' ? 'h-9 w-9' : 'h-8 w-8'} rounded-full border-2 border-background cursor-pointer transition-all ${assigneeFilters.includes('unassigned') ? 'ring-2 ring-offset-1 ring-primary z-10' : 'hover:z-10 hover:-translate-y-0.5'}`}
+                                    onClick={() =>
+                                        setAssigneeFilters((prev) =>
+                                            prev.includes('unassigned')
+                                                ? prev.filter(
+                                                      (p) => p !== 'unassigned',
+                                                  )
+                                                : [...prev, 'unassigned'],
+                                        )
+                                    }
+                                    className={`${iconSize === 'sm' ? 'h-7 w-7' : iconSize === 'lg' ? 'h-9 w-9' : 'h-8 w-8'} border-background cursor-pointer rounded-full border-2 transition-all ${assigneeFilters.includes('unassigned') ? 'ring-primary z-10 ring-2 ring-offset-1' : 'hover:z-10 hover:-translate-y-0.5'}`}
                                     title={t('Unassigned')}
                                 >
                                     <AvatarFallback className="bg-muted text-muted-foreground">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconSize === 'sm' ? 'w-3.5 h-3.5' : iconSize === 'lg' ? 'w-4.5 h-4.5' : 'w-4 h-4'}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className={
+                                                iconSize === 'sm'
+                                                    ? 'h-3.5 w-3.5'
+                                                    : iconSize === 'lg'
+                                                      ? 'h-4.5 w-4.5'
+                                                      : 'h-4 w-4'
+                                            }
+                                        >
+                                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                            <circle cx="12" cy="7" r="4" />
+                                        </svg>
                                     </AvatarFallback>
                                 </Avatar>
                                 {lookups?.users?.map((u) => (
                                     <Avatar
                                         key={u.id}
-                                        onClick={() => setAssigneeFilters((prev) => prev.includes(String(u.id)) ? prev.filter((p) => p !== String(u.id)) : [...prev, String(u.id)])}
-                                        className={`${iconSize === 'sm' ? 'h-7 w-7' : iconSize === 'lg' ? 'h-9 w-9' : 'h-8 w-8'} rounded-full border-2 border-background cursor-pointer transition-all ${assigneeFilters.includes(String(u.id)) ? 'ring-2 ring-offset-1 ring-primary z-10' : 'hover:z-10 hover:-translate-y-0.5'}`}
+                                        onClick={() =>
+                                            setAssigneeFilters((prev) =>
+                                                prev.includes(String(u.id))
+                                                    ? prev.filter(
+                                                          (p) =>
+                                                              p !==
+                                                              String(u.id),
+                                                      )
+                                                    : [...prev, String(u.id)],
+                                            )
+                                        }
+                                        className={`${iconSize === 'sm' ? 'h-7 w-7' : iconSize === 'lg' ? 'h-9 w-9' : 'h-8 w-8'} border-background cursor-pointer rounded-full border-2 transition-all ${assigneeFilters.includes(String(u.id)) ? 'ring-primary z-10 ring-2 ring-offset-1' : 'hover:z-10 hover:-translate-y-0.5'}`}
                                         title={u.name}
                                     >
-                                        <AvatarFallback className={`${iconSize === 'sm' ? 'text-[10px]' : iconSize === 'lg' ? 'text-xs' : 'text-[11px]'} font-medium bg-[#DE350B] text-white`}>{u.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}</AvatarFallback>
+                                        <AvatarFallback
+                                            className={`${iconSize === 'sm' ? 'text-[10px]' : iconSize === 'lg' ? 'text-xs' : 'text-[11px]'} bg-[#DE350B] font-medium text-white`}
+                                        >
+                                            {u.name
+                                                .split(' ')
+                                                .map((n: string) => n[0])
+                                                .join('')
+                                                .substring(0, 2)
+                                                .toUpperCase()}
+                                        </AvatarFallback>
                                     </Avatar>
                                 ))}
                             </div>
-                            <Button variant="outline" size="sm" className={`${iconSize === 'sm' ? 'h-7.5 text-xs px-2.5' : iconSize === 'lg' ? 'h-9.5 text-sm px-3.5' : 'h-8 text-xs px-3'} font-medium ${(searchQuery || assigneeFilters.length > 0) ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' : 'text-muted-foreground'}`}>
-                                <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5" /> {t('Filter')}
-                                {(searchQuery || assigneeFilters.length > 0) && <span className="ml-1.5 bg-primary/20 text-primary rounded-full px-1.5 py-0.5 text-[10px] leading-none">{(searchQuery ? 1 : 0) + assigneeFilters.length}</span>}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className={`${iconSize === 'sm' ? 'h-7.5 px-2.5 text-xs' : iconSize === 'lg' ? 'h-9.5 px-3.5 text-sm' : 'h-8 px-3 text-xs'} font-medium ${searchQuery || assigneeFilters.length > 0 ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' : 'text-muted-foreground'}`}
+                            >
+                                <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />{' '}
+                                {t('Filter')}
+                                {(searchQuery ||
+                                    assigneeFilters.length > 0) && (
+                                    <span className="bg-primary/20 text-primary ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] leading-none">
+                                        {(searchQuery ? 1 : 0) +
+                                            assigneeFilters.length}
+                                    </span>
+                                )}
                             </Button>
                             {(searchQuery || assigneeFilters.length > 0) && (
-                                <button onClick={() => { setSearchQuery(''); setAssigneeFilters([]); }} className="text-xs font-medium text-muted-foreground hover:text-foreground mx-1">{t('Clear filters')}</button>
+                                <button
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setAssigneeFilters([]);
+                                    }}
+                                    className="text-muted-foreground hover:text-foreground mx-1 text-xs font-medium"
+                                >
+                                    {t('Clear filters')}
+                                </button>
                             )}
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <Button variant="outline" size="icon" className={`${iconSize === 'sm' ? 'h-7.5 w-7.5' : iconSize === 'lg' ? 'h-9.5 w-9.5' : 'h-8 w-8'} text-muted-foreground`}><LineChart className="w-4 h-4" /></Button>
-                            <Button variant="outline" size="icon" className={`${iconSize === 'sm' ? 'h-7.5 w-7.5' : iconSize === 'lg' ? 'h-9.5 w-9.5' : 'h-8 w-8'} text-muted-foreground`}><SlidersHorizontal className="w-4 h-4" /></Button>
-                            <Button variant="outline" size="icon" className={`${iconSize === 'sm' ? 'h-7.5 w-7.5' : iconSize === 'lg' ? 'h-9.5 w-9.5' : 'h-8 w-8'} text-muted-foreground`}><MoreHorizontal className="w-4 h-4" /></Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className={`${iconSize === 'sm' ? 'h-7.5 w-7.5' : iconSize === 'lg' ? 'h-9.5 w-9.5' : 'h-8 w-8'} text-muted-foreground`}
+                            >
+                                <LineChart className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className={`${iconSize === 'sm' ? 'h-7.5 w-7.5' : iconSize === 'lg' ? 'h-9.5 w-9.5' : 'h-8 w-8'} text-muted-foreground`}
+                            >
+                                <SlidersHorizontal className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className={`${iconSize === 'sm' ? 'h-7.5 w-7.5' : iconSize === 'lg' ? 'h-9.5 w-9.5' : 'h-8 w-8'} text-muted-foreground`}
+                            >
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
                         </div>
                     </div>
 
@@ -215,15 +363,32 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
                             <DroppableSprint
                                 key={sprint.id}
                                 sprint={sprint}
-                                issues={filteredIssues.filter((i) => i.sprint_id === sprint.id)}
+                                issues={filteredIssues.filter(
+                                    (i) => i.sprint_id === sprint.id,
+                                )}
                                 lookups={lookups}
                                 onStart={(id) => {
                                     startSprint(id)
-                                        .then(() => toast.success(t('Sprint started successfully')))
-                                        .catch((err: any) => toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to start sprint'));
+                                        .then(() =>
+                                            toast.success(
+                                                t(
+                                                    'Sprint started successfully',
+                                                ),
+                                            ),
+                                        )
+                                        .catch((err: any) =>
+                                            toast.error(
+                                                err.response?.data?.error ||
+                                                    err.response?.data
+                                                        ?.message ||
+                                                    'Failed to start sprint',
+                                            ),
+                                        );
                                 }}
                                 onComplete={(id) => {
-                                    const targetSprint = sortedSprints.find((s) => s.id === id);
+                                    const targetSprint = sortedSprints.find(
+                                        (s) => s.id === id,
+                                    );
                                     if (targetSprint) {
                                         setSprintToComplete(targetSprint);
                                         setIsCompleteDialogOpen(true);
@@ -233,7 +398,9 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
                                 updateIssue={updateIssue}
                                 assignIssue={assignIssue}
                                 isOwner={isOwner}
-                                onEditSprint={(s, m) => setSprintDialog({ sprint: s, mode: m })}
+                                onEditSprint={(s, m) =>
+                                    setSprintDialog({ sprint: s, mode: m })
+                                }
                                 onIssueClick={onIssueClick}
                             />
                         ))}
@@ -254,7 +421,7 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
 
                 <DragOverlay>
                     {activeIssue ? (
-                        <div className="opacity-95 rotate-2 scale-105 shadow-xl">
+                        <div className="scale-105 rotate-2 opacity-95 shadow-xl">
                             <BacklogIssueRow
                                 issue={activeIssue}
                                 lookups={lookups}
@@ -280,7 +447,11 @@ export const BacklogManager: React.FC<BacklogManagerProps> = ({
                         await completeSprint({ sprintId, moveToSprintId });
                         toast.success(t('Sprint completed successfully'));
                     } catch (err: any) {
-                        toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to complete sprint');
+                        toast.error(
+                            err.response?.data?.error ||
+                                err.response?.data?.message ||
+                                'Failed to complete sprint',
+                        );
                         throw err;
                     }
                 }}
