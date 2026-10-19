@@ -41,3 +41,9 @@ class EditCommentController extends Controller
         ]);
     }
 }
+
+
+// Nota 
+
+// apabila tidak menghadiri atau mengirimkan PIC, div. TI tidak mensuport kebutuhan use case dari divisi lain. 
+// Jadi, pastikan untuk menghadiri meeting atau mengirimkan PIC agar kebutuhan use case dapat didukung dengan baik.

@@ -8,6 +8,23 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\AuthenticateSession;
+
+if (! class_exists('AppAuthenticateSession')) {
+    class AppAuthenticateSession extends AuthenticateSession
+    {
+        protected function guard()
+        {
+            $guard = parent::guard();
+
+            if (! method_exists($guard, 'viaRemember')) {
+                return $this->auth->guard('web');
+            }
+
+            return $guard;
+        }
+    }
+}
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -26,6 +43,12 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        $middleware->alias([
+            'auth.session' => AppAuthenticateSession::class,
+        ]);
+
+        $middleware->authenticateSessions();
 
         $middleware->statefulApi();
 

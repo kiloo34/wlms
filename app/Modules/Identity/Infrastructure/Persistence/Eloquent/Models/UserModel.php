@@ -138,4 +138,13 @@ class UserModel extends Authenticatable implements PasskeyUser
             'workspace_id'
         )->withPivot('role')->withTimestamps();
     }
+
+    public function passkeys(): HasMany
+    {
+        /** @var HasMany<\Laravel\Passkeys\Passkey, \Illuminate\Database\Eloquent\Model> $relation */
+        $relation = $this->hasMany(\Laravel\Passkeys\Passkeys::passkeyModel(), 'user_id');
+
+        return $relation;
+    }
 }
+

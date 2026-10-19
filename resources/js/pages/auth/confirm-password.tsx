@@ -26,7 +26,7 @@ export default function ConfirmPassword() {
         <>
             <Head title={t('Security Verification')} />
 
-            <div className="space-y-8">
+            <div className="mx-auto max-w-xl space-y-6">
                 <Card>
                     <CardHeader>
                         <CardTitle>{t('Security Verification')}</CardTitle>
@@ -37,7 +37,7 @@ export default function ConfirmPassword() {
                         </CardDescription>
                     </CardHeader>
 
-                    <div className="max-w-2xl space-y-8 p-6">
+                    <CardContent className="space-y-6">
                         <PasskeyVerify
                             routes={{
                                 options: confirmOptions(),
@@ -47,13 +47,11 @@ export default function ConfirmPassword() {
                             loadingLabel={t('Confirming...')}
                             separator={t('Or confirm with password')}
                         />
-                    </div>
 
-                    <Form {...store.form()} resetOnSuccess={['password']}>
-                        {({ processing, errors }) => (
-                            <>
-                                <CardContent>
-                                    <div className="max-w-xl space-y-2">
+                        <Form {...store.form()} resetOnSuccess={['password']}>
+                            {({ processing, errors }) => (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
                                         <Label htmlFor="password">
                                             {t('Password')}
                                         </Label>
@@ -65,25 +63,26 @@ export default function ConfirmPassword() {
                                             )}
                                             autoComplete="current-password"
                                             autoFocus
-                                            className="w-full max-w-md"
+                                            className="w-full"
                                         />
                                         <InputError message={errors.password} />
                                     </div>
-                                </CardContent>
-                                <CardFooter className="justify-end">
-                                    <Button
-                                        disabled={processing}
-                                        data-test="confirm-password-button"
-                                    >
-                                        {processing && (
-                                            <Spinner className="mr-2" />
-                                        )}
-                                        {t('Confirm Password')}
-                                    </Button>
-                                </CardFooter>
-                            </>
-                        )}
-                    </Form>
+
+                                    <div className="flex justify-end pt-2">
+                                        <Button
+                                            disabled={processing}
+                                            data-test="confirm-password-button"
+                                        >
+                                            {processing && (
+                                                <Spinner className="mr-2" />
+                                            )}
+                                            {t('Confirm Password')}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </Form>
+                    </CardContent>
                 </Card>
             </div>
         </>
