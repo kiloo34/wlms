@@ -38,8 +38,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/roles/{id}', [RoleController::class, 'show']);
         Route::put('/roles/{id}', [RoleController::class, 'update']);
         Route::delete('/roles/{id}', [RoleController::class, 'destroy']);
-        Route::put('/roles/{id}/permissions', [RoleController::class, 'syncPermissions']);
-        Route::put('/roles/{id}/menus', [RoleController::class, 'syncMenus']);
+        Route::match(['put', 'post'], '/roles/{id}/permissions', [RoleController::class, 'syncPermissions']);
+        Route::match(['put', 'post'], '/roles/{id}/menus', [RoleController::class, 'syncMenus']);
 
         Route::get('/permissions', [PermissionController::class, 'index']);
         Route::get('/menus', [MenuController::class, 'index']);

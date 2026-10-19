@@ -90,6 +90,10 @@ test('normal user cannot access mapping endpoints (Anti-IDOR 403)', function () 
     $response = $this->getJson('/api/rbac/menus');
     $response->assertStatus(403);
 
+    // GET /api/rbac/permissions
+    $response = $this->getJson('/api/rbac/permissions');
+    $response->assertStatus(403);
+
     // PUT /api/rbac/roles/{id}/permissions
     $response = $this->putJson('/api/rbac/roles/'.$this->targetRole->id.'/permissions', [
         'permission_ids' => [$this->perm1Id],
@@ -138,6 +142,11 @@ test('superadmin can map permissions and menus successfully (Normal Case)', func
     $responseMenus = $this->getJson('/api/rbac/menus');
     $responseMenus->assertStatus(200);
     $responseMenus->assertJsonCount(2, 'data');
+
+    // Get Permissions
+    $responsePerms = $this->getJson('/api/rbac/permissions');
+    $responsePerms->assertStatus(200);
+    $responsePerms->assertJsonCount(2, 'data');
 });
 
 test('syncing with invalid menu_ids returns 422 Error', function () {
