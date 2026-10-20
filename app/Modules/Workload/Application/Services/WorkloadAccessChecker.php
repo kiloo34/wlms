@@ -147,9 +147,16 @@ final class WorkloadAccessChecker
         }
 
         if (DB::table('user_roles')
-            ->where('context_type', 'PROJECT')
-            ->where('context_id', $projectId)
             ->where('user_id', $userId)
+            ->where(function ($q) use ($projectId, $workspaceId) {
+                $q->where(function ($pq) use ($projectId) {
+                    $pq->where('context_type', 'PROJECT')
+                        ->where('context_id', $projectId);
+                })->orWhere(function ($wq) use ($workspaceId) {
+                    $wq->where('context_type', 'WORKSPACE')
+                        ->where('context_id', $workspaceId);
+                });
+            })
             ->exists()) {
             return true;
         }

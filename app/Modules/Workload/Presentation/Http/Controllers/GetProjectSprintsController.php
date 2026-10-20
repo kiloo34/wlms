@@ -22,10 +22,6 @@ final class GetProjectSprintsController
             abort(403, 'Unauthorized.');
         }
 
-        if (! $user->hasPermission('projects:view')) {
-            return response()->json(['error' => 'Forbidden'], 403);
-        }
-
         $sprints = $this->query->execute($projectId);
 
         return response()->json([

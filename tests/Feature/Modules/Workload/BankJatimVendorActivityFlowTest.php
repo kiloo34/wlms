@@ -603,6 +603,11 @@ test('skenario tim developer bersama-sama: 1 role Developer (workspace) otomatis
     expect($response)->toHaveCount(5);
     $loadedKeys = array_column($response, 'key');
     expect($loadedKeys)->toEqualCanonicalizing(['ML01', 'ML02', 'ML03', 'ML04', 'ML05']);
+
+    // Verifikasi: Aditya dapat mengakses endpoint sprints use case tanpa 403 Forbidden
+    $this->actingAs($aditya)
+        ->getJson("/api/projects/{$projectIds[0]}/sprints")
+        ->assertStatus(200);
 });
 
 test('user tanpa permission analytics:view tidak diizinkan mengakses data analytics (403)', function () {

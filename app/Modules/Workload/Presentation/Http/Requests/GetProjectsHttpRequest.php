@@ -17,8 +17,8 @@ final class GetProjectsHttpRequest extends FormRequest
         }
 
         $workspaceId = (string) $this->route('workspaceId');
-        if ($workspaceId && WorkloadAccessChecker::canViewWorkspace($user->id, $workspaceId)) {
-            return true;
+        if ($workspaceId !== '') {
+            return WorkloadAccessChecker::canViewWorkspace($user->id, $workspaceId);
         }
 
         return $user->hasPermission('projects:view') || $user->hasPermission('workspaces:view');
