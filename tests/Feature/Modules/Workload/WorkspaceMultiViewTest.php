@@ -1119,6 +1119,56 @@ it('authorizes project lookups for users with project-level access and blocks ou
         ->assertStatus(200);
 });
 
+test('user with Workspace Owner role scoped as WORKSPACE can create workspace for their unit', function () {
+    $levelId = (string) Str::uuid();
+    DB::table('org_levels')->insert([
+        'id' => $levelId,
+        'slug' => 'vendor-level',
+        'name' => 'Vendor Level',
+        'depth' => 1,
+        'can_own_workspace' => true,
+    ]);
+
+    $vendorUnitId = (string) Str::uuid();
+    DB::table('org_units')->insert([
+        'id' => $vendorUnitId,
+        'org_level_id' => $levelId,
+        'name' => 'Mitra Integrasi Informatika Test',
+        'code' => 'MII_TEST',
+        'max_workspaces' => 1,
+    ]);
+
+    $vendorUser = UserModel::factory()->create(['org_unit_id' => $vendorUnitId]);
+
+    // Role Workspace Owner with scope workspace and permission workspaces:manage
+    $role = RoleModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Workspace Owner',
+        'scope' => 'workspace',
+    ]);
+    $permId = (string) Str::uuid();
+    DB::table('permissions')->insertOrIgnore(['id' => $permId, 'name' => 'workspaces:manage']);
+    $perm = DB::table('permissions')->where('name', 'workspaces:manage')->first();
+    DB::table('role_permissions')->insert(['role_id' => $role->id, 'permission_id' => $perm->id]);
+
+    // Assign to user with context_type WORKSPACE
+    UserRoleModel::create([
+        'id' => (string) Str::uuid(),
+        'user_id' => $vendorUser->id,
+        'role_id' => $role->id,
+        'context_type' => 'WORKSPACE',
+        'context_id' => null,
+    ]);
+
+    // Vendor user can successfully create workspace
+    $response = $this->actingAs($vendorUser)
+        ->postJson('/api/workspaces', ['name' => 'MII Workspace Test'])
+        ->assertStatus(201);
+
+    expect($response->json('name'))->toBe('MII Workspace Test')
+        ->and($response->json('owner_group_id'))->toBe($vendorUnitId);
+});
+
 
 
 

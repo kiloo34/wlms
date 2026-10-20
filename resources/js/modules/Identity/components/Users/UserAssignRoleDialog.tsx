@@ -81,7 +81,6 @@ export function UserAssignRoleDialog({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedRole) return;
-        if (selectedScope === 'WORKSPACE' && !selectedWorkspaceId) return;
         if (selectedScope === 'PROJECT' && !selectedProjectId) return;
 
         try {
@@ -95,8 +94,8 @@ export function UserAssignRoleDialog({
                 role_id: selectedRole,
             };
             if (selectedScope === 'WORKSPACE') {
-                payload.context_type = 'WORKSPACE';
-                payload.context_id = selectedWorkspaceId;
+                payload.context_type = selectedWorkspaceId ? 'WORKSPACE' : 'GLOBAL';
+                payload.context_id = selectedWorkspaceId || null;
             } else if (selectedScope === 'PROJECT') {
                 payload.context_type = 'PROJECT';
                 payload.context_id = selectedProjectId;
@@ -112,8 +111,7 @@ export function UserAssignRoleDialog({
     };
 
     const isContextIncomplete =
-        (selectedScope === 'WORKSPACE' && !selectedWorkspaceId) ||
-        (selectedScope === 'PROJECT' && !selectedProjectId);
+        selectedScope === 'PROJECT' && !selectedProjectId;
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -163,10 +161,12 @@ export function UserAssignRoleDialog({
                                     setSelectedWorkspaceId(e.target.value)
                                 }
                                 className="border-input bg-background flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm"
-                                required
+                                required={selectedScope === 'PROJECT'}
                             >
-                                <option value="" disabled>
-                                    {t('Select a workspace...')}
+                                <option value="">
+                                    {workspaces.length === 0
+                                        ? t('Global / Initial (No workspace yet)')
+                                        : t('Global / All Workspaces (or select below)')}
                                 </option>
                                 {workspaces.map((ws) => (
                                     <option key={ws.id} value={ws.id}>

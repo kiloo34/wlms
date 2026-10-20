@@ -12,7 +12,7 @@ final class CreateWorkspaceHttpRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        if (! $user || ! $user->hasPermission('workspaces:manage')) {
+        if (! $user) {
             return false;
         }
 
@@ -20,7 +20,26 @@ final class CreateWorkspaceHttpRequest extends FormRequest
             abort(422, 'User belum terdaftar pada unit organisasi. Hubungi Administrator.');
         }
 
-        return true;
+        if ($user->hasPermission('workspaces:manage')) {
+            return true;
+        }
+
+        // Cek apakah user memiliki role dengan permission workspaces:manage (misal Workspace Owner)
+        $user->loadMissing('userRoles.role.permissions');
+        foreach ($user->userRoles as $userRole) {
+            if ($userRole->role) {
+                if (strtolower($userRole->role->name) === 'superadmin') {
+                    return true;
+                }
+                foreach ($userRole->role->permissions as $perm) {
+                    if ($perm->name === 'workspaces:manage') {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
