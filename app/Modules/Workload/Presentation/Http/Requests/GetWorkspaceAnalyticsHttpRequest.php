@@ -27,8 +27,16 @@ final class GetWorkspaceAnalyticsHttpRequest extends FormRequest
             abort(404, 'Workspace not found.');
         }
 
-        return WorkloadAccessChecker::canViewWorkspace($user->id, $workspaceId)
-            || $user->can('view', $workspace);
+        if (WorkloadAccessChecker::canManageWorkspace($user->id, $workspaceId)) {
+            return true;
+        }
+
+        if ($user->hasPermission('analytics:view') || $user->hasPermission('workspaces:manage')) {
+            return WorkloadAccessChecker::canViewWorkspace($user->id, $workspaceId)
+                || $user->can('view', $workspace);
+        }
+
+        return false;
     }
 
     /**

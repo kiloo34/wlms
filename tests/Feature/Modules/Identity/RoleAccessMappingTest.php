@@ -2,6 +2,7 @@
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -157,4 +158,49 @@ test('syncing with invalid menu_ids returns 422 Error', function () {
         'menu_ids' => [$fakeMenuId],
     ]);
     $response->assertStatus(422);
+});
+
+test('role dengan permission :manage otomatis mengakomodir seluruh sub-aksi modul tersebut', function () {
+    $managePermId = Str::uuid()->toString();
+    DB::table('permissions')->insert([
+        'id' => $managePermId,
+        'name' => 'issues:manage',
+        'description' => 'Manage all issues',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $role = RoleModel::create([
+        'id' => Str::uuid()->toString(),
+        'name' => 'Issue Master',
+        'scope' => 'GLOBAL',
+    ]);
+
+    DB::table('role_permissions')->insert([
+        'role_id' => $role->id,
+        'permission_id' => $managePermId,
+    ]);
+
+    $user = UserModel::factory()->create([
+        'email' => 'master@bankjatim.co.id',
+    ]);
+
+    UserRoleModel::create([
+        'id' => Str::uuid()->toString(),
+        'user_id' => $user->id,
+        'role_id' => $role->id,
+        'context_type' => 'GLOBAL',
+        'context_id' => null,
+    ]);
+
+    // Verifikasi: memiliki issues:manage otomatis mengizinkan view, create, edit, assign, delete
+    expect($user->hasPermission('issues:manage'))->toBeTrue();
+    expect($user->hasPermission('issues:view'))->toBeTrue();
+    expect($user->hasPermission('issues:create'))->toBeTrue();
+    expect($user->hasPermission('issues:edit'))->toBeTrue();
+    expect($user->hasPermission('issues:assign'))->toBeTrue();
+    expect($user->hasPermission('issues:delete'))->toBeTrue();
+
+    // Tetapi TIDAK mengizinkan modul lain (e.g. projects:view)
+    expect($user->hasPermission('projects:view'))->toBeFalse();
 });

@@ -22,6 +22,7 @@ import { useSprints } from '../hooks/useSprints';
 import { toast } from 'sonner';
 import { useTranslate } from '@/hooks/useTranslate';
 import { useIconSize } from '@/hooks/use-appearance';
+import { usePermission } from '@/hooks/usePermission';
 
 interface LookupItem {
     id: string;
@@ -44,6 +45,10 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
 }) => {
     const { t } = useTranslate();
     const { iconSize } = useIconSize();
+    const { can } = usePermission();
+    const canViewAnalytics = can('analytics:view');
+    const canCreateIssue = can('issues:create') || can('issues:manage');
+
     const {
         issues,
         isLoading,
@@ -74,7 +79,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                 tab === 'list' ||
                 tab === 'board' ||
                 tab === 'backlog' ||
-                tab === 'analytics'
+                (tab === 'analytics' && canViewAnalytics)
             )
                 return tab;
         }
@@ -85,7 +90,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                 saved === 'list' ||
                 saved === 'board' ||
                 saved === 'backlog' ||
-                saved === 'analytics'
+                (saved === 'analytics' && canViewAnalytics)
             )
                 return saved;
         }
@@ -93,6 +98,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
     });
 
     const setViewMode = (mode: 'list' | 'board' | 'backlog' | 'analytics') => {
+        if (mode === 'analytics' && !canViewAnalytics) return;
         setViewModeState(mode);
         if (typeof window !== 'undefined') {
             localStorage.setItem(`project-${projectId}-viewMode`, mode);
@@ -339,17 +345,19 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                         >
                             {t('Backlog')}
                         </Button>
-                        <Button
-                            variant={
-                                viewMode === 'analytics' ? 'default' : 'ghost'
-                            }
-                            size="sm"
-                            className={tabBtnClass}
-                            onClick={() => setViewMode('analytics')}
-                        >
-                            <BarChart2 className="mr-1 h-3.5 w-3.5" />
-                            {t('Analytics')}
-                        </Button>
+                        {canViewAnalytics && (
+                            <Button
+                                variant={
+                                    viewMode === 'analytics' ? 'default' : 'ghost'
+                                }
+                                size="sm"
+                                className={tabBtnClass}
+                                onClick={() => setViewMode('analytics')}
+                            >
+                                <BarChart2 className="mr-1 h-3.5 w-3.5" />
+                                {t('Analytics')}
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -376,13 +384,13 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                 </div>
             </div>
 
-            {viewMode === 'analytics' ? (
+            {viewMode === 'analytics' && canViewAnalytics ? (
                 <ProjectAnalyticsDashboard projectId={projectId} />
             ) : viewMode === 'list' ? (
                 <IssueList
                     issues={filteredIssues}
                     isLoading={isLoading}
-                    onCreateClick={handleCreateClick}
+                    onCreateClick={canCreateIssue ? handleCreateClick : undefined}
                     onEdit={handleEditClick}
                     onDelete={handleDelete}
                     onLogWork={handleLogWorkClick}
@@ -413,12 +421,14 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                                 onChange={setBoardFilters}
                             />
                         </div>
-                        <Button
-                            onClick={handleCreateClick}
-                            className={createBtnClass}
-                        >
-                            {t('Create Task')}
-                        </Button>
+                        {canCreateIssue && (
+                            <Button
+                                onClick={handleCreateClick}
+                                className={createBtnClass}
+                            >
+                                {t('Create Task')}
+                            </Button>
+                        )}
                     </div>
                     {isLoading ? (
                         <div className="p-4 text-center">

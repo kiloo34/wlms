@@ -97,9 +97,17 @@ final class WorkloadAccessChecker
             return true;
         }
 
-        return DB::table('workspace_members')
+        if (DB::table('workspace_members')
             ->where('workspace_id', $workspaceId)
             ->where('user_id', $userId)
+            ->exists()) {
+            return true;
+        }
+
+        return DB::table('user_roles')
+            ->where('user_id', $userId)
+            ->where('context_type', 'WORKSPACE')
+            ->where('context_id', $workspaceId)
             ->exists();
     }
 
@@ -153,4 +161,3 @@ final class WorkloadAccessChecker
             ->exists();
     }
 }
-

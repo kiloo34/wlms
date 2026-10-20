@@ -33,12 +33,14 @@ export default function ProjectsIndex() {
         | 'analytics'
         | null;
 
+    const canViewAnalytics = can('analytics:view');
+
     const [activeTab, setActiveTab] = useState<
         'overview' | 'tasks' | 'analytics'
     >(
         tabParam === 'tasks'
             ? 'tasks'
-            : tabParam === 'analytics'
+            : tabParam === 'analytics' && canViewAnalytics
               ? 'analytics'
               : 'overview',
     );
@@ -67,6 +69,7 @@ export default function ProjectsIndex() {
     };
 
     const handleTabChange = (tab: 'overview' | 'tasks' | 'analytics') => {
+        if (tab === 'analytics' && !canViewAnalytics) return;
         setActiveTab(tab);
         if (workspaceId) {
             router.visit(
@@ -191,19 +194,21 @@ export default function ProjectsIndex() {
                                 <span>{t('All Tasks')}</span>
                             </Button>
 
-                            <Button
-                                variant={
-                                    activeTab === 'analytics'
-                                        ? 'default'
-                                        : 'ghost'
-                                }
-                                size="sm"
-                                className="h-9 gap-2 text-xs font-medium"
-                                onClick={() => handleTabChange('analytics')}
-                            >
-                                <BarChart2 className="h-4 w-4" />
-                                <span>{t('Analytics')}</span>
-                            </Button>
+                            {canViewAnalytics && (
+                                <Button
+                                    variant={
+                                        activeTab === 'analytics'
+                                            ? 'default'
+                                            : 'ghost'
+                                    }
+                                    size="sm"
+                                    className="h-9 gap-2 text-xs font-medium"
+                                    onClick={() => handleTabChange('analytics')}
+                                >
+                                    <BarChart2 className="h-4 w-4" />
+                                    <span>{t('Analytics')}</span>
+                                </Button>
+                            )}
                         </div>
 
                         {/* Active Tab Content */}
@@ -225,7 +230,7 @@ export default function ProjectsIndex() {
                             />
                         )}
 
-                        {activeTab === 'analytics' && (
+                        {activeTab === 'analytics' && canViewAnalytics && (
                             <WorkspaceAnalyticsView workspaceId={workspaceId} />
                         )}
                     </div>

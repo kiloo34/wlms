@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Workload\Presentation\Http\Requests;
 
 use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
-use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 
 final class GetProjectAnalyticsHttpRequest extends FormRequest
 {
@@ -22,13 +22,21 @@ final class GetProjectAnalyticsHttpRequest extends FormRequest
             abort(404, 'Project not found.');
         }
 
-        $project = \Illuminate\Support\Facades\DB::table('projects')
+        $project = DB::table('projects')
             ->where('id', $projectId)
             ->whereNull('deleted_at')
             ->first(['id', 'workspace_id', 'lead_id']);
 
         if (! $project) {
             abort(404, 'Project not found.');
+        }
+
+        if (WorkloadAccessChecker::canManageWorkspace($user->id, (string) $project->workspace_id) || (string) $project->lead_id === (string) $user->id) {
+            return true;
+        }
+
+        if (! $user->hasPermission('analytics:view') && ! $user->hasPermission('projects:manage')) {
+            abort(403, 'Unauthorized.');
         }
 
         if (! WorkloadAccessChecker::canViewProject($user->id, $projectId, (string) $project->workspace_id, $project->lead_id)) {

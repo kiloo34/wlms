@@ -605,4 +605,59 @@ test('skenario tim developer bersama-sama: 1 role Developer (workspace) otomatis
     expect($loadedKeys)->toEqualCanonicalizing(['ML01', 'ML02', 'ML03', 'ML04', 'ML05']);
 });
 
+test('user tanpa permission analytics:view tidak diizinkan mengakses data analytics (403)', function () {
+    $levelId = (string) Str::uuid();
+    DB::table('org_levels')->insert(['id' => $levelId, 'name' => 'Vendor Level', 'slug' => 'vendor-level-analytics', 'depth' => 1, 'can_own_workspace' => true]);
 
+    $vendorUnitId = (string) Str::uuid();
+    DB::table('org_units')->insert(['id' => $vendorUnitId, 'name' => 'PT MII', 'code' => 'MII-ANALYTICS', 'org_level_id' => $levelId, 'max_workspaces' => 1]);
+
+    $devRole = RoleModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Junior Developer',
+        'scope' => 'WORKSPACE',
+    ]);
+
+    $viewProj = (string) Str::uuid();
+    DB::table('permissions')->insertOrIgnore(['id' => $viewProj, 'name' => 'projects:view']);
+    $pProj = DB::table('permissions')->where('name', 'projects:view')->first();
+    DB::table('role_permissions')->insert(['role_id' => $devRole->id, 'permission_id' => $pProj->id]);
+
+    $workspaceId = (string) Str::uuid();
+    DB::table('workspaces')->insert([
+        'id' => $workspaceId,
+        'owner_group_id' => (string) Str::uuid(),
+        'name' => 'Secure Workspace',
+        'status' => 'ACTIVE',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $junior = UserModel::factory()->create([
+        'name' => 'Junior Dev',
+        'email' => 'junior@mii.co.id',
+        'org_unit_id' => $vendorUnitId,
+    ]);
+
+    DB::table('workspace_members')->insert([
+        'workspace_id' => $workspaceId,
+        'user_id' => $junior->id,
+        'role' => 'member',
+        'daily_capacity_hours' => 8,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    UserRoleModel::create([
+        'id' => (string) Str::uuid(),
+        'user_id' => $junior->id,
+        'role_id' => $devRole->id,
+        'context_type' => 'WORKSPACE',
+        'context_id' => $workspaceId,
+    ]);
+
+    // Percobaan akses analytics workspace harus 403 Forbidden
+    $this->actingAs($junior)
+        ->getJson("/api/workspaces/{$workspaceId}/analytics")
+        ->assertStatus(403);
+});

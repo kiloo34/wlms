@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,6 +20,8 @@ use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Passkeys\Passkey;
+use Laravel\Passkeys\Passkeys;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -127,6 +130,14 @@ class UserModel extends Authenticatable implements PasskeyUser
                     if ($perm->name === $permissionName) {
                         return true;
                     }
+
+                    // :manage mengakomodir semua sub-aksi pada modul yang sama (:view, :create, :edit, :delete, dll)
+                    if (str_ends_with($perm->name, ':manage')) {
+                        $module = explode(':', $perm->name)[0];
+                        if (str_starts_with($permissionName, $module.':')) {
+                            return true;
+                        }
+                    }
                 }
             }
         }
@@ -149,10 +160,9 @@ class UserModel extends Authenticatable implements PasskeyUser
 
     public function passkeys(): HasMany
     {
-        /** @var HasMany<\Laravel\Passkeys\Passkey, \Illuminate\Database\Eloquent\Model> $relation */
-        $relation = $this->hasMany(\Laravel\Passkeys\Passkeys::passkeyModel(), 'user_id');
+        /** @var HasMany<Passkey, Model> $relation */
+        $relation = $this->hasMany(Passkeys::passkeyModel(), 'user_id');
 
         return $relation;
     }
 }
-
