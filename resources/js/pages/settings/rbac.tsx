@@ -4,6 +4,7 @@ import { RoleManager } from '@/modules/Identity/components/RoleManager';
 import { UserManager } from '@/modules/Identity/components/Users/UserManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserCreateDialog } from '@/modules/Identity/components/Users/UserCreateDialog';
+import { UserBulkCreateDialog } from '@/modules/Identity/components/Users/UserBulkCreateDialog';
 import { RoleCreateDialog } from '@/modules/Identity/components/RoleCreateDialog';
 
 import {
@@ -65,7 +66,10 @@ export default function RBACIndex() {
                         </div>
                         <div className="flex-shrink-0">
                             {activeTab === 'users' ? (
-                                <UserCreateDialog />
+                                <div className="flex items-center gap-2">
+                                    <UserBulkCreateDialog />
+                                    <UserCreateDialog />
+                                </div>
                             ) : (
                                 <RoleCreateDialog />
                             )}

@@ -19,6 +19,30 @@ export type User = {
     updated_at: string;
 };
 
+export type BulkUserItem = {
+    name: string;
+    email: string;
+    password?: string;
+    org_unit_id?: string | null;
+    role_id?: string | null;
+};
+
+export type BulkCreateUsersPayload = {
+    users: BulkUserItem[];
+    default_password?: string;
+    default_org_unit_id?: string | null;
+    default_role_id?: string | null;
+    skip_duplicates?: boolean;
+};
+
+export type BulkCreateUsersResponse = {
+    total_requested: number;
+    created_count: number;
+    skipped_count: number;
+    created_users: { id: string | number; name: string; email: string }[];
+    skipped_users: { email: string; reason: string }[];
+};
+
 export function useUsers() {
     return useQuery({
         queryKey: ['users'],
@@ -40,6 +64,19 @@ export function useCreateUser() {
         }) => {
             const { data } = await axios.post('/api/rbac/users', payload);
             return data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+        },
+    });
+}
+
+export function useBulkCreateUsers() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (payload: BulkCreateUsersPayload) => {
+            const { data } = await axios.post('/api/rbac/users/bulk', payload);
+            return data.data as BulkCreateUsersResponse;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] });

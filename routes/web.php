@@ -46,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users', [UserController::class, 'store']);
+        Route::post('/users/bulk', [UserController::class, 'bulkStore']);
         Route::put('/users/{id}', [UserController::class, 'update']);
 
         Route::post('/user-roles/assign', [UserRoleController::class, 'assign']);
