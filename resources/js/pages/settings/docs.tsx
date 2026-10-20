@@ -368,7 +368,7 @@ export default function DocumentationSettings({
                             <CardTitle>{t('Documentation')}</CardTitle>
                             <CardDescription>
                                 {t(
-                                    'Kelola halaman dokumentasi, SOP, dan buku panduan WLMS dengan TipTap editor.',
+                                    'Kelola halaman dokumentasi, SOP, dan buku panduan WorkPulse dengan TipTap editor.',
                                 )}
                             </CardDescription>
                         </div>

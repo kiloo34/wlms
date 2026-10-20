@@ -123,7 +123,7 @@ export default function DocsIndex({ page, menu }: DocsProps) {
                         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-3">
                             <div className="flex gap-2">
                                 <span className="border-border bg-muted text-muted-foreground inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
-                                    WLMS Docs
+                                    WorkPulse Docs
                                 </span>
                                 <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-600 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
                                     Standard Operating Procedure
@@ -174,7 +174,7 @@ export default function DocsIndex({ page, menu }: DocsProps) {
                         <p className="text-muted-foreground max-w-4xl text-lg">
                             Dokumen ini adalah panduan standar untuk seluruh
                             anggota tim, Project Manager (PM), dan Developer
-                            dalam menggunakan sistem WLMS (Workload Management
+                            dalam menggunakan sistem WorkPulse (Workload Management
                             System).
                         </p>
                         <p className="text-muted-foreground mt-2 max-w-4xl text-lg">
@@ -193,7 +193,7 @@ export default function DocsIndex({ page, menu }: DocsProps) {
                             <div className="border-border bg-card/50 rounded-xl border p-5">
                                 <h3 className="text-foreground mb-4 flex items-center gap-2 text-sm font-semibold tracking-wider uppercase">
                                     <Book className="text-muted-foreground h-4 w-4" />{' '}
-                                    Buku Panduan WLMS
+                                    Buku Panduan WorkPulse
                                 </h3>
                                 <div className="space-y-1">
                                     {menu.map((category) => (
@@ -294,7 +294,7 @@ export default function DocsIndex({ page, menu }: DocsProps) {
                                         Anda?
                                         <p className="text-muted-foreground mt-1 text-xs font-normal">
                                             Bantu kami meningkatkan kualitas
-                                            dokumentasi operasional WLMS.
+                                            dokumentasi operasional WorkPulse.
                                         </p>
                                     </div>
                                     <div className="flex w-full gap-2 sm:w-auto">

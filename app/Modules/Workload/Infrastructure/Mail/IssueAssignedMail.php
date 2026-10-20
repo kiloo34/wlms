@@ -24,7 +24,7 @@ final class IssueAssignedMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "[WLMS] Issue Assigned: {$this->issueNumber}",
+            subject: "[WorkPulse] Issue Assigned: {$this->issueNumber}",
         );
     }
 

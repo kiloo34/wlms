@@ -1,12 +1,12 @@
-# 🚀 WLMS — Workload & Learning Management System
+# 🚀 WorkPulse — Enterprise Workload & Operations System
 
-WLMS is an enterprise-grade workload management, agile project tracking, and organizational ticketing platform built with **Laravel 11**, **React 19**, **Inertia.js**, and **PostgreSQL**.
+WorkPulse is an enterprise-grade workload management, agile project tracking, and organizational ticketing platform built with **Laravel 11**, **React 19**, **Inertia.js**, and **PostgreSQL**.
 
 ---
 
 ## 🏗️ Architecture & Philosophy
 
-WLMS enforces **Clean Architecture** and **Pragmatic CQRS**:
+WorkPulse enforces **Clean Architecture** and **Pragmatic CQRS**:
 
 ```
 app/Modules/
@@ -132,7 +132,7 @@ php artisan queue:work
 
 ## 🧪 Testing & Code Quality
 
-WLMS maintains a strict quality gate:
+WorkPulse maintains a strict quality gate:
 
 ```bash
 # 1. Run all Pest tests (Unit, Feature, and Arch suites)
