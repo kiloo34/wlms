@@ -802,11 +802,11 @@ it('enforces org unit workspace quota and automatic creator ownership', function
         ->assertStatus(201);
     $wsId = $resp1->json('id');
 
-    // Assert user is in workspace_members with role 'owner'
+    // Assert user is in workspace_members with role 'admin'
     $this->assertDatabaseHas('workspace_members', [
         'workspace_id' => $wsId,
         'user_id' => $userTmdp->id,
-        'role' => 'owner',
+        'role' => 'admin',
     ]);
 
     // TMDP tries to create 2nd workspace -> fails with 422 quota reached
@@ -1167,6 +1167,12 @@ test('user with Workspace Owner role scoped as WORKSPACE can create workspace fo
 
     expect($response->json('name'))->toBe('MII Workspace Test')
         ->and($response->json('owner_group_id'))->toBe($vendorUnitId);
+
+    // Vendor user can fetch projects for their workspace without 403
+    $workspaceId = $response->json('id');
+    $this->actingAs($vendorUser)
+        ->getJson("/api/workspaces/{$workspaceId}/projects")
+        ->assertStatus(200);
 });
 
 

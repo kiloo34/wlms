@@ -15,14 +15,15 @@ final class AssignWorkspaceCreatorAsOwnerListener
      */
     public function handle(WorkspaceCreated $event): void
     {
-        // 1. Simpan di workspace_members
+        // 1. Simpan di workspace_members sebagai admin
         DB::table('workspace_members')->updateOrInsert(
             [
                 'workspace_id' => $event->workspaceId,
                 'user_id' => $event->actorId,
             ],
             [
-                'role' => 'owner',
+                'role' => 'admin',
+                'daily_capacity_hours' => 8,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]

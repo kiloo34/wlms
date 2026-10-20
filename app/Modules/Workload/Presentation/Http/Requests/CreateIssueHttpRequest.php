@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Workload\Presentation\Http\Requests;
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 
