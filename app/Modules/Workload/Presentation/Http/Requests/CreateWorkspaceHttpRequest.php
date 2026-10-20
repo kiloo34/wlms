@@ -11,8 +11,16 @@ final class CreateWorkspaceHttpRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Pastikan user sudah login dan memiliki akses membuat workspace
-        return auth()->check() && auth()->user()->hasPermission('workspaces:manage');
+        $user = auth()->user();
+        if (! $user || ! $user->hasPermission('workspaces:manage')) {
+            return false;
+        }
+
+        if (empty($user->org_unit_id)) {
+            abort(422, 'User belum terdaftar pada unit organisasi. Hubungi Administrator.');
+        }
+
+        return true;
     }
 
     /**
@@ -44,12 +52,11 @@ final class CreateWorkspaceHttpRequest extends FormRequest
 
     /**
      * Mengambil ID group pemilik workspace.
-     * Dalam kasus ini, kita asumsikan user membuat workspace untuk groupnya sendiri,
+     * Dalam kasus ini, user membuat workspace untuk groupnya sendiri,
      * yang mana datanya ada di properti user, BUKAN dari payload (mencegah IDOR).
      */
     public function getOwnerGroupId(): string
     {
-        // Asumsi relasi user ke org_unit ada.
         return (string) auth()->user()->org_unit_id;
     }
 }

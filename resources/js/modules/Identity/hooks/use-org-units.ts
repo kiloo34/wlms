@@ -9,6 +9,7 @@ export type OrgUnit = {
     name: string;
     code: string;
     is_active: boolean;
+    max_workspaces?: number;
     level?: OrgLevel;
     children?: OrgUnit[];
     created_at?: string;

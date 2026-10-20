@@ -58,6 +58,7 @@ class OrgUnitController extends Controller
             'name' => 'required|string|max:150',
             'code' => 'nullable|string|max:30|unique:org_units,code',
             'is_active' => 'boolean',
+            'max_workspaces' => 'nullable|integer|min:0',
         ]);
 
         $unit = DB::transaction(function () use ($validated) {
@@ -87,6 +88,7 @@ class OrgUnitController extends Controller
             'name' => 'sometimes|required|string|max:150',
             'code' => 'sometimes|nullable|string|max:30|unique:org_units,code,'.$id,
             'is_active' => 'boolean',
+            'max_workspaces' => 'sometimes|nullable|integer|min:0',
         ]);
 
         DB::transaction(function () use ($unit, $validated) {

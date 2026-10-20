@@ -29,6 +29,7 @@ export interface OrgUnitFormData {
     parent_id: string;
     org_level_id: string;
     is_active: boolean;
+    max_workspaces: number;
 }
 
 interface OrgUnitFormDialogProps {
@@ -171,6 +172,33 @@ export function OrgUnitFormDialog({
                                 ))}
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="max_workspaces">
+                            {t('Max Workspaces Quota')}
+                        </Label>
+                        <Input
+                            id="max_workspaces"
+                            type="number"
+                            min="0"
+                            value={formData.max_workspaces}
+                            onChange={(e) =>
+                                onFormDataChange({
+                                    ...formData,
+                                    max_workspaces: Math.max(
+                                        0,
+                                        parseInt(e.target.value) || 0,
+                                    ),
+                                })
+                            }
+                            placeholder="0"
+                        />
+                        <p className="text-muted-foreground text-xs">
+                            {t(
+                                'Jumlah maksimum workspace yang dapat dibuat oleh unit ini (0 = tidak diizinkan membuat workspace).',
+                            )}
+                        </p>
                     </div>
 
                     <div className="space-y-4 pt-2">

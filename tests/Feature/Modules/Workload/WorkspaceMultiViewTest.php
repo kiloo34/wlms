@@ -762,4 +762,363 @@ it('forbids user from Division B without access from viewing Division A project 
     $this->actingAs($userB)->getJson("/api/issues/{$issueId}/timeline")->assertStatus(403);
 });
 
+it('enforces org unit workspace quota and automatic creator ownership', function () {
+    $levelId = (string) Str::uuid();
+    DB::table('org_levels')->insert([
+        'id' => $levelId, 'slug' => 'divisi-level', 'name' => 'Divisi', 'depth' => 1, 'can_own_workspace' => true,
+    ]);
+
+    // Unit 1: DWH (max_workspaces = 0, cannot create)
+    $dwhId = (string) Str::uuid();
+    DB::table('org_units')->insert([
+        'id' => $dwhId, 'org_level_id' => $levelId, 'name' => 'Big Data & Datawarehouse', 'code' => 'TEST_DWH', 'max_workspaces' => 0,
+    ]);
+
+    // Unit 2: TMDP (max_workspaces = 1, can create 1)
+    $tmdpId = (string) Str::uuid();
+    DB::table('org_units')->insert([
+        'id' => $tmdpId, 'org_level_id' => $levelId, 'name' => 'Manajemen Data Perusahaan', 'code' => 'TEST_TMDP', 'max_workspaces' => 1,
+    ]);
+
+    $userDwh = UserModel::factory()->create(['org_unit_id' => $dwhId]);
+    $userTmdp = UserModel::factory()->create(['org_unit_id' => $tmdpId]);
+
+    // Give both users workspaces:manage permission
+    $role = RoleModel::create(['id' => (string) Str::uuid(), 'name' => 'Manager Role', 'scope' => 'GLOBAL']);
+    $permId = (string) Str::uuid();
+    DB::table('permissions')->insertOrIgnore(['id' => $permId, 'name' => 'workspaces:manage']);
+    $perm = DB::table('permissions')->where('name', 'workspaces:manage')->first();
+    DB::table('role_permissions')->insert(['role_id' => $role->id, 'permission_id' => $perm->id]);
+    UserRoleModel::create(['id' => (string) Str::uuid(), 'user_id' => $userDwh->id, 'role_id' => $role->id]);
+    UserRoleModel::create(['id' => (string) Str::uuid(), 'user_id' => $userTmdp->id, 'role_id' => $role->id]);
+
+    // DWH tries to create -> fails with 422
+    $this->actingAs($userDwh)->postJson('/api/workspaces', ['name' => 'DWH Workspace'])
+        ->assertStatus(422)
+        ->assertJsonFragment(['message' => 'Workspace limit of 0 reached. Unit organisasi Anda tidak memiliki kuota untuk membuat workspace baru. Silakan hubungi Administrator.']);
+
+    // TMDP creates first workspace -> 201 Created and auto-assigned as owner
+    $resp1 = $this->actingAs($userTmdp)->postJson('/api/workspaces', ['name' => 'TMDP Data Platform'])
+        ->assertStatus(201);
+    $wsId = $resp1->json('id');
+
+    // Assert user is in workspace_members with role 'owner'
+    $this->assertDatabaseHas('workspace_members', [
+        'workspace_id' => $wsId,
+        'user_id' => $userTmdp->id,
+        'role' => 'owner',
+    ]);
+
+    // TMDP tries to create 2nd workspace -> fails with 422 quota reached
+    $this->actingAs($userTmdp)->postJson('/api/workspaces', ['name' => 'TMDP Workspace 2'])
+        ->assertStatus(422);
+});
+
+it('supports hierarchical workspace visibility for parent (DTI) and child (DWH) units', function () {
+    $levelId = (string) Str::uuid();
+    DB::table('org_levels')->insert([
+        'id' => $levelId, 'slug' => 'test-levels', 'name' => 'Level', 'depth' => 1, 'can_own_workspace' => true,
+    ]);
+
+    $dtiId = (string) Str::uuid();
+    $tmdpId = (string) Str::uuid();
+    $dwhId = (string) Str::uuid();
+    $miiId = (string) Str::uuid();
+
+    DB::table('org_units')->insert([
+        ['id' => $dtiId, 'parent_id' => null, 'org_level_id' => $levelId, 'name' => 'Divisi TI', 'code' => 'H_DTI', 'max_workspaces' => 0],
+        ['id' => $tmdpId, 'parent_id' => $dtiId, 'org_level_id' => $levelId, 'name' => 'TMDP', 'code' => 'H_TMDP', 'max_workspaces' => 1],
+        ['id' => $dwhId, 'parent_id' => $tmdpId, 'org_level_id' => $levelId, 'name' => 'DWH', 'code' => 'H_DWH', 'max_workspaces' => 0],
+        ['id' => $miiId, 'parent_id' => null, 'org_level_id' => $levelId, 'name' => 'MII Vendor', 'code' => 'H_MII', 'max_workspaces' => 1],
+    ]);
+
+    // Populate org_unit_closures
+    DB::table('org_unit_closures')->insert([
+        ['ancestor_id' => $dtiId, 'descendant_id' => $dtiId, 'depth' => 0],
+        ['ancestor_id' => $dtiId, 'descendant_id' => $tmdpId, 'depth' => 1],
+        ['ancestor_id' => $dtiId, 'descendant_id' => $dwhId, 'depth' => 2],
+        ['ancestor_id' => $tmdpId, 'descendant_id' => $tmdpId, 'depth' => 0],
+        ['ancestor_id' => $tmdpId, 'descendant_id' => $dwhId, 'depth' => 1],
+        ['ancestor_id' => $dwhId, 'descendant_id' => $dwhId, 'depth' => 0],
+        ['ancestor_id' => $miiId, 'descendant_id' => $miiId, 'depth' => 0],
+    ]);
+
+    $wsTmdpId = (string) Str::uuid();
+    $wsMiiId = (string) Str::uuid();
+
+    DB::table('workspaces')->insert([
+        ['id' => $wsTmdpId, 'owner_group_id' => $tmdpId, 'name' => 'TMDP Shared Platform', 'status' => 'ACTIVE', 'created_at' => now(), 'updated_at' => now()],
+        ['id' => $wsMiiId, 'owner_group_id' => $miiId, 'name' => 'MII ML Platform', 'status' => 'ACTIVE', 'created_at' => now(), 'updated_at' => now()],
+    ]);
+
+    $query = app(\App\Modules\Workload\Application\Queries\GetWorkspacesByGroupQuery::class);
+
+    // 1. Pimdiv DTI sees TMDP workspace (as descendant) but NOT MII
+    $dtiWorkspaces = collect($query->execute($dtiId, 999))->pluck('id')->all();
+    expect($dtiWorkspaces)->toContain($wsTmdpId)->not->toContain($wsMiiId);
+
+    // 2. DWH team sees TMDP workspace (as ancestor) but NOT MII
+    $dwhWorkspaces = collect($query->execute($dwhId, 888))->pluck('id')->all();
+    expect($dwhWorkspaces)->toContain($wsTmdpId)->not->toContain($wsMiiId);
+
+    // 3. MII only sees MII workspace
+    $miiWorkspaces = collect($query->execute($miiId, 777))->pluck('id')->all();
+    expect($miiWorkspaces)->toContain($wsMiiId)->not->toContain($wsTmdpId);
+});
+
+it('blocks IDOR when user from Unit B attempts to rename or archive Unit A workspace', function () {
+    $unitA = (string) Str::uuid();
+    $unitB = (string) Str::uuid();
+
+    $userA = UserModel::factory()->create(['org_unit_id' => $unitA]);
+    $userB = UserModel::factory()->create(['org_unit_id' => $unitB]);
+
+    // Give userB workspaces:manage permission so they pass FormRequest authorization
+    $role = RoleModel::create(['id' => (string) Str::uuid(), 'name' => 'Manager Role B', 'scope' => 'GLOBAL']);
+    $permId = (string) Str::uuid();
+    DB::table('permissions')->insertOrIgnore(['id' => $permId, 'name' => 'workspaces:manage']);
+    $perm = DB::table('permissions')->where('name', 'workspaces:manage')->first();
+    DB::table('role_permissions')->insert(['role_id' => $role->id, 'permission_id' => $perm->id]);
+    UserRoleModel::create(['id' => (string) Str::uuid(), 'user_id' => $userB->id, 'role_id' => $role->id]);
+
+    $workspaceA = WorkspaceModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Unit A Workspace',
+        'owner_group_id' => $unitA,
+        'status' => 'ACTIVE',
+    ]);
+
+    // User B tries to rename Unit A's workspace -> 403 Forbidden
+    $this->actingAs($userB)
+        ->putJson("/api/workspaces/{$workspaceA->id}", ['name' => 'Hacked Workspace Name'])
+        ->assertStatus(403);
+
+    // User B tries to archive Unit A's workspace -> 403 Forbidden
+    $this->actingAs($userB)
+        ->deleteJson("/api/workspaces/{$workspaceA->id}")
+        ->assertStatus(403);
+
+    // Verify workspace was not changed
+    expect(WorkspaceModel::find($workspaceA->id)->name)->toBe('Unit A Workspace');
+    expect(WorkspaceModel::find($workspaceA->id)->status)->toBe('ACTIVE');
+});
+
+it('releases workspace quota upon archival allowing department with limit 1 to create new workspace', function () {
+    $levelId = (string) Str::uuid();
+    DB::table('org_levels')->insert([
+        'id' => $levelId, 'slug' => 'div-level-quota', 'name' => 'Divisi', 'depth' => 1, 'can_own_workspace' => true,
+    ]);
+
+    $unitId = (string) Str::uuid();
+    DB::table('org_units')->insert([
+        'id' => $unitId, 'org_level_id' => $levelId, 'name' => 'Unit Quota Test', 'code' => 'U_QUOTA', 'max_workspaces' => 1,
+    ]);
+
+    $user = UserModel::factory()->create(['org_unit_id' => $unitId]);
+
+    $role = RoleModel::create(['id' => (string) Str::uuid(), 'name' => 'Quota Manager Role', 'scope' => 'GLOBAL']);
+    $permId = (string) Str::uuid();
+    DB::table('permissions')->insertOrIgnore(['id' => $permId, 'name' => 'workspaces:manage']);
+    $perm = DB::table('permissions')->where('name', 'workspaces:manage')->first();
+    DB::table('role_permissions')->insert(['role_id' => $role->id, 'permission_id' => $perm->id]);
+    UserRoleModel::create(['id' => (string) Str::uuid(), 'user_id' => $user->id, 'role_id' => $role->id]);
+
+    // 1. Create first workspace -> 201 Created
+    $resp1 = $this->actingAs($user)->postJson('/api/workspaces', ['name' => 'First Workspace'])
+        ->assertStatus(201);
+    $wsId = $resp1->json('id');
+
+    // 2. Second workspace creation blocked by quota limit
+    $this->actingAs($user)->postJson('/api/workspaces', ['name' => 'Second Workspace'])
+        ->assertStatus(422);
+
+    // 3. Archive first workspace -> 200 OK
+    $this->actingAs($user)->deleteJson("/api/workspaces/{$wsId}")
+        ->assertStatus(200);
+
+    // 4. Second workspace creation now succeeds because quota was released
+    $resp2 = $this->actingAs($user)->postJson('/api/workspaces', ['name' => 'Second Workspace After Archival'])
+        ->assertStatus(201);
+
+    expect($resp2->json('id'))->not->toBeNull();
+});
+
+it('allows parent unit (DTI) to pass WorkspacePolicy view for child unit (TMDP) workspace', function () {
+    $levelId = (string) Str::uuid();
+    DB::table('org_levels')->insert([
+        'id' => $levelId, 'slug' => 'hierarchy-level', 'name' => 'Level', 'depth' => 1, 'can_own_workspace' => true,
+    ]);
+
+    $dtiId = (string) Str::uuid();
+    $tmdpId = (string) Str::uuid();
+
+    DB::table('org_units')->insert([
+        ['id' => $dtiId, 'parent_id' => null, 'org_level_id' => $levelId, 'name' => 'Divisi TI', 'code' => 'H_DTI_POL', 'max_workspaces' => 0],
+        ['id' => $tmdpId, 'parent_id' => $dtiId, 'org_level_id' => $levelId, 'name' => 'TMDP', 'code' => 'H_TMDP_POL', 'max_workspaces' => 1],
+    ]);
+
+    DB::table('org_unit_closures')->insert([
+        ['ancestor_id' => $dtiId, 'descendant_id' => $dtiId, 'depth' => 0],
+        ['ancestor_id' => $dtiId, 'descendant_id' => $tmdpId, 'depth' => 1],
+        ['ancestor_id' => $tmdpId, 'descendant_id' => $tmdpId, 'depth' => 0],
+    ]);
+
+    $parentUser = UserModel::factory()->create(['org_unit_id' => $dtiId]);
+
+    $childWorkspace = WorkspaceModel::create([
+        'id' => (string) Str::uuid(),
+        'owner_group_id' => $tmdpId,
+        'name' => 'TMDP Child Workspace',
+        'status' => 'ACTIVE',
+    ]);
+
+    $policy = app(\App\Modules\Workload\Infrastructure\Auth\Policies\WorkspacePolicy::class);
+
+    expect($policy->view($parentUser, $childWorkspace))->toBeTrue();
+    expect($policy->update($parentUser, $childWorkspace))->toBeTrue();
+});
+
+it('blocks subordinate child unit (DWH) from updating or archiving parent (TMDP) workspace', function () {
+    $levelId = (string) Str::uuid();
+    DB::table('org_levels')->insert([
+        'id' => $levelId, 'slug' => 'child-sec-level', 'name' => 'Level', 'depth' => 1, 'can_own_workspace' => true,
+    ]);
+
+    $tmdpId = (string) Str::uuid();
+    $dwhId = (string) Str::uuid();
+
+    DB::table('org_units')->insert([
+        ['id' => $tmdpId, 'parent_id' => null, 'org_level_id' => $levelId, 'name' => 'TMDP', 'code' => 'P_TMDP', 'max_workspaces' => 1],
+        ['id' => $dwhId, 'parent_id' => $tmdpId, 'org_level_id' => $levelId, 'name' => 'DWH', 'code' => 'C_DWH', 'max_workspaces' => 0],
+    ]);
+
+    DB::table('org_unit_closures')->insert([
+        ['ancestor_id' => $tmdpId, 'descendant_id' => $tmdpId, 'depth' => 0],
+        ['ancestor_id' => $tmdpId, 'descendant_id' => $dwhId, 'depth' => 1],
+        ['ancestor_id' => $dwhId, 'descendant_id' => $dwhId, 'depth' => 0],
+    ]);
+
+    $childUser = UserModel::factory()->create(['org_unit_id' => $dwhId]);
+
+    // Give childUser workspaces:manage permission
+    $role = RoleModel::create(['id' => (string) Str::uuid(), 'name' => 'Child Manager', 'scope' => 'GLOBAL']);
+    $permId = (string) Str::uuid();
+    DB::table('permissions')->insertOrIgnore(['id' => $permId, 'name' => 'workspaces:manage']);
+    $perm = DB::table('permissions')->where('name', 'workspaces:manage')->first();
+    DB::table('role_permissions')->insert(['role_id' => $role->id, 'permission_id' => $perm->id]);
+    UserRoleModel::create(['id' => (string) Str::uuid(), 'user_id' => $childUser->id, 'role_id' => $role->id]);
+
+    $parentWorkspace = WorkspaceModel::create([
+        'id' => (string) Str::uuid(),
+        'owner_group_id' => $tmdpId,
+        'name' => 'TMDP Master Workspace',
+        'status' => 'ACTIVE',
+    ]);
+
+    // Child unit user CANNOT rename parent workspace -> 403 Forbidden
+    $this->actingAs($childUser)
+        ->putJson("/api/workspaces/{$parentWorkspace->id}", ['name' => 'Hacked TMDP'])
+        ->assertStatus(403);
+
+    // Child unit user CANNOT archive parent workspace -> 403 Forbidden
+    $this->actingAs($childUser)
+        ->deleteJson("/api/workspaces/{$parentWorkspace->id}")
+        ->assertStatus(403);
+
+    // Policy check: child unit user cannot update/delete parent workspace
+    $policy = app(\App\Modules\Workload\Infrastructure\Auth\Policies\WorkspacePolicy::class);
+    expect($policy->update($childUser, $parentWorkspace))->toBeFalse();
+    expect($policy->delete($childUser, $parentWorkspace))->toBeFalse();
+});
+
+it('rejects workspace creation when user has no assigned org_unit_id', function () {
+    $userWithoutUnit = UserModel::factory()->create(['org_unit_id' => null]);
+
+    $role = RoleModel::create(['id' => (string) Str::uuid(), 'name' => 'Floating Manager', 'scope' => 'GLOBAL']);
+    $permId = (string) Str::uuid();
+    DB::table('permissions')->insertOrIgnore(['id' => $permId, 'name' => 'workspaces:manage']);
+    $perm = DB::table('permissions')->where('name', 'workspaces:manage')->first();
+    DB::table('role_permissions')->insert(['role_id' => $role->id, 'permission_id' => $perm->id]);
+    UserRoleModel::create(['id' => (string) Str::uuid(), 'user_id' => $userWithoutUnit->id, 'role_id' => $role->id]);
+
+    $this->actingAs($userWithoutUnit)
+        ->postJson('/api/workspaces', ['name' => 'Orphan Workspace'])
+        ->assertStatus(422)
+        ->assertJsonFragment(['message' => 'User belum terdaftar pada unit organisasi. Hubungi Administrator.']);
+});
+
+it('returns 404 when superadmin updates or archives a non-existent workspace', function () {
+    $superadmin = UserModel::factory()->create(['email' => 'superadmin@wlms.com']);
+    $fakeId = (string) Str::uuid();
+
+    $this->actingAs($superadmin)
+        ->putJson("/api/workspaces/{$fakeId}", ['name' => 'New Name'])
+        ->assertStatus(404);
+
+    $this->actingAs($superadmin)
+        ->deleteJson("/api/workspaces/{$fakeId}")
+        ->assertStatus(404);
+});
+
+it('authorizes project lookups for users with project-level access and blocks outsiders', function () {
+    $ownerGroupId = (string) Str::uuid();
+    $outsiderGroupId = (string) Str::uuid();
+
+    $lead = UserModel::factory()->create(['org_unit_id' => $ownerGroupId]);
+    $guest = UserModel::factory()->create(['org_unit_id' => $outsiderGroupId]);
+    $outsider = UserModel::factory()->create(['org_unit_id' => $outsiderGroupId]);
+
+    $workspace = WorkspaceModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Project Lookups Workspace',
+        'owner_group_id' => $ownerGroupId,
+        'status' => 'ACTIVE',
+    ]);
+
+    $workflowId = (string) Str::uuid();
+    DB::table('workflows')->insert([
+        'id' => $workflowId,
+        'name' => 'Workflow Lookups',
+        'is_default' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $project = ProjectModel::create([
+        'id' => (string) Str::uuid(),
+        'workspace_id' => $workspace->id,
+        'workflow_id' => $workflowId,
+        'key' => 'LKUP',
+        'name' => 'Project Lookups Test',
+        'status' => 'ACTIVE',
+        'lead_id' => $lead->id,
+    ]);
+
+    // Give guest project-level role in user_roles
+    $role = RoleModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Project Guest Role',
+        'scope' => 'PROJECT',
+    ]);
+    UserRoleModel::create([
+        'id' => (string) Str::uuid(),
+        'user_id' => $guest->id,
+        'role_id' => $role->id,
+        'context_type' => 'PROJECT',
+        'context_id' => $project->id,
+    ]);
+
+    // Outsider has no access -> 403 Forbidden
+    $this->actingAs($outsider)
+        ->getJson("/api/projects/{$project->id}/lookups")
+        ->assertStatus(403);
+
+    // Guest has PROJECT role in user_roles -> 200 OK
+    $this->actingAs($guest)
+        ->getJson("/api/projects/{$project->id}/lookups")
+        ->assertStatus(200);
+});
+
+
+
 

@@ -9,6 +9,7 @@ export interface Workspace {
 export interface CreateWorkspacePayload {
     name: string;
     description?: string;
+    owner_group_id?: string;
 }
 
 // Wrapper DTO dari Laravel Resource biasanya ada didalam "data"

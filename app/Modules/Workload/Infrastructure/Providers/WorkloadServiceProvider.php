@@ -16,6 +16,7 @@ use App\Modules\Workload\Domain\Repositories\WorkflowRepositoryInterface;
 use App\Modules\Workload\Domain\Repositories\WorkspaceRepositoryInterface;
 use App\Modules\Workload\Infrastructure\Auth\Policies\WorkspacePolicy;
 use App\Modules\Workload\Infrastructure\Config\WorkspaceSettings;
+use App\Modules\Workload\Infrastructure\Listeners\AssignWorkspaceCreatorAsOwnerListener;
 use App\Modules\Workload\Infrastructure\Listeners\NotifyAssigneeMailListener;
 use App\Modules\Workload\Infrastructure\Listeners\WriteIssueAuditLogListener;
 use App\Modules\Workload\Infrastructure\Listeners\WriteWorkspaceAuditLogListener;
@@ -56,6 +57,7 @@ class WorkloadServiceProvider extends ServiceProvider
 
         // Workspace Events
         Event::listen(WorkspaceCreated::class, WriteWorkspaceAuditLogListener::class);
+        Event::listen(WorkspaceCreated::class, AssignWorkspaceCreatorAsOwnerListener::class);
 
         // Issue Events
         Event::listen(IssueTransitioned::class, WriteIssueAuditLogListener::class);

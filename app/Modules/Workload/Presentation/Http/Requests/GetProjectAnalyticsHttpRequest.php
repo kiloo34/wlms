@@ -18,11 +18,24 @@ final class GetProjectAnalyticsHttpRequest extends FormRequest
         }
 
         $projectId = (string) ($this->route('id') ?? $this->route('projectId') ?? $this->route('project_id') ?? '');
-        if ($projectId === '' || ! ProjectModel::where('id', $projectId)->whereNull('deleted_at')->exists()) {
+        if ($projectId === '') {
             abort(404, 'Project not found.');
         }
 
-        return WorkloadAccessChecker::canViewProject($user->id, $projectId);
+        $project = \Illuminate\Support\Facades\DB::table('projects')
+            ->where('id', $projectId)
+            ->whereNull('deleted_at')
+            ->first(['id', 'workspace_id', 'lead_id']);
+
+        if (! $project) {
+            abort(404, 'Project not found.');
+        }
+
+        if (! WorkloadAccessChecker::canViewProject($user->id, $projectId, (string) $project->workspace_id, $project->lead_id)) {
+            abort(403, 'Unauthorized.');
+        }
+
+        return true;
     }
 
     /**

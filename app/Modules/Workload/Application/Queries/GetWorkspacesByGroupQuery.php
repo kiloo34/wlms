@@ -18,11 +18,34 @@ final class GetWorkspacesByGroupQuery
         $query = DB::table('workspaces');
 
         if (! $isSuperadmin) {
-            $query->where(function ($q) use ($groupId, $userId) {
-                // 1. Tuan Rumah (Internal Divisi)
-                $q->where('owner_group_id', $groupId)
-                    // 2. Diundang langsung sebagai Member Workspace
-                    ->orWhereExists(function ($q2) use ($userId) {
+            // Resolve hierarchical org unit accessibility (Ancestors & Descendants via Closure Table)
+            $accessibleGroupIds = [];
+            if (! empty($groupId)) {
+                $accessibleGroupIds = [$groupId];
+                $related = DB::table('org_unit_closures')
+                    ->where('ancestor_id', $groupId)
+                    ->orWhere('descendant_id', $groupId)
+                    ->get(['ancestor_id', 'descendant_id'])
+                    ->flatMap(fn ($row) => [(string) $row->ancestor_id, (string) $row->descendant_id])
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                if (! empty($related)) {
+                    $accessibleGroupIds = $related;
+                }
+            }
+
+            $query->where(function ($q) use ($accessibleGroupIds, $userId) {
+                // 1. Tuan Rumah (Internal Divisi atau Hirarki Turunannya)
+                if (! empty($accessibleGroupIds)) {
+                    $q->whereIn('owner_group_id', $accessibleGroupIds);
+                } else {
+                    $q->whereRaw('1 = 0');
+                }
+
+                // 2. Diundang langsung sebagai Member Workspace
+                $q->orWhereExists(function ($q2) use ($userId) {
                         $q2->select(DB::raw(1))
                             ->from('workspace_members')
                             ->whereColumn('workspace_members.workspace_id', 'workspaces.id')

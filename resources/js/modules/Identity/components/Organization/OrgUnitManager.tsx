@@ -21,6 +21,7 @@ const DEFAULT_FORM_DATA: OrgUnitFormData = {
     parent_id: '',
     org_level_id: '',
     is_active: true,
+    max_workspaces: 0,
 };
 
 const flattenUnits = (
@@ -87,6 +88,7 @@ export function OrgUnitManager({ createTrigger = 0 }: OrgUnitManagerProps) {
             parent_id: unit.parent_id ?? '',
             org_level_id: unit.org_level_id,
             is_active: unit.is_active,
+            max_workspaces: unit.max_workspaces ?? 0,
         });
         setIsDialogOpen(true);
     };
@@ -108,6 +110,7 @@ export function OrgUnitManager({ createTrigger = 0 }: OrgUnitManagerProps) {
             org_level_id: formData.org_level_id,
             parent_id: formData.parent_id || null,
             is_active: formData.is_active,
+            max_workspaces: formData.max_workspaces,
         };
 
         if (editingUnit) {
