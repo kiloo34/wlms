@@ -572,16 +572,3 @@ export function UserBulkCreateDialog() {
         </Dialog>
     );
 }
-
-
-
-
-NIP : 120858
-NIP: 120853
-NIP : 120787
-NIP: 18098
-NIP: 18295
-NIP: 120852
-NIP: 120848
-NIP: 120846
-NIP: 120845
