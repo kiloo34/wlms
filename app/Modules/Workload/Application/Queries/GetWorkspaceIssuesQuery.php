@@ -23,14 +23,20 @@ final class GetWorkspaceIssuesQuery
 
         if ($actorUserId !== null && $actorUserId !== '') {
             if (! WorkloadAccessChecker::canBypassWorkspaceFilter($actorUserId, $workspaceId)) {
-                $query->whereHas('project', function (Builder $pq) use ($actorUserId) {
+                $query->whereHas('project', function (Builder $pq) use ($actorUserId, $workspaceId) {
                     $pq->where('projects.lead_id', $actorUserId)
-                        ->orWhereExists(function ($sub) use ($actorUserId) {
+                        ->orWhereExists(function ($sub) use ($actorUserId, $workspaceId) {
                             $sub->select(DB::raw(1))
                                 ->from('user_roles')
-                                ->whereColumn('user_roles.context_id', 'projects.id')
-                                ->where('user_roles.context_type', 'PROJECT')
-                                ->where('user_roles.user_id', $actorUserId);
+                                ->where('user_roles.user_id', $actorUserId)
+                                ->where(function ($rq) use ($workspaceId) {
+                                    $rq->where('user_roles.context_type', 'PROJECT')
+                                        ->whereColumn('user_roles.context_id', 'projects.id')
+                                        ->orWhere(function ($wq) use ($workspaceId) {
+                                            $wq->where('user_roles.context_type', 'WORKSPACE')
+                                                ->where('user_roles.context_id', $workspaceId);
+                                        });
+                                });
                         })
                         ->orWhereExists(function ($sub) use ($actorUserId) {
                             $sub->select(DB::raw(1))

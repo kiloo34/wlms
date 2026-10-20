@@ -39,13 +39,19 @@ final class GetProjectsUseCase
             $query->where(function ($q) use ($input) {
                 // 1. User is the Project Lead
                 $q->where('projects.lead_id', $input->actorUserId)
-                  // 2. User has a context role in the project
+                  // 2. User has a context role in the project or workspace
                     ->orWhereExists(function ($sub) use ($input) {
                         $sub->select(DB::raw(1))
                             ->from('user_roles')
-                            ->whereColumn('user_roles.context_id', 'projects.id')
-                            ->where('user_roles.context_type', 'PROJECT')
-                            ->where('user_roles.user_id', $input->actorUserId);
+                            ->where('user_roles.user_id', $input->actorUserId)
+                            ->where(function ($rq) use ($input) {
+                                $rq->where('user_roles.context_type', 'PROJECT')
+                                    ->whereColumn('user_roles.context_id', 'projects.id')
+                                    ->orWhere(function ($wq) use ($input) {
+                                        $wq->where('user_roles.context_type', 'WORKSPACE')
+                                            ->where('user_roles.context_id', $input->workspaceId);
+                                    });
+                            });
                     })
                   // 3. User is assigned to at least one issue in the project
                     ->orWhereExists(function ($sub) use ($input) {

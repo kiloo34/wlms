@@ -529,3 +529,80 @@ test('skenario hak akses penuh Superadmin lintas unit dan workspace', function (
     $this->actingAs($superadmin)->deleteJson("/api/workspaces/{$nonExistentId}")->assertStatus(404);
 });
 
+test('skenario tim developer bersama-sama: 1 role Developer (workspace) otomatis membuka akses ke seluruh 5 use case ML', function () {
+    $levelId = (string) Str::uuid();
+    DB::table('org_levels')->insert(['id' => $levelId, 'name' => 'Vendor Level', 'slug' => 'vendor-level', 'depth' => 1, 'can_own_workspace' => true]);
+
+    $vendorUnitId = (string) Str::uuid();
+    DB::table('org_units')->insert(['id' => $vendorUnitId, 'name' => 'PT MII', 'code' => 'MII', 'org_level_id' => $levelId, 'max_workspaces' => 1]);
+
+    // Role Developer dengan scope WORKSPACE
+    $devRole = RoleModel::create([
+        'id' => (string) Str::uuid(),
+        'name' => 'Developer',
+        'scope' => 'WORKSPACE',
+    ]);
+    $permId = (string) Str::uuid();
+    DB::table('permissions')->insertOrIgnore(['id' => $permId, 'name' => 'projects:view']);
+    $perm = DB::table('permissions')->where('name', 'projects:view')->first();
+    DB::table('role_permissions')->insert(['role_id' => $devRole->id, 'permission_id' => $perm->id]);
+
+    // Workspace MII
+    $workspaceId = (string) Str::uuid();
+    DB::table('workspaces')->insert([
+        'id' => $workspaceId,
+        'owner_group_id' => $vendorUnitId,
+        'name' => 'MII Machine Learning 5 Use Cases',
+        'status' => 'ACTIVE',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $workflow = WorkflowModel::create(['id' => (string) Str::uuid(), 'name' => 'ML Workflow', 'is_default' => true]);
+
+    // 5 Proyek Use Case dibuat di dalam workspace yang sama
+    $projectIds = [];
+    for ($i = 1; $i <= 5; $i++) {
+        $pId = (string) Str::uuid();
+        DB::table('projects')->insert([
+            'id' => $pId,
+            'workspace_id' => $workspaceId,
+            'workflow_id' => $workflow->id,
+            'key' => "ML0{$i}",
+            'name' => "Machine Learning Use Case {$i}",
+            'status' => 'ACTIVE',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $projectIds[] = $pId;
+    }
+
+    // Anggota Tim: Mochammad Aditya Putra Suhendar (Developer)
+    $aditya = UserModel::factory()->create([
+        'name' => 'Mochammad Aditya Putra Suhendar',
+        'email' => 'aditya@mii.co.id',
+        'org_unit_id' => $vendorUnitId,
+    ]);
+
+    // CUKUP 1 KALI ASSIGN di level WORKSPACE (tanpa harus assign 5 kali per proyek)
+    UserRoleModel::create([
+        'id' => (string) Str::uuid(),
+        'user_id' => $aditya->id,
+        'role_id' => $devRole->id,
+        'context_type' => 'WORKSPACE',
+        'context_id' => $workspaceId,
+    ]);
+
+    // Aditya membuka daftar proyek di workspace MII
+    $response = $this->actingAs($aditya)
+        ->getJson("/api/workspaces/{$workspaceId}/projects")
+        ->assertStatus(200)
+        ->json();
+
+    // Verifikasi: Aditya otomatis bisa melihat dan mengakses SELURUH 5 use case ML sekaligus!
+    expect($response)->toHaveCount(5);
+    $loadedKeys = array_column($response, 'key');
+    expect($loadedKeys)->toEqualCanonicalizing(['ML01', 'ML02', 'ML03', 'ML04', 'ML05']);
+});
+
+
