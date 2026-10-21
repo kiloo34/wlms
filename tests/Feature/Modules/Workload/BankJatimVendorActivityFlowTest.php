@@ -269,6 +269,15 @@ test('skenario lengkap alur aktivitas vendor MII dan Bank Jatim sesuai hirarki d
     expect($updatedProjectsList)->toHaveCount(1)
         ->and($updatedProjectsList[0]['id'])->toBe($projectId);
 
+    // Quinton dapat mengakses issues dan sprints proyek tanpa 403 Forbidden
+    $this->actingAs($quinton)
+        ->getJson("/api/projects/{$projectId}/issues?per_page=500")
+        ->assertStatus(200);
+
+    $this->actingAs($quinton)
+        ->getJson("/api/projects/{$projectId}/sprints")
+        ->assertStatus(200);
+
     // ------------------------------------------------------------------------
     // TAHAP 10: USER BANK JATIM (TMDP & SUBDIVISI DWH)
     // ------------------------------------------------------------------------

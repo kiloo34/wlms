@@ -11,13 +11,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import {
     useMyWorkspaces,
     useWorkspaceProjects,
@@ -95,7 +89,10 @@ export function GlobalIssueCreateModal() {
                 title,
                 issue_type_id: typeId,
                 priority_id: priorityId,
-                assignee_id: assigneeId || null,
+                assignee_id:
+                    assigneeId && assigneeId !== 'unassigned'
+                        ? assigneeId
+                        : null,
             },
             {
                 onSuccess: () => {
@@ -124,7 +121,12 @@ export function GlobalIssueCreateModal() {
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent
+                className="sm:max-w-[500px]"
+                onInteractOutside={(e) => {
+                    e.preventDefault();
+                }}
+            >
                 <DialogHeader>
                     <DialogTitle>{t('Create New Issue')}</DialogTitle>
                     <DialogDescription>
@@ -135,72 +137,63 @@ export function GlobalIssueCreateModal() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="workspace">{t('Workspace')}</Label>
-                        <Select
+                        <Combobox
+                            id="workspace"
+                            options={(workspaces || []).map(
+                                (ws: WorkspaceItem) => ({
+                                    value: ws.id.toString(),
+                                    label: ws.name,
+                                }),
+                            )}
                             value={workspaceId}
-                            disabled={!!activeProject?.workspace_id}
-                            onValueChange={(val) => {
+                            disabled={
+                                !!activeProject?.workspace_id ||
+                                isLoadingWorkspaces
+                            }
+                            onChange={(val) => {
                                 setWorkspaceId(val);
                                 setProjectId('');
                                 setTypeId('');
                                 setPriorityId('');
                                 setAssigneeId('');
                             }}
-                        >
-                            <SelectTrigger id="workspace">
-                                <SelectValue
-                                    placeholder={
-                                        isLoadingWorkspaces
-                                            ? 'Loading workspaces...'
-                                            : 'Select Workspace'
-                                    }
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {workspaces?.map((ws: WorkspaceItem) => (
-                                    <SelectItem
-                                        key={ws.id}
-                                        value={ws.id.toString()}
-                                    >
-                                        {ws.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                            placeholder={
+                                isLoadingWorkspaces
+                                    ? t('Loading workspaces...')
+                                    : t('Select Workspace')
+                            }
+                            emptyText={t('No workspace found.')}
+                        />
                     </div>
 
                     {workspaceId && (
                         <div className="space-y-2">
                             <Label htmlFor="project">{t('Project')}</Label>
-                            <Select
+                            <Combobox
+                                id="project"
+                                options={(projects || []).map(
+                                    (proj: ProjectItem) => ({
+                                        value: proj.id.toString(),
+                                        label: proj.name,
+                                    }),
+                                )}
                                 value={projectId}
-                                disabled={!!activeProject?.id}
-                                onValueChange={(val) => {
+                                disabled={
+                                    !!activeProject?.id || isLoadingProjects
+                                }
+                                onChange={(val) => {
                                     setProjectId(val);
                                     setTypeId('');
                                     setPriorityId('');
                                     setAssigneeId('');
                                 }}
-                            >
-                                <SelectTrigger id="project">
-                                    <SelectValue
-                                        placeholder={
-                                            isLoadingProjects
-                                                ? 'Loading projects...'
-                                                : 'Select Project'
-                                        }
-                                    />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {projects?.map((proj: ProjectItem) => (
-                                        <SelectItem
-                                            key={proj.id}
-                                            value={proj.id.toString()}
-                                        >
-                                            {proj.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                placeholder={
+                                    isLoadingProjects
+                                        ? t('Loading projects...')
+                                        : t('Select Project')
+                                }
+                                emptyText={t('No project found.')}
+                            />
                         </div>
                     )}
 
@@ -212,12 +205,19 @@ export function GlobalIssueCreateModal() {
                                 </Label>
                                 <Input
                                     id="title"
+                                    className="w-full"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     placeholder={t('Enter issue title')}
                                     required
                                 />
                             </div>
+
+                            {isLoadingLookups && (
+                                <p className="text-muted-foreground text-sm">
+                                    {t('Loading options...')}
+                                </p>
+                            )}
 
                             {!isLoadingLookups &&
                                 lookups &&
@@ -237,111 +237,89 @@ export function GlobalIssueCreateModal() {
                                                 <Label htmlFor="type">
                                                     {t('Type')} *
                                                 </Label>
-                                                <Select
+                                                <Combobox
+                                                    id="type"
+                                                    options={issueTypes.map(
+                                                        (type: LookupItem) => ({
+                                                            value: type.id.toString(),
+                                                            label:
+                                                                type.name ||
+                                                                `Type ${type.id}`,
+                                                        }),
+                                                    )}
                                                     value={typeId}
-                                                    onValueChange={setTypeId}
-                                                >
-                                                    <SelectTrigger id="type">
-                                                        <SelectValue
-                                                            placeholder={t(
-                                                                'Select Type',
-                                                            )}
-                                                        />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {issueTypes.map(
-                                                            (
-                                                                type: LookupItem,
-                                                            ) => (
-                                                                <SelectItem
-                                                                    key={
-                                                                        type.id
-                                                                    }
-                                                                    value={type.id.toString()}
-                                                                >
-                                                                    {type.name}
-                                                                </SelectItem>
-                                                            ),
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
+                                                    onChange={setTypeId}
+                                                    placeholder={t(
+                                                        'Select Type',
+                                                    )}
+                                                    emptyText={t(
+                                                        'No type found.',
+                                                    )}
+                                                />
                                             </div>
 
                                             <div className="space-y-2">
                                                 <Label htmlFor="priority">
                                                     {t('Priority')} *
                                                 </Label>
-                                                <Select
+                                                <Combobox
+                                                    id="priority"
+                                                    options={priorities.map(
+                                                        (
+                                                            priority: LookupItem,
+                                                        ) => ({
+                                                            value: priority.id.toString(),
+                                                            label:
+                                                                priority.name ||
+                                                                `Priority ${priority.id}`,
+                                                        }),
+                                                    )}
                                                     value={priorityId}
-                                                    onValueChange={
-                                                        setPriorityId
-                                                    }
-                                                >
-                                                    <SelectTrigger id="priority">
-                                                        <SelectValue
-                                                            placeholder={t(
-                                                                'Select Priority',
-                                                            )}
-                                                        />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {priorities.map(
-                                                            (
-                                                                priority: LookupItem,
-                                                            ) => (
-                                                                <SelectItem
-                                                                    key={
-                                                                        priority.id
-                                                                    }
-                                                                    value={priority.id.toString()}
-                                                                >
-                                                                    {
-                                                                        priority.name
-                                                                    }
-                                                                </SelectItem>
-                                                            ),
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
+                                                    onChange={setPriorityId}
+                                                    placeholder={t(
+                                                        'Select Priority',
+                                                    )}
+                                                    emptyText={t(
+                                                        'No priority found.',
+                                                    )}
+                                                />
                                             </div>
 
                                             <div className="col-span-2 space-y-2">
                                                 <Label htmlFor="assignee">
                                                     {t('Assignee')}
                                                 </Label>
-                                                <Select
-                                                    value={assigneeId}
-                                                    onValueChange={
-                                                        setAssigneeId
-                                                    }
-                                                >
-                                                    <SelectTrigger id="assignee">
-                                                        <SelectValue
-                                                            placeholder={t(
-                                                                'Select Assignee',
-                                                            )}
-                                                        />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {assignees.map(
+                                                <Combobox
+                                                    id="assignee"
+                                                    options={[
+                                                        {
+                                                            value: 'unassigned',
+                                                            label: t(
+                                                                'Unassigned',
+                                                            ),
+                                                        },
+                                                        ...assignees.map(
                                                             (
                                                                 member: LookupItem,
-                                                            ) => (
-                                                                <SelectItem
-                                                                    key={
-                                                                        member.id
-                                                                    }
-                                                                    value={member.id.toString()}
-                                                                >
-                                                                    {member.name ||
-                                                                        member
-                                                                            .user
-                                                                            ?.name}
-                                                                </SelectItem>
-                                                            ),
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
+                                                            ) => ({
+                                                                value: member.id.toString(),
+                                                                label:
+                                                                    member.name ||
+                                                                    member.user
+                                                                        ?.name ||
+                                                                    `User ${member.id}`,
+                                                            }),
+                                                        ),
+                                                    ]}
+                                                    value={assigneeId}
+                                                    onChange={setAssigneeId}
+                                                    placeholder={t(
+                                                        'Select Assignee',
+                                                    )}
+                                                    emptyText={t(
+                                                        'No user found.',
+                                                    )}
+                                                />
                                             </div>
                                         </div>
                                     );

@@ -22,6 +22,7 @@ use App\Modules\Workload\Presentation\Http\Requests\UpdateIssueHttpRequest;
 use App\Modules\Workload\Presentation\Http\Resources\IssueResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 final class IssueController
 {
@@ -36,11 +37,30 @@ final class IssueController
     {
         /** @var UserModel|null $user */
         $user = $request->user();
-        if (! $user || ! $user->hasPermission('issues:view')) {
+        if (! $user) {
+            abort(401, 'Unauthenticated.');
+        }
+
+        $project = DB::table('projects')
+            ->where('id', $projectId)
+            ->whereNull('deleted_at')
+            ->first(['workspace_id', 'lead_id']);
+
+        if (! $project) {
+            abort(404, 'Project not found.');
+        }
+
+        $workspaceId = (string) $project->workspace_id;
+
+        $hasPermission = $user->hasPermission('issues:view')
+            || $user->hasPermission('issues:view', 'WORKSPACE', $workspaceId)
+            || $user->hasPermission('issues:view', 'PROJECT', $projectId);
+
+        if (! $hasPermission) {
             abort(403, 'Unauthorized.');
         }
 
-        if (! WorkloadAccessChecker::canViewProject($user->id, $projectId)) {
+        if (! WorkloadAccessChecker::canViewProject($user->id, $projectId, $workspaceId, $project->lead_id)) {
             abort(403, 'Unauthorized.');
         }
 
@@ -96,13 +116,28 @@ final class IssueController
     {
         /** @var UserModel|null $user */
         $user = $request->user();
-        if (! $user || ! $user->hasPermission('issues:view')) {
-            abort(403, 'Unauthorized.');
+        if (! $user) {
+            abort(401, 'Unauthenticated.');
         }
 
         $issue = IssueModel::with(['assignee', 'reporter', 'status'])->findOrFail($id);
+        $project = DB::table('projects')
+            ->where('id', $issue->project_id)
+            ->whereNull('deleted_at')
+            ->first(['workspace_id', 'lead_id']);
 
-        if (! WorkloadAccessChecker::canViewProject($user->id, (string) $issue->project_id)) {
+        $workspaceId = $project ? (string) $project->workspace_id : '';
+        $projectId = (string) $issue->project_id;
+
+        $hasPermission = $user->hasPermission('issues:view')
+            || ($workspaceId !== '' && $user->hasPermission('issues:view', 'WORKSPACE', $workspaceId))
+            || $user->hasPermission('issues:view', 'PROJECT', $projectId);
+
+        if (! $hasPermission) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if (! WorkloadAccessChecker::canViewProject($user->id, $projectId, $workspaceId, $project?->lead_id)) {
             abort(403, 'Unauthorized.');
         }
 

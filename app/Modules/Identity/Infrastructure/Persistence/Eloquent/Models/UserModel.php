@@ -95,8 +95,12 @@ class UserModel extends Authenticatable implements PasskeyUser
 
         $this->loadMissing('userRoles.role');
         foreach ($this->userRoles as $userRole) {
-            $isGlobal = $userRole->context_type === null || strtoupper((string) $userRole->context_type) === 'GLOBAL';
-            $matchesContext = $contextType !== null && $contextId !== null && strcasecmp((string) $userRole->context_type, $contextType) === 0 && (string) $userRole->context_id === (string) $contextId;
+            $isGlobal = $userRole->context_type === null
+                || strtoupper((string) $userRole->context_type) === 'GLOBAL'
+                || $userRole->context_id === null;
+            $matchesContext = $contextType !== null
+                && strcasecmp((string) $userRole->context_type, $contextType) === 0
+                && ($userRole->context_id === null || ($contextId !== null && (string) $userRole->context_id === (string) $contextId));
             if (! $isGlobal && ! $matchesContext) {
                 continue;
             }
@@ -116,8 +120,12 @@ class UserModel extends Authenticatable implements PasskeyUser
 
         $this->loadMissing('userRoles.role.permissions');
         foreach ($this->userRoles as $userRole) {
-            $isGlobal = $userRole->context_type === null || strtoupper((string) $userRole->context_type) === 'GLOBAL';
-            $matchesContext = $contextType !== null && $contextId !== null && strcasecmp((string) $userRole->context_type, $contextType) === 0 && (string) $userRole->context_id === (string) $contextId;
+            $isGlobal = $userRole->context_type === null
+                || strtoupper((string) $userRole->context_type) === 'GLOBAL'
+                || $userRole->context_id === null;
+            $matchesContext = $contextType !== null
+                && strcasecmp((string) $userRole->context_type, $contextType) === 0
+                && ($userRole->context_id === null || ($contextId !== null && (string) $userRole->context_id === (string) $contextId));
             if (! $isGlobal && ! $matchesContext) {
                 continue;
             }
