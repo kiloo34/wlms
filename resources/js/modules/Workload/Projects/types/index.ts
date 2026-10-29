@@ -10,6 +10,10 @@ export interface Project {
     completed_issues_count?: number;
     start_date?: string | null;
     end_date?: string | null;
+    settings?: {
+        enable_sprints?: boolean;
+        [key: string]: unknown;
+    } | null;
     created_at?: string;
     updated_at?: string;
 }

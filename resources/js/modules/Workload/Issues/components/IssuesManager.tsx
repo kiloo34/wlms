@@ -27,6 +27,16 @@ import { usePermission } from '@/hooks/usePermission';
 interface LookupItem {
     id: string;
     name: string;
+    slug?: string;
+}
+
+export interface ProjectWorkloadSettings {
+    enable_sprints?: boolean;
+    sla_days_by_priority?: Record<string, number>;
+    working_days?: number[];
+    holidays?: string[];
+    worklog_max_hours_per_day?: number;
+    attachment_max_mb?: number;
 }
 
 interface IssuesManagerProps {
@@ -36,6 +46,7 @@ interface IssuesManagerProps {
         priorities: LookupItem[];
         statuses: LookupItem[];
         users: LookupItem[];
+        settings?: ProjectWorkloadSettings;
     };
 }
 
@@ -48,6 +59,8 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
     const { can } = usePermission();
     const canViewAnalytics = can('analytics:view');
     const canCreateIssue = can('issues:create') || can('issues:manage');
+
+    const enableSprints = lookups.settings?.enable_sprints !== false;
 
     const {
         issues,
@@ -110,6 +123,10 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
 
     // Add effect to sync URL if it lacks the tab on first load
     React.useEffect(() => {
+        if (!enableSprints && viewMode === 'backlog') {
+            setViewMode('board');
+            return;
+        }
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
             if (!params.get('tab')) {
@@ -118,7 +135,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                 window.history.replaceState({}, '', url.toString());
             }
         }
-    }, [viewMode]);
+    }, [viewMode, enableSprints]);
 
     // State for Log Work Dialog
     const [isLogWorkOpen, setIsLogWorkOpen] = useState(false);
@@ -156,9 +173,10 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
     const activeSprint = sprints.find(
         (s) => s.state?.toUpperCase() === 'ACTIVE',
     );
-    const kanbanIssues = activeSprint
-        ? boardFilteredIssues.filter((i) => i.sprint_id === activeSprint.id)
-        : boardFilteredIssues;
+    const kanbanIssues =
+        enableSprints && activeSprint
+            ? boardFilteredIssues.filter((i) => i.sprint_id === activeSprint.id)
+            : boardFilteredIssues;
 
     const doneStatusIds = lookups.statuses
         .filter((s) =>
@@ -232,7 +250,9 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                     payload: payload as UpdateIssuePayload,
                 });
             } else {
-                await createIssue(payload as CreateIssuePayload);
+                const created = await createIssue(payload as CreateIssuePayload);
+                handleCloseDialog();
+                return created;
             }
             handleCloseDialog();
         } catch (error) {
@@ -335,16 +355,18 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                         >
                             {t('List')}
                         </Button>
-                        <Button
-                            variant={
-                                viewMode === 'backlog' ? 'default' : 'ghost'
-                            }
-                            size="sm"
-                            className={tabBtnClass}
-                            onClick={() => setViewMode('backlog')}
-                        >
-                            {t('Backlog')}
-                        </Button>
+                        {enableSprints && (
+                            <Button
+                                variant={
+                                    viewMode === 'backlog' ? 'default' : 'ghost'
+                                }
+                                size="sm"
+                                className={tabBtnClass}
+                                onClick={() => setViewMode('backlog')}
+                            >
+                                {t('Backlog')}
+                            </Button>
+                        )}
                         {canViewAnalytics && (
                             <Button
                                 variant={
@@ -468,6 +490,7 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                 priorities={lookups.priorities}
                 statuses={lookups.statuses}
                 assignees={lookups.users}
+                settings={lookups.settings}
             />
 
             <LogWorkDialog

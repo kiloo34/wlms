@@ -5,19 +5,25 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useIssueComments } from '../hooks/useIssueComments';
 import { useTranslate } from '@/hooks/useTranslate';
-import { useUsers } from '@/modules/Identity/hooks/use-users';
+
+interface MentionUser {
+    id: string | number;
+    name: string;
+    email?: string;
+}
 
 interface IssueCommentSectionProps {
     issueId: string;
+    users?: MentionUser[];
 }
 
 export const IssueCommentSection: React.FC<IssueCommentSectionProps> = ({
     issueId,
+    users = [],
 }) => {
     const { t } = useTranslate();
     const { comments, isLoading, addComment, isAdding } =
         useIssueComments(issueId);
-    const { data: users = [] } = useUsers();
 
     const [newComment, setNewComment] = useState('');
     const [mentionQuery, setMentionQuery] = useState<string | null>(null);
@@ -35,7 +41,7 @@ export const IssueCommentSection: React.FC<IssueCommentSectionProps> = ({
                           u.name
                               .toLowerCase()
                               .includes(mentionQuery.toLowerCase()) ||
-                          u.email
+                          (u.email || '')
                               .toLowerCase()
                               .includes(mentionQuery.toLowerCase()),
                   )
@@ -66,7 +72,7 @@ export const IssueCommentSection: React.FC<IssueCommentSectionProps> = ({
         setMentionIndex(-1);
     };
 
-    const handleSelectMention = (user: { name: string; email: string }) => {
+    const handleSelectMention = (user: MentionUser) => {
         if (mentionIndex === -1) return;
 
         const cleanName = user.name.replace(/\s+/g, '');

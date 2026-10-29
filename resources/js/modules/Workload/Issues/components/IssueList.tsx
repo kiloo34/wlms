@@ -3,8 +3,21 @@ import { usePage } from '@inertiajs/react';
 import { Issue } from '@/types/issue';
 import { SharedData } from '@/types';
 import { Button } from '@/components/ui/button';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { SelectOption } from './IssueFormDialog';
+import { IssueFlags } from './IssueFlags';
 import { PriorityBadge } from '@/components/PriorityBadge';
+import { Badge } from '@/components/ui/badge';
 import { useTranslate } from '@/hooks/useTranslate';
 import { useIconSize } from '@/hooks/use-appearance';
 
@@ -126,6 +139,11 @@ export const IssueList: React.FC<IssueListProps> = ({
                                     {t('Assignee')}
                                 </th>
                                 <th
+                                    className={`${headerPaddingClass} text-muted-foreground text-left font-medium tracking-wider uppercase`}
+                                >
+                                    {t('Due Date')}
+                                </th>
+                                <th
                                     className={`${headerPaddingClass} text-muted-foreground text-right font-medium tracking-wider uppercase`}
                                 >
                                     {t('Actions')}
@@ -150,6 +168,9 @@ export const IssueList: React.FC<IssueListProps> = ({
                                                 className="hover:text-primary cursor-pointer hover:underline"
                                             >
                                                 {issue.title}
+                                            </span>
+                                            <span className="ml-2 inline-flex items-center gap-1 align-middle">
+                                                <IssueFlags issue={issue} />
                                             </span>
                                         </td>
                                         <td
@@ -213,6 +234,56 @@ export const IssueList: React.FC<IssueListProps> = ({
                                             )}
                                         </td>
                                         <td
+                                            className={`${cellPaddingClass} whitespace-nowrap`}
+                                        >
+                                            {issue.due_date ? (
+                                                (() => {
+                                                    const todayStr = new Date()
+                                                        .toISOString()
+                                                        .slice(0, 10);
+                                                    const dueStr =
+                                                        issue.due_date.slice(
+                                                            0,
+                                                            10,
+                                                        );
+                                                    const isDone =
+                                                        issue.status?.category?.toUpperCase() ===
+                                                        'DONE';
+                                                    const isOverdue =
+                                                        issue.is_overdue ??
+                                                        (!isDone &&
+                                                            dueStr < todayStr);
+                                                    return (
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span
+                                                                className={
+                                                                    isOverdue
+                                                                        ? 'font-medium text-red-600 dark:text-red-400'
+                                                                        : 'text-muted-foreground'
+                                                                }
+                                                            >
+                                                                {dueStr}
+                                                            </span>
+                                                            {isOverdue && (
+                                                                <Badge
+                                                                    variant="outline"
+                                                                    className="border-red-500/20 bg-red-500/10 px-1.5 py-0 text-[10px] font-semibold text-red-600 dark:text-red-400"
+                                                                >
+                                                                    {t(
+                                                                        'Overdue',
+                                                                    )}
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()
+                                            ) : (
+                                                <span className="text-muted-foreground text-xs">
+                                                    -
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td
                                             className={`${cellPaddingClass} space-x-1.5 text-right font-medium whitespace-nowrap`}
                                         >
                                             {currentUserId &&
@@ -242,22 +313,46 @@ export const IssueList: React.FC<IssueListProps> = ({
                                             >
                                                 {t('Edit')}
                                             </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                className={actionButtonClass}
-                                                onClick={() => {
-                                                    if (
-                                                        window.confirm(
-                                                            'Are you sure you want to delete this issue?',
-                                                        )
-                                                    ) {
-                                                        onDelete(issue.id);
-                                                    }
-                                                }}
-                                            >
-                                                {t('Delete')}
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        className={
+                                                            actionButtonClass
+                                                        }
+                                                    >
+                                                        {t('Delete')}
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>
+                                                            {t('Delete Issue')}
+                                                        </AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            {t(
+                                                                'Are you sure you want to delete this issue?',
+                                                            )}
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>
+                                                            {t('Cancel')}
+                                                        </AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() =>
+                                                                onDelete(
+                                                                    issue.id,
+                                                                )
+                                                            }
+                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                        >
+                                                            {t('Delete')}
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </td>
                                     </tr>
                                 );

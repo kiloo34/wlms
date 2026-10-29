@@ -31,6 +31,7 @@ import {
     Flame,
     Sparkles,
     ListFilter,
+    Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -57,6 +58,9 @@ export function ProjectAnalyticsDashboard({
     );
     const [breakdownMode, setBreakdownMode] = useState<'type' | 'priority'>(
         'type',
+    );
+    const [timesheetMonth, setTimesheetMonth] = useState<string>(() =>
+        new Date().toISOString().slice(0, 7),
     );
 
     const { data, isLoading, error } = useProjectAnalytics({
@@ -186,26 +190,52 @@ export function ProjectAnalyticsDashboard({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5">
-                    {sprint_metrics.has_sprints &&
-                        sprint_metrics.velocity.length > 0 && (
-                            <Select
-                                value={selectedSprintId || 'all'}
-                                onValueChange={(val) =>
-                                    setSelectedSprintId(
-                                        val === 'all' ? undefined : val,
-                                    )
-                                }
+                    <div className="flex items-center gap-1.5">
+                        <input
+                            type="month"
+                            value={timesheetMonth}
+                            onChange={(e) => setTimesheetMonth(e.target.value)}
+                            className="border-input bg-background ring-offset-background focus-visible:ring-ring h-8 rounded-md border px-2 text-xs focus-visible:ring-1 focus-visible:outline-none"
+                        />
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 gap-1.5 text-xs"
+                            asChild
+                        >
+                            <a
+                                href={`/api/projects/${projectId}/timesheets/export?month=${encodeURIComponent(timesheetMonth)}&format=xlsx`}
+                                download
                             >
-                                <SelectTrigger className="h-8 w-40 text-xs">
-                                    <SelectValue
-                                        placeholder={t('All Sprints')}
-                                    />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">
-                                        {t('Active / Latest Sprint')}
-                                    </SelectItem>
-                                    {sprint_metrics.velocity.map((v) => (
+                                <Download className="h-3.5 w-3.5" />
+                                {t('Export Timesheet')}
+                            </a>
+                        </Button>
+                    </div>
+
+                    {sprint_metrics.has_sprints && (
+                        <Select
+                            value={selectedSprintId || 'all'}
+                            onValueChange={(val) =>
+                                setSelectedSprintId(
+                                    val === 'all' ? undefined : val,
+                                )
+                            }
+                        >
+                            <SelectTrigger className="h-8 w-44 text-xs">
+                                <SelectValue
+                                    placeholder={t('All Sprints')}
+                                />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    {t('Active / Latest Sprint')}
+                                </SelectItem>
+                                <SelectItem value="non_sprint">
+                                    {t('Non-Sprint (Period Flow)')}
+                                </SelectItem>
+                                {sprint_metrics.mode !== 'non_sprint' &&
+                                    sprint_metrics.velocity.map((v) => (
                                         <SelectItem
                                             key={v.sprint_id}
                                             value={v.sprint_id}
@@ -213,9 +243,9 @@ export function ProjectAnalyticsDashboard({
                                             {v.sprint_name}
                                         </SelectItem>
                                     ))}
-                                </SelectContent>
-                            </Select>
-                        )}
+                            </SelectContent>
+                        </Select>
+                    )}
 
                     <DateRangeFilter
                         dateRange={dateRange}
@@ -227,7 +257,14 @@ export function ProjectAnalyticsDashboard({
             </div>
 
             {/* KPI Summary Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+                className={cn(
+                    'grid grid-cols-1 gap-4 sm:grid-cols-2',
+                    summary.overdue_issues !== undefined
+                        ? 'lg:grid-cols-5'
+                        : 'lg:grid-cols-4',
+                )}
+            >
                 <Card className={cardPadding}>
                     <div className="flex items-center justify-between">
                         <span className="text-muted-foreground text-xs font-medium">
@@ -308,6 +345,36 @@ export function ProjectAnalyticsDashboard({
                         {t('Waiting to be started')}
                     </p>
                 </Card>
+
+                {summary.overdue_issues !== undefined && (
+                    <Card
+                        className={cn(
+                            cardPadding,
+                            summary.overdue_issues > 0 &&
+                                'border-red-500/30 bg-red-500/5',
+                        )}
+                    >
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground text-xs font-medium">
+                                {t('Overdue')}
+                            </span>
+                            <AlertCircle className="h-4 w-4 text-red-500" />
+                        </div>
+                        <div className="mt-2 flex items-baseline gap-2">
+                            <span
+                                className={cn(
+                                    'font-bold text-red-600 dark:text-red-400',
+                                    kpiValSize,
+                                )}
+                            >
+                                {summary.overdue_issues}
+                            </span>
+                        </div>
+                        <p className="text-muted-foreground mt-1 text-[11px]">
+                            {t('Past due date & unresolved')}
+                        </p>
+                    </Card>
+                )}
             </div>
 
             {/* Row 2: Delivery Speed Histogram & Cumulative Flow */}
@@ -477,17 +544,19 @@ export function ProjectAnalyticsDashboard({
                         <div className="flex items-center justify-between">
                             <div>
                                 <CardTitle className="text-sm font-semibold">
-                                    {sprint_metrics.has_sprints
+                                    {sprint_metrics.has_sprints &&
+                                    sprint_metrics.mode !== 'non_sprint'
                                         ? t('Sprint Burndown & Velocity')
-                                        : t('Throughput Metrics')}
+                                        : t('Period Progress & Velocity')}
                                 </CardTitle>
                                 <CardDescription className="text-xs">
-                                    {sprint_metrics.has_sprints
+                                    {sprint_metrics.has_sprints &&
+                                    sprint_metrics.mode !== 'non_sprint'
                                         ? t(
                                               'Ideal vs actual story points burndown and sprint velocity.',
                                           )
                                         : t(
-                                              'Continuous delivery metrics for kanban workflows.',
+                                              'Period burndown and weekly delivery velocity (Sprint-Agnostic).',
                                           )}
                                 </CardDescription>
                             </div>
@@ -495,13 +564,14 @@ export function ProjectAnalyticsDashboard({
                         </div>
                     </CardHeader>
                     <CardContent className="flex-1 pt-2">
-                        {sprint_metrics.has_sprints ? (
+                        {burndownFormatted.length > 0 ||
+                        velocityFormatted.length > 0 ? (
                             <BurndownVelocityChart
                                 burndownData={burndownFormatted}
                                 velocityData={velocityFormatted}
-                                emptyTitle={t('No Sprint Metrics')}
+                                emptyTitle={t('No Progress Metrics')}
                                 emptyMessage={t(
-                                    'No sprint history available for this project.',
+                                    'No progress history available for this project.',
                                 )}
                             />
                         ) : (

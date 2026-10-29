@@ -21,6 +21,7 @@ import {
 import { useTranslate } from '@/hooks/useTranslate';
 import { useIconSize, type IconSize } from '@/hooks/use-appearance';
 import { EstimatePopover } from './EstimatePopover';
+import { IssueFlags } from './IssueFlags';
 
 export interface LookupData {
     statuses?: any[];
@@ -63,6 +64,18 @@ export const getFullPayload = (issue: Issue, overrides: any) => ({
         overrides.remaining_estimate_seconds !== undefined
             ? overrides.remaining_estimate_seconds
             : issue.remaining_estimate_seconds,
+    start_date:
+        overrides.start_date !== undefined
+            ? overrides.start_date
+            : issue.start_date || null,
+    due_date:
+        overrides.due_date !== undefined
+            ? overrides.due_date
+            : issue.due_date || null,
+    parent_id:
+        overrides.parent_id !== undefined
+            ? overrides.parent_id
+            : issue.parent_id || null,
 });
 
 export const getStatusVariant = (name: string) => {
@@ -338,6 +351,7 @@ export const BacklogIssueRow: React.FC<BacklogIssueRowProps> = ({
                         className={`${actionIconClass} text-muted-foreground opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100`}
                     />
                 </span>
+                <IssueFlags issue={issue} />
             </div>
             <div className="flex flex-shrink-0 items-center gap-3.5">
                 <div

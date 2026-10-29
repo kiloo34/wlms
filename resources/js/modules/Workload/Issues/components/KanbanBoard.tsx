@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/react';
 import { Issue } from '@/types/issue';
 import { SharedData } from '@/types';
 import { SelectOption } from './IssueFormDialog';
+import { IssueFlags } from './IssueFlags';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PriorityBadge } from '@/components/PriorityBadge';
@@ -23,6 +24,7 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Calendar, AlertCircle } from 'lucide-react';
 import { useTranslate } from '@/hooks/useTranslate';
 import { useIconSize } from '@/hooks/use-appearance';
 
@@ -146,6 +148,43 @@ const SortableIssueCard = ({
                         category={priorityObj?.category}
                         size={iconSize === 'lg' ? 'md' : 'sm'}
                     />
+                    {issue.due_date &&
+                        (() => {
+                            const todayStr = new Date()
+                                .toISOString()
+                                .slice(0, 10);
+                            const dueStr = issue.due_date.slice(0, 10);
+                            const isDone =
+                                issue.status?.category?.toUpperCase() ===
+                                'DONE';
+                            const isOverdue =
+                                issue.is_overdue ??
+                                (!isDone && dueStr < todayStr);
+
+                            return (
+                                <Badge
+                                    variant="outline"
+                                    className={`${badgeClass} inline-flex items-center gap-1 font-medium ${
+                                        isOverdue
+                                            ? 'border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400'
+                                            : 'bg-muted/50 text-muted-foreground font-normal'
+                                    }`}
+                                >
+                                    {isOverdue ? (
+                                        <AlertCircle className="h-3 w-3 shrink-0" />
+                                    ) : (
+                                        <Calendar className="h-3 w-3 shrink-0" />
+                                    )}
+                                    <span>{dueStr}</span>
+                                    {isOverdue && (
+                                        <span className="font-semibold">
+                                            ({t('Overdue')})
+                                        </span>
+                                    )}
+                                </Badge>
+                            );
+                        })()}
+                    <IssueFlags issue={issue} />
                 </div>
 
                 <Avatar

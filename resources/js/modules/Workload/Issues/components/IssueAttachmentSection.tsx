@@ -14,6 +14,17 @@ import {
 import { toast } from 'sonner';
 import { useTranslate } from '@/hooks/useTranslate';
 import { Button } from '@/components/ui/button';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { usePage } from '@inertiajs/react';
 import { SharedData } from '@/types';
 import { usePermission } from '@/hooks/usePermission';
@@ -144,9 +155,6 @@ export const IssueAttachmentSection: React.FC<IssueAttachmentSectionProps> = ({
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm(t('Are you sure you want to delete this attachment?')))
-            return;
-
         try {
             setDeletingId(id);
             await axios.delete(`/api/attachments/${id}`);
@@ -263,25 +271,64 @@ export const IssueAttachmentSection: React.FC<IssueAttachmentSectionProps> = ({
                                         </a>
 
                                         {canDelete && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() =>
-                                                    handleDelete(item.id)
-                                                }
-                                                disabled={
-                                                    deletingId === item.id
-                                                }
-                                                className="text-destructive hover:bg-destructive/10 hover:text-destructive h-7 w-7 p-0"
-                                                title={t('Delete attachment')}
-                                            >
-                                                {deletingId === item.id ? (
-                                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                ) : (
-                                                    <Trash2 className="h-3.5 w-3.5" />
-                                                )}
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        disabled={
+                                                            deletingId ===
+                                                            item.id
+                                                        }
+                                                        className="text-destructive hover:bg-destructive/10 hover:text-destructive h-7 w-7 p-0"
+                                                        title={t(
+                                                            'Delete attachment',
+                                                        )}
+                                                    >
+                                                        {deletingId ===
+                                                        item.id ? (
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        )}
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>
+                                                            {t(
+                                                                'Delete attachment',
+                                                            )}
+                                                        </AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            {t(
+                                                                'Are you sure you want to delete this attachment?',
+                                                            )}{' '}
+                                                            (
+                                                            <span className="text-foreground font-medium">
+                                                                {item.filename}
+                                                            </span>
+                                                            )
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>
+                                                            {t('Cancel')}
+                                                        </AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    item.id,
+                                                                )
+                                                            }
+                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                        >
+                                                            {t('Delete')}
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         )}
                                     </div>
                                 </div>

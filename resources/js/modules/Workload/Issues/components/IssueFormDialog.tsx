@@ -15,24 +15,74 @@ import { Issue } from '@/types/issue';
 import {
     CreateIssuePayload,
     UpdateIssuePayload,
+    useIssues,
     useIssueWorklogs,
 } from '../hooks/useIssues';
 import { WorklogHistory } from './WorklogHistory';
 import { IssueCommentSection } from './IssueCommentSection';
 import { IssueAttachmentSection } from './IssueAttachmentSection';
+import { IssueLinksPanel } from './IssueLinksPanel';
+import { LinkAfterCreate, SimilarIssuesBox } from './SimilarIssuesBox';
 import { useTranslate } from '@/hooks/useTranslate';
+import { usePermission } from '@/hooks/usePermission';
 import { toast } from 'sonner';
-import { useProjectLookups } from '@/hooks/api/issues';
+import { useAddIssueLink, useProjectLookups } from '@/hooks/api/issues';
 
 export interface SelectOption {
     id: string;
     name: string;
+    slug?: string;
+}
+
+export interface IssueWorkloadSettings {
+    enable_sprints?: boolean;
+    sla_days_by_priority?: Record<string, number>;
+    working_days?: number[];
+    holidays?: string[];
+    worklog_max_hours_per_day?: number;
+    attachment_max_mb?: number;
+}
+
+function calculateBusinessDueDate(
+    baseDateStr: string,
+    daysToAdd: number,
+    workingDays: number[] = [1, 2, 3, 4, 5],
+    holidays: string[] = [],
+): string {
+    if (daysToAdd <= 0) return baseDateStr;
+    const parts = baseDateStr.split('-').map(Number);
+    const current = new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
+    const holidaySet = new Set(holidays);
+    const validWorkingDays =
+        workingDays.length > 0 ? workingDays : [1, 2, 3, 4, 5];
+
+    let remaining = daysToAdd;
+    let safety = 0;
+    while (remaining > 0 && safety < 1000) {
+        safety++;
+        current.setDate(current.getDate() + 1);
+        const isoDay = current.getDay() === 0 ? 7 : current.getDay();
+        const yyyy = current.getFullYear();
+        const mm = String(current.getMonth() + 1).padStart(2, '0');
+        const dd = String(current.getDate()).padStart(2, '0');
+        const formatted = `${yyyy}-${mm}-${dd}`;
+        if (validWorkingDays.includes(isoDay) && !holidaySet.has(formatted)) {
+            remaining--;
+        }
+    }
+    const yyyy = current.getFullYear();
+    const mm = String(current.getMonth() + 1).padStart(2, '0');
+    const dd = String(current.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
 }
 
 interface IssueFormDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (payload: CreateIssuePayload | UpdateIssuePayload) => void;
+    // Boleh mengembalikan issue hasil create agar tautan "serupa" bisa dibuat.
+    onSubmit: (
+        payload: CreateIssuePayload | UpdateIssuePayload,
+    ) => void | Promise<unknown>;
     issue?: Issue | null;
     isLoading?: boolean;
     projectId?: string;
@@ -41,6 +91,7 @@ interface IssueFormDialogProps {
     priorities: SelectOption[];
     statuses: SelectOption[];
     assignees: SelectOption[];
+    settings?: IssueWorkloadSettings;
 }
 
 export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
@@ -55,6 +106,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
     priorities,
     statuses,
     assignees,
+    settings,
 }) => {
     const { t } = useTranslate();
     const isEdit = !!issue;
@@ -68,6 +120,25 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
     const [assigneeId, setAssigneeId] = useState('');
     const [originalEstimateHours, setOriginalEstimateHours] =
         useState<string>('');
+    const [startDate, setStartDate] = useState<string>('');
+    const [dueDate, setDueDate] = useState<string>('');
+    const [parentId, setParentId] = useState<string>('');
+    const [linkAfterCreate, setLinkAfterCreate] =
+        useState<LinkAfterCreate | null>(null);
+
+    const { can } = usePermission();
+    const canManageLinks = can('issues:create') || can('issues:manage');
+    const addLink = useAddIssueLink();
+
+    const effectiveProjectId =
+        (isEdit ? issue?.project_id : projectId || selectedProjectId) || '';
+    const { issues: projectIssues } = useIssues(effectiveProjectId);
+    const parentOptions = projectIssues
+        .filter((i) => !i.parent_id && i.id !== issue?.id)
+        .map((i) => ({
+            value: i.id,
+            label: `${i.key ?? i.id.slice(0, 3)} ${i.title}`,
+        }));
 
     const { data: worklogs = [], isLoading: isLoadingWorklogs } =
         useIssueWorklogs(issue?.id || null);
@@ -83,6 +154,26 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
     const activePriorities = dynamicLookups?.priorities || priorities;
     const activeStatuses = dynamicLookups?.statuses || statuses;
     const activeAssignees = dynamicLookups?.users || assignees;
+    const activeSettings: IssueWorkloadSettings | undefined =
+        dynamicLookups?.settings || settings;
+
+    const getAutoDueDate = (prioId: string, baseStart?: string): string => {
+        if (!activeSettings?.sla_days_by_priority) return '';
+        const prio = (activePriorities || []).find(
+            (p: SelectOption) => String(p.id) === String(prioId),
+        );
+        if (!prio) return '';
+        const slug = (prio.slug || prio.name).toLowerCase();
+        const slaDays = activeSettings.sla_days_by_priority[slug];
+        if (typeof slaDays !== 'number' || slaDays <= 0) return '';
+        const todayStr = new Date().toISOString().slice(0, 10);
+        return calculateBusinessDueDate(
+            baseStart || todayStr,
+            slaDays,
+            activeSettings.working_days,
+            activeSettings.holidays,
+        );
+    };
 
     useEffect(() => {
         if (!isEdit && selectedProjectId && dynamicLookups) {
@@ -140,6 +231,11 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                         ? String(issue.original_estimate_seconds / 3600)
                         : '',
                 );
+                setStartDate(
+                    issue.start_date ? issue.start_date.slice(0, 10) : '',
+                );
+                setDueDate(issue.due_date ? issue.due_date.slice(0, 10) : '');
+                setParentId(issue.parent_id ? String(issue.parent_id) : '');
             } else {
                 // Recover draft from Local Storage for new issues
                 setTitle(localStorage.getItem('wlms_draft_issue_title') || '');
@@ -151,6 +247,10 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                 setStatusId(statuses[0] ? String(statuses[0].id) : '');
                 setAssigneeId('unassigned');
                 setOriginalEstimateHours('');
+                setStartDate('');
+                setDueDate('');
+                setParentId('');
+                setLinkAfterCreate(null);
             }
         }
     }, [isOpen, issue, issueTypes, priorities, statuses]);
@@ -169,7 +269,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
         }
     }, [projectId]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!isEdit && !projectId && !selectedProjectId) {
@@ -194,6 +294,9 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                     : originalEstimateHours
                       ? Number(originalEstimateHours) * 3600
                       : null,
+            start_date: startDate || null,
+            due_date: dueDate || null,
+            parent_id: parentId || null,
         };
 
         if (isEdit) {
@@ -202,12 +305,33 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
             payload.status_id = statusId;
         }
 
-        onSubmit(payload);
+        const pending = onSubmit(payload);
+        const pendingLink = linkAfterCreate;
 
         // Clear draft on successful submit
         if (!isEdit) {
             localStorage.removeItem('wlms_draft_issue_title');
             localStorage.removeItem('wlms_draft_issue_description');
+        }
+
+        if (!isEdit && pendingLink) {
+            const created = (await pending) as
+                | { id?: string }
+                | null
+                | undefined;
+            if (created?.id) {
+                addLink.mutate(
+                    {
+                        issueId: created.id,
+                        targetIssueId: pendingLink.targetId,
+                        linkType: pendingLink.linkType,
+                    },
+                    {
+                        onError: () =>
+                            toast.error(t('Gagal menautkan tiket serupa')),
+                    },
+                );
+            }
         }
     };
 
@@ -239,6 +363,29 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder={t('Issue title')}
                     required
+                />
+                {!isEdit && (
+                    <SimilarIssuesBox
+                        projectId={effectiveProjectId}
+                        title={title}
+                        value={linkAfterCreate}
+                        onChange={setLinkAfterCreate}
+                    />
+                )}
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="parent">{t('Parent issue (sub-task)')}</Label>
+                <Combobox
+                    id="parent"
+                    options={[
+                        { value: '', label: t('None') },
+                        ...parentOptions,
+                    ]}
+                    value={parentId}
+                    onChange={setParentId}
+                    placeholder={t('Search issue...')}
+                    emptyText={t('No issues found.')}
                 />
             </div>
 
@@ -287,7 +434,13 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                             }),
                         )}
                         value={priorityId}
-                        onChange={setPriorityId}
+                        onChange={(val) => {
+                            setPriorityId(val);
+                            if (!isEdit && activeSettings?.sla_days_by_priority) {
+                                const computed = getAutoDueDate(val, startDate);
+                                if (computed) setDueDate(computed);
+                            }
+                        }}
                         placeholder={t('Search priority...')}
                         emptyText="No priority found."
                     />
@@ -331,6 +484,28 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                         onChange={setAssigneeId}
                         placeholder={t('Search assignee...')}
                         emptyText="No user found."
+                    />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="start_date">{t('Start Date')}</Label>
+                    <Input
+                        id="start_date"
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="due_date">{t('Due Date')}</Label>
+                    <Input
+                        id="due_date"
+                        type="date"
+                        value={dueDate}
+                        onChange={(e) => setDueDate(e.target.value)}
                     />
                 </div>
             </div>
@@ -395,6 +570,9 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                             <TabsTrigger value="details" className="flex-1">
                                 {t('Details')}
                             </TabsTrigger>
+                            <TabsTrigger value="links" className="flex-1">
+                                {t('Sub-tasks & Links')}
+                            </TabsTrigger>
                             <TabsTrigger value="worklogs" className="flex-1">
                                 {t('Worklogs')}
                             </TabsTrigger>
@@ -406,6 +584,13 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="details">{formContent}</TabsContent>
+                        <TabsContent value="links">
+                            <IssueLinksPanel
+                                issue={issue}
+                                canManage={canManageLinks}
+                                projectIssues={projectIssues}
+                            />
+                        </TabsContent>
                         <TabsContent value="worklogs">
                             <WorklogHistory
                                 worklogs={worklogs}
@@ -413,7 +598,10 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                             />
                         </TabsContent>
                         <TabsContent value="comments">
-                            <IssueCommentSection issueId={String(issue.id)} />
+                            <IssueCommentSection
+                                issueId={String(issue.id)}
+                                users={activeAssignees}
+                            />
                         </TabsContent>
                         <TabsContent value="attachments">
                             <IssueAttachmentSection

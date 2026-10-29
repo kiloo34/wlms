@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Plus } from 'lucide-react';
 import { StatusList } from './StatusList';
 import { StatusFormDialog } from './StatusFormDialog';
@@ -21,6 +31,7 @@ export function StatusManager() {
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
+    const [statusToDelete, setStatusToDelete] = useState<Status | null>(null);
 
     const handleOpenCreate = () => {
         setSelectedStatus(null);
@@ -33,11 +44,7 @@ export function StatusManager() {
     };
 
     const handleDelete = (status: Status) => {
-        if (
-            confirm(`Are you sure you want to delete status "${status.name}"?`)
-        ) {
-            deleteStatus.mutate(status.id);
-        }
+        setStatusToDelete(status);
     };
 
     const handleSubmit = (payload: CreateStatusDto | UpdateStatusDto) => {
@@ -81,6 +88,36 @@ export function StatusManager() {
                 onSubmit={handleSubmit}
                 isLoading={createStatus.isPending || updateStatus.isPending}
             />
+
+            <AlertDialog
+                open={!!statusToDelete}
+                onOpenChange={(open) => !open && setStatusToDelete(null)}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {t('Delete Status')}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {`Are you sure you want to delete status "${statusToDelete?.name ?? ''}"?`}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                if (statusToDelete) {
+                                    deleteStatus.mutate(statusToDelete.id);
+                                    setStatusToDelete(null);
+                                }
+                            }}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {t('Delete')}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

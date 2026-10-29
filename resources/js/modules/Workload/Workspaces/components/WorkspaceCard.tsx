@@ -154,6 +154,7 @@ export function WorkspaceCard({
             <EditWorkspaceDialog
                 open={editOpen}
                 onOpenChange={setEditOpen}
+                workspaceId={workspace.id}
                 initialName={workspace.name}
                 onSubmit={handleUpdate}
                 isPending={isUpdating}

@@ -12,6 +12,7 @@ import { BarChart } from '@/components/charts/BarChart';
 import { ChartCardSkeleton } from '@/components/charts/ChartCardSkeleton';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useTranslate } from '@/hooks/useTranslate';
 import { useIconSize } from '@/hooks/use-appearance';
 import {
@@ -22,6 +23,7 @@ import {
     Users,
     AlertCircle,
     Activity,
+    Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -39,6 +41,9 @@ export function WorkspaceAnalyticsView({
     const [dateRange, setDateRange] = useState<DateRangePreset>('30d');
     const [customFrom, setCustomFrom] = useState<string | undefined>();
     const [customTo, setCustomTo] = useState<string | undefined>();
+    const [timesheetMonth, setTimesheetMonth] = useState<string>(() =>
+        new Date().toISOString().slice(0, 7),
+    );
 
     const { data, isLoading, error } = useWorkspaceAnalytics({
         workspaceId,
@@ -151,12 +156,36 @@ export function WorkspaceAnalyticsView({
                         )}
                     </p>
                 </div>
-                <DateRangeFilter
-                    dateRange={dateRange}
-                    from={customFrom}
-                    to={customTo}
-                    onChange={handleDateRangeChange}
-                />
+                <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="flex items-center gap-1.5">
+                        <input
+                            type="month"
+                            value={timesheetMonth}
+                            onChange={(e) => setTimesheetMonth(e.target.value)}
+                            className="border-input bg-background ring-offset-background focus-visible:ring-ring h-8 rounded-md border px-2 text-xs focus-visible:ring-1 focus-visible:outline-none"
+                        />
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 gap-1.5 text-xs"
+                            asChild
+                        >
+                            <a
+                                href={`/api/workspaces/${workspaceId}/timesheets/export?month=${encodeURIComponent(timesheetMonth)}&format=xlsx`}
+                                download
+                            >
+                                <Download className="h-3.5 w-3.5" />
+                                {t('Export Timesheet')}
+                            </a>
+                        </Button>
+                    </div>
+                    <DateRangeFilter
+                        dateRange={dateRange}
+                        from={customFrom}
+                        to={customTo}
+                        onChange={handleDateRangeChange}
+                    />
+                </div>
             </div>
 
             {/* KPI Summary Cards */}

@@ -12,6 +12,9 @@ export interface CreateIssuePayload {
     assignee_id?: string | null;
     original_estimate_seconds?: number | null;
     remaining_estimate_seconds?: number | null;
+    start_date?: string | null;
+    due_date?: string | null;
+    parent_id?: string | null;
 }
 
 export interface UpdateIssuePayload extends Partial<CreateIssuePayload> {
@@ -19,6 +22,9 @@ export interface UpdateIssuePayload extends Partial<CreateIssuePayload> {
     sprint_id?: string | null;
     original_estimate_seconds?: number | null;
     assignee_id?: string | null;
+    start_date?: string | null;
+    due_date?: string | null;
+    parent_id?: string | null;
 }
 
 export const useIssues = (projectId: string) => {

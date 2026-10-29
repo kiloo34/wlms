@@ -10,6 +10,17 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
     IssueFormDialog,
     SelectOption,
 } from '@/modules/Workload/Issues/components/IssueFormDialog';
@@ -553,6 +564,9 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                             <TableHead className="w-[160px]">
                                 {t('Assignee')}
                             </TableHead>
+                            <TableHead className="w-[150px]">
+                                {t('Due Date')}
+                            </TableHead>
                             <TableHead className="w-[80px] text-right">
                                 {t('Action')}
                             </TableHead>
@@ -562,7 +576,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                         {isLoading ? (
                             <TableRow>
                                 <TableCell
-                                    colSpan={6}
+                                    colSpan={8}
                                     className="text-muted-foreground py-12 text-center text-sm"
                                 >
                                     {t('Loading tasks...')}
@@ -571,7 +585,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                         ) : paginatedIssues.length === 0 ? (
                             <TableRow>
                                 <TableCell
-                                    colSpan={6}
+                                    colSpan={8}
                                     className="text-muted-foreground py-12 text-center text-sm"
                                 >
                                     {t(
@@ -688,6 +702,55 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                                             {issue.assignee?.name || (
                                                 <span className="text-muted-foreground/60 italic">
                                                     {t('Unassigned')}
+                                                </span>
+                                            )}
+                                        </TableCell>
+
+                                        <TableCell className="text-xs whitespace-nowrap">
+                                            {issue.due_date ? (
+                                                (() => {
+                                                    const todayStr = new Date()
+                                                        .toISOString()
+                                                        .slice(0, 10);
+                                                    const dueStr =
+                                                        issue.due_date.slice(
+                                                            0,
+                                                            10,
+                                                        );
+                                                    const isDone =
+                                                        issue.status?.category?.toUpperCase() ===
+                                                        'DONE';
+                                                    const isOverdue =
+                                                        issue.is_overdue ??
+                                                        (!isDone &&
+                                                            dueStr < todayStr);
+                                                    return (
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span
+                                                                className={
+                                                                    isOverdue
+                                                                        ? 'font-medium text-red-600 dark:text-red-400'
+                                                                        : 'text-muted-foreground'
+                                                                }
+                                                            >
+                                                                {dueStr}
+                                                            </span>
+                                                            {isOverdue && (
+                                                                <Badge
+                                                                    variant="outline"
+                                                                    className="border-red-500/20 bg-red-500/10 px-1.5 py-0 text-[10px] font-semibold text-red-600 dark:text-red-400"
+                                                                >
+                                                                    {t(
+                                                                        'Overdue',
+                                                                    )}
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()
+                                            ) : (
+                                                <span className="text-muted-foreground">
+                                                    -
                                                 </span>
                                             )}
                                         </TableCell>
@@ -864,43 +927,65 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                         </SelectContent>
                     </Select>
 
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 text-xs"
-                        onClick={async () => {
-                            if (
-                                window.confirm(
-                                    t(
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 text-xs"
+                            >
+                                {t('Delete')}
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    {t('Delete Selected Tasks')}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    {t(
                                         'Are you sure you want to delete selected tasks?',
-                                    ),
-                                )
-                            ) {
-                                try {
-                                    const promises = selectedIssueIds.map(
-                                        (id) =>
-                                            axios.delete(`/api/issues/${id}`),
-                                    );
-                                    await Promise.all(promises);
-                                    queryClient.invalidateQueries({
-                                        queryKey: [
-                                            'workspaces',
-                                            workspaceId,
-                                            'issues',
-                                        ],
-                                    });
-                                    toast.success(
-                                        t('Tasks deleted successfully'),
-                                    );
-                                    setSelectedIssueIds([]);
-                                } catch (e) {
-                                    toast.error(t('Failed to delete tasks'));
-                                }
-                            }
-                        }}
-                    >
-                        {t('Delete')}
-                    </Button>
+                                    )}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                    {t('Cancel')}
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={async () => {
+                                        try {
+                                            const promises =
+                                                selectedIssueIds.map((id) =>
+                                                    axios.delete(
+                                                        `/api/issues/${id}`,
+                                                    ),
+                                                );
+                                            await Promise.all(promises);
+                                            queryClient.invalidateQueries({
+                                                queryKey: [
+                                                    'workspaces',
+                                                    workspaceId,
+                                                    'issues',
+                                                ],
+                                            });
+                                            toast.success(
+                                                t('Tasks deleted successfully'),
+                                            );
+                                            setSelectedIssueIds([]);
+                                        } catch {
+                                            toast.error(
+                                                t('Failed to delete tasks'),
+                                            );
+                                        }
+                                    }}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                    {t('Delete')}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             )}
 
