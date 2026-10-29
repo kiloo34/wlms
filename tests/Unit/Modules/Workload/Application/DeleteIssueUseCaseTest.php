@@ -51,4 +51,3 @@ test('successfully deletes issue via repository', function () {
 
     expect(true)->toBeTrue();
 });
-

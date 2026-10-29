@@ -89,4 +89,3 @@ test('successfully unassigns issue when assigneeId is null', function () {
     expect($output)->toBeInstanceOf(IssueOutput::class)
         ->and($output->id)->toBe('issue-1');
 });
-

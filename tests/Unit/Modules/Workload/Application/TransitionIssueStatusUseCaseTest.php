@@ -101,4 +101,3 @@ test('successfully transitions issue status and saves', function () {
     expect($output)->toBeInstanceOf(IssueOutput::class)
         ->and($output->statusId)->toBe('status-in-progress');
 });
-

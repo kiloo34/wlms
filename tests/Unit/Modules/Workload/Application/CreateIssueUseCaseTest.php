@@ -165,3 +165,48 @@ test('assigns issue when assigneeId is provided in input', function () {
     expect($output)->toBeInstanceOf(IssueOutput::class)
         ->and($output->id)->toBe('issue-1');
 });
+
+test('forwards startDate, dueDate, and parentId to Issue entity', function () {
+    $issueRepo = Mockery::mock(IssueRepositoryInterface::class);
+    $projectRepo = Mockery::mock(ProjectRepositoryInterface::class);
+    $workflowRepo = Mockery::mock(WorkflowRepositoryInterface::class);
+
+    $project = Project::create(
+        new ProjectId('project-1'),
+        new WorkspaceId('01923abc-0000-7000-8000-000000000001'),
+        new ProjectKey('BJT'),
+        'Bank Jatim Project',
+        null,
+        null,
+        'user-1'
+    );
+
+    $projectRepo->shouldReceive('findById')->once()->andReturn($project);
+    $issueRepo->shouldReceive('nextNumberForProject')->once()->andReturn(5);
+    $workflowRepo->shouldReceive('getInitialStatusId')->once()->andReturn('status-todo');
+
+    $issueRepo->shouldReceive('save')->once()->with(Mockery::on(function (Issue $issue) {
+        return $issue->getStartDate() === '2026-10-20'
+            && $issue->getDueDate() === '2026-10-30'
+            && $issue->getParentId() === 'parent-uuid-1';
+    }));
+
+    $useCase = new CreateIssueUseCase($issueRepo, $projectRepo, $workflowRepo);
+    $output = $useCase->execute(new CreateIssueInput(
+        issueId: 'issue-sub-1',
+        projectId: 'project-1',
+        title: 'Subtask deploy MII',
+        description: null,
+        issueTypeId: 'type-1',
+        priorityId: 'priority-1',
+        sprintId: null,
+        reporterUserId: 'user-1',
+        originalEstimateSeconds: 1800,
+        assigneeId: null,
+        startDate: '2026-10-20',
+        dueDate: '2026-10-30',
+        parentId: 'parent-uuid-1',
+    ));
+
+    expect($output->issueNumber)->toBe('BJT-005');
+});
