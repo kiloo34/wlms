@@ -20,6 +20,14 @@ export interface Issue {
     assignee?: { id: string; name: string; avatar?: string };
     original_estimate_seconds?: number | null;
     remaining_estimate_seconds?: number | null;
+    start_date?: string | null;
+    due_date?: string | null;
+    is_overdue?: boolean;
+    key?: string;
+    parent_id?: string | null;
+    subtasks_count?: number;
+    completed_subtasks_count?: number;
+    is_blocked?: boolean;
     created_at: string;
     updated_at: string;
 }
@@ -43,6 +51,9 @@ export interface CreateIssuePayload {
     issue_type_id: string;
     priority_id: string;
     sprint_id?: string | null;
+    start_date?: string | null;
+    due_date?: string | null;
+    parent_id?: string | null;
 }
 
 export interface TransitionIssuePayload {
