@@ -9,6 +9,7 @@ use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\StatusModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkflowTransitionModel;
+use Illuminate\Support\Carbon;
 
 /**
  * CQRS Read: Bypass Domain Layer for read-optimized board view.
@@ -53,6 +54,7 @@ final class GetBoardIssuesQuery
         $doneStatusIds = $statuses->filter(fn (StatusModel $s) => strtoupper((string) $s->category) === 'DONE')->pluck('id')->all();
 
         $issues = IssueModel::query()
+            ->withLinkStats()
             ->where('project_id', $projectId)
             ->where('sprint_id', $sprintId)
             ->when(! $includeArchived && ! empty($doneStatusIds), function ($q) use ($doneStatusIds): void {
@@ -71,12 +73,18 @@ final class GetBoardIssuesQuery
             'status_color' => $status->color,
             'issues' => collect($issues->get($status->id, []))->map(fn (IssueModel $issue) => [
                 'id' => $issue->id,
+                ...$issue->linkStats(),
                 'number' => $issue->number,
                 'title' => $issue->title,
                 'story_points' => $issue->story_points,
                 'assignee_id' => $issue->assignee_id,
                 'priority_id' => $issue->priority_id,
                 'issue_type_id' => $issue->issue_type_id,
+                'start_date' => $issue->start_date ? Carbon::parse($issue->start_date)->format('Y-m-d') : null,
+                'due_date' => $issue->due_date ? Carbon::parse($issue->due_date)->format('Y-m-d') : null,
+                'is_overdue' => $issue->due_date !== null
+                    && Carbon::parse($issue->due_date)->startOfDay()->lt(now()->startOfDay())
+                    && strtoupper((string) $status->category) !== 'DONE',
             ])->values()->all(),
         ], $statuses->all());
     }

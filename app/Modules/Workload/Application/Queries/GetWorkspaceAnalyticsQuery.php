@@ -24,6 +24,7 @@ final class GetWorkspaceAnalyticsQuery
         );
 
         // 2. Query 1: Projects with issue aggregates in bounded O(1) query
+        $todayStr = CarbonImmutable::now()->toDateString();
         $projectRows = DB::table('projects')
             ->leftJoin('issues', function ($join) {
                 $join->on('issues.project_id', '=', 'projects.id')
@@ -41,6 +42,7 @@ final class GetWorkspaceAnalyticsQuery
                 'projects.end_date',
                 DB::raw('COUNT(issues.id) as total_issues'),
                 DB::raw("SUM(CASE WHEN statuses.category = 'DONE' OR statuses.slug = 'done' THEN 1 ELSE 0 END) as completed_issues"),
+                DB::raw("SUM(CASE WHEN issues.due_date IS NOT NULL AND issues.due_date < '{$todayStr}' AND statuses.category != 'DONE' AND statuses.slug != 'done' THEN 1 ELSE 0 END) as overdue_issues"),
                 DB::raw('SUM(COALESCE(issues.original_estimate_seconds, 0)) as total_est_seconds'),
             ])
             ->groupBy(
@@ -72,6 +74,7 @@ final class GetWorkspaceAnalyticsQuery
                     'active_projects' => 0,
                     'total_issues' => 0,
                     'completed_issues' => 0,
+                    'overdue_issues' => 0,
                     'completion_rate' => 0.0,
                 ],
                 projects: [],
@@ -89,13 +92,16 @@ final class GetWorkspaceAnalyticsQuery
         $projectList = [];
         $totalIssues = 0;
         $completedIssues = 0;
+        $overdueIssues = 0;
         $activeProjectsCount = 0;
 
         foreach ($projectRows as $row) {
             $pTotal = (int) $row->total_issues;
             $pCompleted = (int) $row->completed_issues;
+            $pOverdue = (int) ($row->overdue_issues ?? 0);
             $totalIssues += $pTotal;
             $completedIssues += $pCompleted;
+            $overdueIssues += $pOverdue;
 
             $statusStr = strtoupper((string) ($row->status ?? 'ACTIVE'));
             if ($statusStr === 'ACTIVE' || $statusStr === 'IN_PROGRESS') {
@@ -235,6 +241,7 @@ final class GetWorkspaceAnalyticsQuery
             'active_projects' => $activeProjectsCount > 0 ? $activeProjectsCount : count($projectList),
             'total_issues' => $totalIssues,
             'completed_issues' => $completedIssues,
+            'overdue_issues' => $overdueIssues,
             'completion_rate' => $totalIssues > 0 ? round(($completedIssues / $totalIssues) * 100.0, 1) : 0.0,
         ];
 
@@ -282,7 +289,7 @@ final class GetWorkspaceAnalyticsQuery
     }
 
     /**
-     * @param Collection<int, \stdClass> $completedRows
+     * @param  Collection<int, \stdClass>  $completedRows
      * @return array<int, array<string, mixed>>
      */
     private function aggregateThroughput(

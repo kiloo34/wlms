@@ -104,10 +104,33 @@ final class WorkloadAccessChecker
             return true;
         }
 
-        return DB::table('user_roles')
+        if (DB::table('user_roles')
             ->where('user_id', $userId)
-            ->where('context_type', 'WORKSPACE')
-            ->where('context_id', $workspaceId)
+            ->where(function ($q) use ($workspaceId): void {
+                $q->where(function ($wq) use ($workspaceId): void {
+                    $wq->where('context_type', 'WORKSPACE')
+                        ->where('context_id', $workspaceId);
+                })->orWhereIn('context_id', function ($sub) use ($workspaceId): void {
+                    $sub->select('id')->from('projects')->where('workspace_id', $workspaceId)->whereNull('deleted_at');
+                });
+            })
+            ->exists()) {
+            return true;
+        }
+
+        return DB::table('projects')
+            ->where('workspace_id', $workspaceId)
+            ->whereNull('deleted_at')
+            ->where(function ($q) use ($userId): void {
+                $q->where('lead_id', $userId)
+                    ->orWhereExists(function ($sub) use ($userId): void {
+                        $sub->select(DB::raw(1))
+                            ->from('issues')
+                            ->whereColumn('issues.project_id', 'projects.id')
+                            ->whereNull('issues.deleted_at')
+                            ->where('issues.assignee_id', $userId);
+                    });
+            })
             ->exists();
     }
 

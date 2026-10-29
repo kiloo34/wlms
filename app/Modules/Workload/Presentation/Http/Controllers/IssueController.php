@@ -14,6 +14,7 @@ use App\Modules\Workload\Application\UseCases\CreateIssueUseCase;
 use App\Modules\Workload\Application\UseCases\DeleteIssueUseCase;
 use App\Modules\Workload\Application\UseCases\TransitionIssueStatusUseCase;
 use App\Modules\Workload\Domain\Exceptions\InvalidTransitionException;
+use App\Modules\Workload\Infrastructure\Config\WorkloadSettings;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\StatusModel;
 use App\Modules\Workload\Presentation\Http\Requests\CreateIssueHttpRequest;
@@ -65,6 +66,7 @@ final class IssueController
         }
 
         $query = IssueModel::query()
+            ->withLinkStats()
             ->with(['assignee', 'reporter', 'status'])
             ->where('project_id', $projectId);
 
@@ -93,6 +95,13 @@ final class IssueController
     {
         $v = $request->validated();
 
+        $dueDate = ! empty($v['due_date'])
+            ? (string) $v['due_date']
+            : WorkloadSettings::calculateDefaultDueDate(
+                (string) $v['priority_id'],
+                isset($v['start_date']) && $v['start_date'] !== '' ? (string) $v['start_date'] : null
+            );
+
         $output = $this->createUseCase->execute(new CreateIssueInput(
             issueId: $request->getIdempotencyKey(),
             projectId: $projectId,
@@ -104,6 +113,9 @@ final class IssueController
             reporterUserId: $request->getActorId(),
             originalEstimateSeconds: $v['original_estimate_seconds'] ?? null,
             assigneeId: isset($v['assignee_id']) && $v['assignee_id'] !== '' ? (string) $v['assignee_id'] : null,
+            startDate: $v['start_date'] ?? null,
+            dueDate: $dueDate,
+            parentId: $v['parent_id'] ?? null,
         ));
 
         // Load eloquent model to return with Resource
@@ -185,6 +197,9 @@ final class IssueController
             'sprint_id' => $v['sprint_id'] ?? null,
             'original_estimate_seconds' => $v['original_estimate_seconds'] ?? null,
             'remaining_estimate_seconds' => array_key_exists('remaining_estimate_seconds', $v) ? $v['remaining_estimate_seconds'] : $issueModel->remaining_estimate_seconds,
+            'start_date' => array_key_exists('start_date', $v) ? $v['start_date'] : $issueModel->start_date,
+            'due_date' => array_key_exists('due_date', $v) ? $v['due_date'] : $issueModel->due_date,
+            'parent_id' => array_key_exists('parent_id', $v) ? $v['parent_id'] : $issueModel->parent_id,
         ]);
 
         // Refresh model with relations

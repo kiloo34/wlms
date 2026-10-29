@@ -60,7 +60,10 @@ final class CreateIssueUseCase
                 new StatusId($initialStatusId),
                 $input->sprintId ? new SprintId($input->sprintId) : null,
                 $input->reporterUserId,
-                $input->originalEstimateSeconds
+                $input->originalEstimateSeconds,
+                $input->startDate,
+                $input->dueDate,
+                $input->parentId,
             );
 
             if ($input->assigneeId !== null && $input->assigneeId !== '') {

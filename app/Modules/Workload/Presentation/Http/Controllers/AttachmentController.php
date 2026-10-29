@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
 use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
+use App\Modules\Workload\Infrastructure\Config\WorkloadSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class AttachmentController extends Controller
@@ -71,14 +73,24 @@ final class AttachmentController extends Controller
             abort(403, 'Unauthorized.');
         }
 
+        $settings = WorkloadSettings::all();
+        $maxKb = (int) $settings['attachment_max_mb'] * 1024;
+
         $validated = $request->validate([
-            'file' => ['required', 'file', 'max:5120'], // Max 5MB (5120 KB)
+            'file' => ['required', 'file', 'max:'.$maxKb],
             'comment_id' => ['nullable', 'string', 'uuid'],
         ]);
 
         $file = $request->file('file');
         if (! $file) {
             abort(422, 'File is required.');
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, $settings['attachment_allowed_extensions'], true)) {
+            throw ValidationException::withMessages([
+                'file' => 'Ekstensi file tidak diizinkan.',
+            ]);
         }
 
         $originalFilename = $file->getClientOriginalName();
@@ -176,4 +188,3 @@ final class AttachmentController extends Controller
         return response()->json(['message' => 'Attachment deleted successfully.']);
     }
 }
-

@@ -43,7 +43,9 @@ final class IssuesExport implements FromQuery, ShouldAutoSize, WithHeadings, Wit
             'Sprint',
             'Original Estimate (Hours)',
             'Remaining Estimate (Hours)',
+            'Start Date',
             'Due Date',
+            'SLA Status',
             'Created At',
         ];
     }
@@ -58,6 +60,13 @@ final class IssuesExport implements FromQuery, ShouldAutoSize, WithHeadings, Wit
         $origHours = $issue->original_estimate_seconds ? round($issue->original_estimate_seconds / 3600, 2) : 0;
         $remHours = $issue->remaining_estimate_seconds ? round($issue->remaining_estimate_seconds / 3600, 2) : 0;
 
+        $slaStatus = '-';
+        if ($issue->due_date) {
+            $isDone = strtoupper((string) ($issue->status?->category ?? '')) === 'DONE';
+            $isOverdue = ! $isDone && $issue->due_date->copy()->startOfDay()->lt(now()->startOfDay());
+            $slaStatus = $isOverdue ? 'Overdue' : 'On Track';
+        }
+
         return [
             $key,
             $issue->title,
@@ -71,7 +80,9 @@ final class IssuesExport implements FromQuery, ShouldAutoSize, WithHeadings, Wit
             $issue->sprint->name ?? '-',
             $origHours,
             $remHours,
+            $issue->start_date ? $issue->start_date->format('Y-m-d') : '-',
             $issue->due_date ? $issue->due_date->format('Y-m-d') : '-',
+            $slaStatus,
             $issue->created_at ? $issue->created_at->format('Y-m-d H:i') : '-',
         ];
     }

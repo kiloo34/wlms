@@ -28,8 +28,9 @@ final class ShowProjectPageController extends Controller
         }
 
         $lookups = $this->getProjectLookupsQuery->getLookupsForProject(
-            $projectModel->workspace_id,
-            $projectModel->workflow_id
+            (string) $projectModel->workspace_id,
+            $projectModel->workflow_id,
+            (string) $projectModel->id
         );
 
         return inertia('Projects/Show', [

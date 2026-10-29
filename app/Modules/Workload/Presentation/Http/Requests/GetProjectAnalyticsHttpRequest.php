@@ -35,7 +35,15 @@ final class GetProjectAnalyticsHttpRequest extends FormRequest
             return true;
         }
 
-        if (! $user->hasPermission('analytics:view') && ! $user->hasPermission('projects:manage')) {
+        $workspaceId = (string) $project->workspace_id;
+        $hasAnalyticsPerm = $user->hasPermission('analytics:view')
+            || $user->hasPermission('projects:manage')
+            || $user->hasPermission('analytics:view', 'WORKSPACE', $workspaceId)
+            || $user->hasPermission('projects:manage', 'WORKSPACE', $workspaceId)
+            || $user->hasPermission('analytics:view', 'PROJECT', $projectId)
+            || $user->hasPermission('projects:manage', 'PROJECT', $projectId);
+
+        if (! $hasAnalyticsPerm) {
             abort(403, 'Unauthorized.');
         }
 

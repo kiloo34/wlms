@@ -26,7 +26,11 @@ final class GetProjectLookupsController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $lookups = $this->query->getLookupsForProject($project->workspace_id, $project->workflow_id);
+        $lookups = $this->query->getLookupsForProject(
+            (string) $project->workspace_id,
+            $project->workflow_id,
+            (string) $project->id
+        );
 
         return response()->json([
             'data' => $lookups,

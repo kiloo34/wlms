@@ -113,7 +113,9 @@ final class GetDashboardDataQuery
                 'id' => (string) $issue->id,
                 'key' => $issue->project ? $issue->project->key.'-'.$issue->number : (string) $issue->number,
                 'title' => $issue->title,
+                'start_date' => $issue->start_date?->format('Y-m-d'),
                 'due_date' => $issue->due_date?->format('Y-m-d'),
+                'is_overdue' => $urgency === 'overdue',
                 'urgency' => $urgency,
                 'project' => [
                     'id' => $issue->project?->id,

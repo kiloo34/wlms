@@ -31,7 +31,12 @@ final class GetWorkspaceAnalyticsHttpRequest extends FormRequest
             return true;
         }
 
-        if ($user->hasPermission('analytics:view') || $user->hasPermission('workspaces:manage')) {
+        if (
+            $user->hasPermission('analytics:view')
+            || $user->hasPermission('workspaces:manage')
+            || $user->hasPermission('analytics:view', 'WORKSPACE', $workspaceId)
+            || $user->hasPermission('workspaces:manage', 'WORKSPACE', $workspaceId)
+        ) {
             return WorkloadAccessChecker::canViewWorkspace($user->id, $workspaceId)
                 || $user->can('view', $workspace);
         }

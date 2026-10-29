@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Workload\Application\Queries;
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use App\Modules\Workload\Infrastructure\Config\WorkloadSettings;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueTypeModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\PriorityModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
@@ -38,6 +39,10 @@ final class GetWorkspaceLookupsQuery
             'priorities' => $priorities,
             'statuses' => $statuses,
             'users' => $users,
+            'settings' => [
+                ...WorkloadSettings::all(),
+                'enable_sprints' => WorkloadSettings::isSprintsEnabled($workspaceId),
+            ],
         ];
     }
 }

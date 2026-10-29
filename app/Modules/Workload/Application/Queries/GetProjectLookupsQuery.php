@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Workload\Application\Queries;
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use App\Modules\Workload\Infrastructure\Config\WorkloadSettings;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueTypeModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\PriorityModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\StatusModel;
@@ -21,7 +22,7 @@ final class GetProjectLookupsQuery
     /**
      * @return array<string, mixed>
      */
-    public function getLookupsForProject(string $workspaceId, ?string $workflowId): array
+    public function getLookupsForProject(string $workspaceId, ?string $workflowId, ?string $projectId = null): array
     {
         $issueTypes = IssueTypeModel::select('id', 'name', 'slug', 'icon', 'color')->get();
         $priorities = PriorityModel::select('id', 'name', 'slug', 'level', 'icon', 'color')->get();
@@ -63,6 +64,10 @@ final class GetProjectLookupsQuery
             'priorities' => $priorities,
             'statuses' => $statuses,
             'users' => $users,
+            'settings' => [
+                ...WorkloadSettings::all(),
+                'enable_sprints' => WorkloadSettings::isSprintsEnabled($workspaceId),
+            ],
         ];
     }
 
