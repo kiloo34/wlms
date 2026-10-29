@@ -19,6 +19,7 @@ import { useIconSize } from '@/hooks/use-appearance';
 interface LookupItem {
     id: string;
     name: string;
+    slug?: string;
     category?: string;
 }
 
@@ -29,6 +30,14 @@ interface ProjectShowProps {
         priorities: LookupItem[];
         statuses: LookupItem[];
         users: LookupItem[];
+        settings?: {
+            enable_sprints?: boolean;
+            sla_days_by_priority?: Record<string, number>;
+            working_days?: number[];
+            holidays?: string[];
+            worklog_max_hours_per_day?: number;
+            attachment_max_mb?: number;
+        };
     };
 }
 

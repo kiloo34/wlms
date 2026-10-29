@@ -16,8 +16,10 @@ import { index as projectsIndex } from '@/routes/projects';
 import { index as workspacesIndex } from '@/routes/workspaces';
 import { Combobox } from '@/components/ui/combobox';
 import { WorkspaceMembersDialog } from '@/modules/Workload/Workspaces/components/WorkspaceMembersDialog';
-import { Users, FolderKanban, CheckSquare, BarChart2 } from 'lucide-react';
-import { useState } from 'react';
+import { Users, FolderKanban, CheckSquare, BarChart2, Layers } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import axios from '@/lib/axios';
+import { toast } from 'sonner';
 import { useTranslate } from '@/hooks/useTranslate';
 import { usePermission } from '@/hooks/usePermission';
 
@@ -54,8 +56,41 @@ export default function ProjectsIndex() {
     const canManageProjects = can('projects:manage');
     const canManageIssues = can('issues:manage');
     const [membersOpen, setMembersOpen] = useState(false);
+    const [enableSprints, setEnableSprints] = useState<boolean>(
+        lookups?.settings?.enable_sprints !== false,
+    );
+    const [isTogglingSprints, setIsTogglingSprints] = useState(false);
+
+    useEffect(() => {
+        if (lookups?.settings?.enable_sprints !== undefined) {
+            setEnableSprints(lookups.settings.enable_sprints !== false);
+        }
+    }, [lookups?.settings?.enable_sprints]);
 
     const activeWorkspace = workspaces.find((w: any) => w.id === workspaceId);
+
+    const handleToggleWorkspaceSprints = async () => {
+        if (!workspaceId) return;
+        const next = !enableSprints;
+        try {
+            setIsTogglingSprints(true);
+            await axios.put(`/api/workspaces/${workspaceId}/settings`, {
+                enable_sprints: next,
+            });
+            setEnableSprints(next);
+            toast.success(
+                next
+                    ? t('Mode Sprint (Scrum) diaktifkan untuk workspace ini.')
+                    : t(
+                          'Mode Kanban murni diaktifkan untuk workspace ini (tanpa Sprint/Backlog).',
+                      ),
+            );
+        } catch {
+            toast.error(t('Gagal memperbarui pengaturan workspace.'));
+        } finally {
+            setIsTogglingSprints(false);
+        }
+    };
 
     const handleWorkspaceChange = (value: string) => {
         router.visit(
@@ -118,6 +153,26 @@ export default function ProjectsIndex() {
                             activeWorkspace &&
                             hasManagePermission && (
                                 <>
+                                    <Button
+                                        variant={
+                                            enableSprints
+                                                ? 'secondary'
+                                                : 'outline'
+                                        }
+                                        className="flex h-9 shrink-0 items-center gap-1.5 px-3"
+                                        disabled={isTogglingSprints}
+                                        onClick={handleToggleWorkspaceSprints}
+                                        title={t(
+                                            'Toggle Scrum (Sprint) / Pure Kanban Mode untuk seluruh proyek di Workspace ini',
+                                        )}
+                                    >
+                                        <Layers className="h-4 w-4" />
+                                        <span className="sr-only sm:not-sr-only sm:text-xs">
+                                            {enableSprints
+                                                ? t('Scrum Mode')
+                                                : t('Kanban Mode')}
+                                        </span>
+                                    </Button>
                                     <Button
                                         variant="outline"
                                         className="flex h-9 shrink-0 items-center gap-2 px-3"

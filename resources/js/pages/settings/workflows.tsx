@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { StatusManager } from '@/modules/Workload/Workflows/components/Statuses/StatusManager';
 import { WorkflowManager } from '@/modules/Workload/Workflows/components/Workflows/WorkflowManager';
+import { WorkloadPoliciesManager } from '@/modules/Workload/Workflows/components/Policies/WorkloadPoliciesManager';
 
 export default function WorkflowsIndex() {
     const { t } = useTranslate();
@@ -70,12 +71,15 @@ export default function WorkflowsIndex() {
                             className="w-full"
                         >
                             <div className="pb-4">
-                                <TabsList className="grid w-full max-w-md grid-cols-2">
+                                <TabsList className="grid w-full max-w-xl grid-cols-3">
                                     <TabsTrigger value="workflows">
                                         {t('Workflows')}
                                     </TabsTrigger>
                                     <TabsTrigger value="statuses">
                                         {t('Statuses')}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="policies">
+                                        {t('SLA & Policies')}
                                     </TabsTrigger>
                                 </TabsList>
                             </div>
@@ -86,6 +90,10 @@ export default function WorkflowsIndex() {
 
                             <TabsContent value="statuses" className="mt-0">
                                 <StatusManager />
+                            </TabsContent>
+
+                            <TabsContent value="policies" className="mt-0">
+                                <WorkloadPoliciesManager />
                             </TabsContent>
                         </Tabs>
                     </CardContent>
