@@ -6,6 +6,7 @@ export interface ProjectAnalyticsSummary {
     completed_issues: number;
     in_progress_issues: number;
     todo_issues: number;
+    overdue_issues?: number;
     completion_rate: number;
 }
 
@@ -62,6 +63,7 @@ export interface SprintVelocityPoint {
 
 export interface SprintMetrics {
     has_sprints: boolean;
+    mode?: 'sprint' | 'non_sprint';
     burndown: SprintBurndownPoint[];
     velocity: SprintVelocityPoint[];
 }
