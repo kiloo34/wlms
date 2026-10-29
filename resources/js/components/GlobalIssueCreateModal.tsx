@@ -17,7 +17,14 @@ import {
     useWorkspaceProjects,
     useProjectLookups,
     useCreateIssue,
+    useAddIssueLink,
 } from '@/hooks/api/issues';
+import { useIssues } from '@/modules/Workload/Issues/hooks/useIssues';
+import {
+    LinkAfterCreate,
+    SimilarIssuesBox,
+} from '@/modules/Workload/Issues/components/SimilarIssuesBox';
+import { toast } from 'sonner';
 import { useTranslate } from '@/hooks/useTranslate';
 
 interface LookupItem {
@@ -68,6 +75,19 @@ export function GlobalIssueCreateModal() {
     const [typeId, setTypeId] = useState<string>('');
     const [priorityId, setPriorityId] = useState<string>('');
     const [assigneeId, setAssigneeId] = useState<string>('');
+    const [startDate, setStartDate] = useState<string>('');
+    const [dueDate, setDueDate] = useState<string>('');
+    const [parentId, setParentId] = useState<string>('');
+    const [linkAfterCreate, setLinkAfterCreate] =
+        useState<LinkAfterCreate | null>(null);
+    const addLink = useAddIssueLink();
+    const { issues: projectIssues } = useIssues(projectId);
+    const parentOptions = projectIssues
+        .filter((i) => !i.parent_id)
+        .map((i) => ({
+            value: i.id,
+            label: `${i.key ?? i.id.slice(0, 3)} ${i.title}`,
+        }));
 
     const { data: workspaces, isLoading: isLoadingWorkspaces } =
         useMyWorkspaces();
@@ -93,9 +113,28 @@ export function GlobalIssueCreateModal() {
                     assigneeId && assigneeId !== 'unassigned'
                         ? assigneeId
                         : null,
+                start_date: startDate || null,
+                due_date: dueDate || null,
+                parent_id: parentId || null,
             },
             {
-                onSuccess: () => {
+                onSuccess: (res) => {
+                    const newId = res?.data?.id ?? res?.id;
+                    if (newId && linkAfterCreate) {
+                        addLink.mutate(
+                            {
+                                issueId: newId,
+                                targetIssueId: linkAfterCreate.targetId,
+                                linkType: linkAfterCreate.linkType,
+                            },
+                            {
+                                onError: () =>
+                                    toast.error(
+                                        t('Gagal menautkan tiket serupa'),
+                                    ),
+                            },
+                        );
+                    }
                     resetForm();
                     closeModal();
                 },
@@ -104,12 +143,16 @@ export function GlobalIssueCreateModal() {
     };
 
     const resetForm = () => {
+        setParentId('');
+        setLinkAfterCreate(null);
         setWorkspaceId('');
         setProjectId('');
         setTitle('');
         setTypeId('');
         setPriorityId('');
         setAssigneeId('');
+        setStartDate('');
+        setDueDate('');
     };
 
     const handleOpenChange = (open: boolean) => {
@@ -210,6 +253,29 @@ export function GlobalIssueCreateModal() {
                                     onChange={(e) => setTitle(e.target.value)}
                                     placeholder={t('Enter issue title')}
                                     required
+                                />
+                                <SimilarIssuesBox
+                                    projectId={projectId}
+                                    title={title}
+                                    value={linkAfterCreate}
+                                    onChange={setLinkAfterCreate}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="parent">
+                                    {t('Parent issue (sub-task)')}
+                                </Label>
+                                <Combobox
+                                    id="parent"
+                                    options={[
+                                        { value: '', label: t('None') },
+                                        ...parentOptions,
+                                    ]}
+                                    value={parentId}
+                                    onChange={setParentId}
+                                    placeholder={t('Search issue...')}
+                                    emptyText={t('No issues found.')}
                                 />
                             </div>
 
@@ -319,6 +385,38 @@ export function GlobalIssueCreateModal() {
                                                     emptyText={t(
                                                         'No user found.',
                                                     )}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="start_date">
+                                                    {t('Start Date')}
+                                                </Label>
+                                                <Input
+                                                    id="start_date"
+                                                    type="date"
+                                                    value={startDate}
+                                                    onChange={(e) =>
+                                                        setStartDate(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="due_date">
+                                                    {t('Due Date')}
+                                                </Label>
+                                                <Input
+                                                    id="due_date"
+                                                    type="date"
+                                                    value={dueDate}
+                                                    onChange={(e) =>
+                                                        setDueDate(
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                 />
                                             </div>
                                         </div>

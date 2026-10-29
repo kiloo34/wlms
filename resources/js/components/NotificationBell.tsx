@@ -5,6 +5,9 @@ import {
     ClipboardList,
     CheckCircle2,
     RefreshCw,
+    AlertTriangle,
+    Clock,
+    AtSign,
 } from 'lucide-react';
 import { useNotifications, Notification } from '@/hooks/useNotifications';
 import { usePage } from '@inertiajs/react';
@@ -34,8 +37,14 @@ export const NotificationBell = () => {
     };
 
     const getIcon = (type: string) => {
-        if (type === 'issue.assigned')
+        if (type === 'issue.overdue')
+            return <AlertTriangle className="text-destructive h-4 w-4" />;
+        if (type === 'issue.due_soon')
+            return <Clock className="h-4 w-4 text-amber-500" />;
+        if (type === 'issue.assigned' || type === 'issue_assigned')
             return <ClipboardList className="text-primary h-4 w-4" />;
+        if (type === 'comment.mentioned')
+            return <AtSign className="text-primary h-4 w-4" />;
         if (type === 'comment.added')
             return <MessageSquare className="text-primary h-4 w-4" />;
         if (type === 'issue.transitioned')
@@ -47,10 +56,16 @@ export const NotificationBell = () => {
 
     const getMessage = (notification: Notification) => {
         const { type, data } = notification;
-        if (type === 'issue.assigned')
+        if (type === 'issue.overdue')
+            return `Overdue: [${data?.issue_number}] ${data?.title || ''} (Due: ${data?.due_date})`;
+        if (type === 'issue.due_soon')
+            return `Due soon: [${data?.issue_number}] ${data?.title || ''} (Due: ${data?.due_date})`;
+        if (type === 'issue.assigned' || type === 'issue_assigned')
             return t('You were assigned to issue :number', {
                 number: data?.issue_number,
             });
+        if (type === 'comment.mentioned')
+            return `${data?.author_name || t('Someone')} ${t('mentioned you')}: ${data?.body_preview || ''}`;
         if (type === 'comment.added')
             return t('New comment: :preview', { preview: data?.body_preview });
         if (type === 'issue.transitioned') return t('Issue status changed');
