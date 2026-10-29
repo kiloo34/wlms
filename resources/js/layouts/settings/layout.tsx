@@ -58,6 +58,11 @@ const getSidebarNavGroups = (isSuperAdmin: boolean): NavGroup[] => {
                     icon: SettingsIcon,
                 },
                 {
+                    title: 'SLA & Policies',
+                    href: '/settings/workflows?tab=policies',
+                    icon: ShieldCheck,
+                },
+                {
                     title: 'Documentation',
                     href: '/settings/docs',
                     icon: BookOpen,
