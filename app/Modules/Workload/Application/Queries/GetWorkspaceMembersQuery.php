@@ -11,7 +11,7 @@ final class GetWorkspaceMembersQuery
     /**
      * @return array<int, object>
      */
-    public function execute(string $workspaceId, int $limit = 50, int $offset = 0): array
+    public function execute(string $workspaceId, ?int $limit = null, int $offset = 0): array
     {
         $query = DB::table('workspace_members')
             ->join('users', 'workspace_members.user_id', '=', 'users.id')
@@ -24,9 +24,11 @@ final class GetWorkspaceMembersQuery
                 'workspace_members.daily_capacity_hours',
                 'workspace_members.created_at',
             ])
-            ->orderBy('workspace_members.created_at', 'desc')
-            ->limit($limit)
-            ->offset($offset);
+            ->orderBy('workspace_members.created_at', 'desc');
+
+        if ($limit !== null && $limit > 0) {
+            $query->limit($limit)->offset($offset);
+        }
 
         return $query->get()->all();
     }
