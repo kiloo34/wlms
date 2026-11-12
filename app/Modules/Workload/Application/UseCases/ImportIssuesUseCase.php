@@ -96,6 +96,8 @@ final class ImportIssuesUseCase
             $projectIds = array_values($projectsMap);
             $maxNumbers = [];
             if (! empty($projectIds)) {
+                DB::table('projects')->whereIn('id', $projectIds)->lockForUpdate()->pluck('id');
+
                 $maxNumbersData = DB::table('issues')
                     ->whereIn('project_id', $projectIds)
                     ->select('project_id', DB::raw('MAX(number) as max_number'))
