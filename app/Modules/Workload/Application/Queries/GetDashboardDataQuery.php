@@ -8,6 +8,7 @@ use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 final class GetDashboardDataQuery
 {
@@ -216,17 +217,28 @@ final class GetDashboardDataQuery
 
         $labels = [];
 
-        if (! empty($idsByField['status_id'])) {
+        // Nilai riwayat bisa berupa label lama (mis. "Backlog") dan bukan ID.
+        // PostgreSQL menolak string non-UUID/non-numerik pada kolom bertipe uuid/bigint,
+        // jadi hanya nilai yang bentuknya valid yang dikirim ke query.
+        $statusIds = array_values(array_filter(
+            array_map('strval', array_keys($idsByField['status_id'] ?? [])),
+            fn (string $id): bool => Str::isUuid($id)
+        ));
+        if ($statusIds !== []) {
             $labels['status_id'] = DB::table('statuses')
-                ->whereIn('id', array_keys($idsByField['status_id']))
+                ->whereIn('id', $statusIds)
                 ->pluck('name', 'id')
                 ->mapWithKeys(fn ($name, $id): array => [(string) $id => (string) $name])
                 ->all();
         }
 
-        if (! empty($idsByField['assignee_id'])) {
+        $assigneeIds = array_values(array_filter(
+            array_map('strval', array_keys($idsByField['assignee_id'] ?? [])),
+            fn (string $id): bool => ctype_digit($id)
+        ));
+        if ($assigneeIds !== []) {
             $labels['assignee_id'] = DB::table('users')
-                ->whereIn('id', array_keys($idsByField['assignee_id']))
+                ->whereIn('id', $assigneeIds)
                 ->pluck('name', 'id')
                 ->mapWithKeys(fn ($name, $id): array => [(string) $id => (string) $name])
                 ->all();

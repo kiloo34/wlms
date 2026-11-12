@@ -14,18 +14,18 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     // Setup dependency: Buat org level dan unit agar referensi table valid
     DB::table('org_levels')->insert([
-        'id' => '01923abc-level-1234-1234-123456789abc', 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
+        'id' => '01923abc-1e7e-4123-8123-123456789abc', 'slug' => 'group', 'name' => 'Group', 'depth' => 1, 'can_own_workspace' => true,
     ]);
 
     DB::table('org_units')->insert([
-        'id' => '01923abc-org-1234-1234-123456789abc',
-        'org_level_id' => '01923abc-level-1234-1234-123456789abc',
+        'id' => '01923abc-0a96-4123-8123-123456789abc',
+        'org_level_id' => '01923abc-1e7e-4123-8123-123456789abc',
         'name' => 'IT Group',
     ]);
 
     // Setup Dummy User dengan ID khusus
     $this->user = UserModel::factory()->create([
-        'org_unit_id' => '01923abc-org-1234-1234-123456789abc',
+        'org_unit_id' => '01923abc-0a96-4123-8123-123456789abc',
     ]);
     $role = RoleModel::firstOrCreate(['name' => 'Superadmin'], ['id' => Str::uuid(), 'scope' => 'GLOBAL']);
     UserRoleModel::create(['id' => Str::uuid(), 'user_id' => $this->user->id, 'role_id' => $role->id]);
@@ -63,7 +63,7 @@ test('anti-idor: owner_group_id is taken from auth token, payload override attem
     $this->assertDatabaseHas('workspaces', [
         'id' => $idempotencyKey,
         'name' => 'Valid Workspace',
-        'owner_group_id' => '01923abc-org-1234-1234-123456789abc',
+        'owner_group_id' => '01923abc-0a96-4123-8123-123456789abc',
         'status' => 'ACTIVE', // Mass assignment status ditolak
     ]);
 });

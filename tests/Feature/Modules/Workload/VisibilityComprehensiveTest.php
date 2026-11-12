@@ -12,8 +12,10 @@ use Illuminate\Support\Str;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    Schema::dropIfExists('org_levels');
+    // org_units memiliki FK ke org_levels, jadi harus di-drop lebih dulu (PostgreSQL menolak urutan sebaliknya).
+    Schema::dropIfExists('org_unit_closures');
     Schema::dropIfExists('org_units');
+    Schema::dropIfExists('org_levels');
 
     Schema::create('org_levels', function (Blueprint $table) {
         $table->uuid('id')->primary();
@@ -57,7 +59,7 @@ beforeEach(function () {
 
     // Users
     $this->superadminId = DB::table('users')->insertGetId(['uuid' => (string) Str::uuid(), 'name' => 'Superadmin', 'email' => 'sa@test.com', 'password' => 'sec', 'org_unit_id' => $this->superadminOrgId]);
-    DB::table('user_roles')->insert(['id' => Str::uuid()->toString(), 'user_id' => $this->superadminId, 'role_id' => $this->roleSuperadminId, 'context_type' => 'GLOBAL', 'context_id' => 'GLOBAL']);
+    DB::table('user_roles')->insert(['id' => Str::uuid()->toString(), 'user_id' => $this->superadminId, 'role_id' => $this->roleSuperadminId, 'context_type' => 'GLOBAL', 'context_id' => null]);
 
     $this->workspaceAdminId = DB::table('users')->insertGetId(['uuid' => (string) Str::uuid(), 'name' => 'Workspace Admin', 'email' => 'wa@test.com', 'password' => 'sec', 'org_unit_id' => $this->externalOrgId]);
 

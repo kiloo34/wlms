@@ -47,7 +47,7 @@ final class CreateWorkspaceHttpRequest extends FormRequest
         }
 
         $requestedGroupId = $this->input('target_org_unit_id') ?? $this->input('owner_group_id');
-        if (is_string($requestedGroupId) && $requestedGroupId !== '' && $requestedGroupId !== (string) $user->org_unit_id) {
+        if (is_string($requestedGroupId) && Str::isUuid($requestedGroupId) && $requestedGroupId !== (string) $user->org_unit_id) {
             if (Schema::hasTable('org_units') && DB::table('org_units')->where('id', $requestedGroupId)->exists()) {
                 $isDescendant = Schema::hasTable('org_unit_closures') && DB::table('org_unit_closures')
                     ->where('ancestor_id', (string) $user->org_unit_id)
@@ -101,7 +101,7 @@ final class CreateWorkspaceHttpRequest extends FormRequest
         $userOrgUnitId = (string) $user->org_unit_id;
         $requestedGroupId = $this->input('target_org_unit_id') ?? $this->input('owner_group_id');
 
-        if (is_string($requestedGroupId) && $requestedGroupId !== '' && $requestedGroupId !== $userOrgUnitId) {
+        if (is_string($requestedGroupId) && Str::isUuid($requestedGroupId) && $requestedGroupId !== $userOrgUnitId) {
             if (Schema::hasTable('org_units') && DB::table('org_units')->where('id', $requestedGroupId)->exists()) {
                 $isDescendant = Schema::hasTable('org_unit_closures') && DB::table('org_unit_closures')
                     ->where('ancestor_id', $userOrgUnitId)
