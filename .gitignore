@@ -36,3 +36,4 @@ Screenshot *.png
 
 .agents/
 /.vitest/
+*.csv
