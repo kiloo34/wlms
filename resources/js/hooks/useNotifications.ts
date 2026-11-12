@@ -48,7 +48,7 @@ export const useNotifications = (userId?: string) => {
 
         const channel = echo.private(`user.${userId}`);
 
-        channel.listen('NewNotification', (e: any) => {
+        channel.listen('.notification.new', (e: any) => {
             queryClient.invalidateQueries({ queryKey });
 
             // Show toast based on type
