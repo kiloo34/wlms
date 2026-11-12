@@ -23,13 +23,17 @@ export const initEcho = () => {
     }
 
     if (!window.Echo) {
+        const scheme =
+            import.meta.env.VITE_REVERB_SCHEME ??
+            (window.location.protocol === 'https:' ? 'https' : 'http');
+
         window.Echo = new Echo({
             broadcaster: 'reverb',
             key: appKey,
             wsHost: import.meta.env.VITE_REVERB_HOST,
             wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
-            wssPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
-            forceTLS: false,
+            wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
+            forceTLS: scheme === 'https',
             enabledTransports: ['ws', 'wss'],
             // Enable sanctum authorizer for private channels
             authorizer: (channel: { name: string }) => {
