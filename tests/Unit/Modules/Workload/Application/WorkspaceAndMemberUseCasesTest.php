@@ -84,17 +84,25 @@ test('AddWorkspaceMemberUseCase throws exception for invalid role', function () 
         ->toThrow(InvalidArgumentException::class, 'Invalid role provided.');
 });
 
-test('AddWorkspaceMemberUseCase upserts workspace member record', function () {
-    $queryMock = Mockery::mock();
-    $queryMock->shouldReceive('updateOrInsert')
+test('AddWorkspaceMemberUseCase inserts workspace member record with default capacity', function () {
+    $selectMock = Mockery::mock();
+    $selectMock->shouldReceive('where')->once()->with('workspace_id', 'ws-1')->andReturnSelf();
+    $selectMock->shouldReceive('where')->once()->with('user_id', 10)->andReturnSelf();
+    $selectMock->shouldReceive('first')->once()->andReturnNull();
+
+    $insertMock = Mockery::mock();
+    $insertMock->shouldReceive('insert')
         ->once()
-        ->with(
-            ['workspace_id' => 'ws-1', 'user_id' => 10],
-            Mockery::on(fn (array $values) => $values['role'] === 'admin' && isset($values['updated_at'], $values['created_at']))
-        )
+        ->with(Mockery::on(fn (array $values) => $values['workspace_id'] === 'ws-1'
+            && $values['user_id'] === 10
+            && $values['role'] === 'admin'
+            && $values['daily_capacity_hours'] === 8
+            && isset($values['updated_at'], $values['created_at'])
+        ))
         ->andReturnTrue();
 
-    DB::shouldReceive('table')->once()->with('workspace_members')->andReturn($queryMock);
+    DB::shouldReceive('table')->once()->with('workspace_members')->andReturn($selectMock);
+    DB::shouldReceive('table')->once()->with('workspace_members')->andReturn($insertMock);
 
     $useCase = new AddWorkspaceMemberUseCase;
     $useCase->execute('ws-1', 10, 'admin');
@@ -102,13 +110,28 @@ test('AddWorkspaceMemberUseCase upserts workspace member record', function () {
     expect(true)->toBeTrue();
 });
 
-test('RemoveWorkspaceMemberUseCase deletes member from workspace_members', function () {
-    $queryMock = Mockery::mock();
-    $queryMock->shouldReceive('where')->once()->with('workspace_id', 'ws-1')->andReturnSelf();
-    $queryMock->shouldReceive('where')->once()->with('user_id', 10)->andReturnSelf();
-    $queryMock->shouldReceive('delete')->once()->andReturn(1);
+test('RemoveWorkspaceMemberUseCase deletes member from workspace_members after unassigning issues', function () {
+    $memberQuery = Mockery::mock();
+    $memberQuery->shouldReceive('where')->once()->with('workspace_id', 'ws-1')->andReturnSelf();
+    $memberQuery->shouldReceive('where')->once()->with('user_id', 10)->andReturnSelf();
+    $memberQuery->shouldReceive('first')->once()->andReturn((object) ['role' => 'viewer']);
 
-    DB::shouldReceive('table')->once()->with('workspace_members')->andReturn($queryMock);
+    DB::shouldReceive('table')->once()->with('workspace_members')->andReturn($memberQuery);
+    DB::shouldReceive('transaction')->once()->andReturnUsing(fn ($cb) => $cb());
+
+    $issuesQuery = Mockery::mock();
+    $issuesQuery->shouldReceive('where')->once()->with('assignee_id', 10)->andReturnSelf();
+    $issuesQuery->shouldReceive('whereIn')->once()->with('project_id', Mockery::type('Closure'))->andReturnSelf();
+    $issuesQuery->shouldReceive('update')->once()->with(['assignee_id' => null])->andReturn(1);
+
+    DB::shouldReceive('table')->once()->with('issues')->andReturn($issuesQuery);
+
+    $deleteQuery = Mockery::mock();
+    $deleteQuery->shouldReceive('where')->once()->with('workspace_id', 'ws-1')->andReturnSelf();
+    $deleteQuery->shouldReceive('where')->once()->with('user_id', 10)->andReturnSelf();
+    $deleteQuery->shouldReceive('delete')->once()->andReturn(1);
+
+    DB::shouldReceive('table')->once()->with('workspace_members')->andReturn($deleteQuery);
 
     $useCase = new RemoveWorkspaceMemberUseCase;
     $useCase->execute('ws-1', 10);

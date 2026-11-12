@@ -33,10 +33,13 @@ test('member candidates include active non-members even when workspace has 0 mem
     $admin = UserModel::factory()->create(['org_unit_id' => $unitId, 'email' => 'superadmin@wlms.com']);
     $active = UserModel::factory()->create(['org_unit_id' => $unitId]);
     $inactive = UserModel::factory()->create(['org_unit_id' => $unitId, 'status' => 'INACTIVE']);
+    $suspended = UserModel::factory()->create(['org_unit_id' => $unitId, 'status' => 'SUSPENDED']);
 
     $ids = collect(candidatesFor($admin, $wsId))->pluck('id');
 
-    expect($ids)->toContain($active->id)->not->toContain($inactive->id);
+    expect($ids)->toContain($active->id)
+        ->not->toContain($inactive->id)
+        ->not->toContain($suspended->id);
 });
 
 test('member candidates exclude existing members', function () {

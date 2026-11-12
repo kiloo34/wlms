@@ -8,11 +8,14 @@ use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Workload\Application\Queries\GetWorkspaceMembersQuery;
 use App\Modules\Workload\Application\UseCases\AddWorkspaceMemberUseCase;
 use App\Modules\Workload\Application\UseCases\RemoveWorkspaceMemberUseCase;
+use App\Modules\Workload\Domain\Enums\WorkspaceMemberRole;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\WorkspaceModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 final class WorkspaceMemberController extends Controller
 {
@@ -29,7 +32,7 @@ final class WorkspaceMemberController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $limit = (int) $request->query('limit', 50);
+        $limit = $request->has('limit') ? (int) $request->query('limit') : null;
         $offset = (int) $request->query('offset', 0);
 
         $members = $this->getWorkspaceMembersQuery->execute($workspaceId, $limit, $offset);
@@ -60,7 +63,7 @@ final class WorkspaceMemberController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|integer',
-            'role' => 'nullable|string|in:viewer,member,admin',
+            'role' => ['sometimes', 'filled', 'string', Rule::in(WorkspaceMemberRole::values())],
         ]);
 
         $workspace = WorkspaceModel::findOrFail($workspaceId);
@@ -87,9 +90,30 @@ final class WorkspaceMemberController extends Controller
         }
 
         $validated = $request->validate([
-            'role' => 'sometimes|string',
-            'daily_capacity_hours' => 'sometimes|integer|min:0|max:24',
+            'role' => ['sometimes', 'filled', 'string', Rule::in(WorkspaceMemberRole::values())],
+            'daily_capacity_hours' => ['sometimes', 'filled', 'integer', 'min:0', 'max:24'],
         ]);
+
+        if (isset($validated['role']) && ! in_array($validated['role'], ['admin', 'owner'], true)) {
+            $currentMember = DB::table('workspace_members')
+                ->where('workspace_id', $workspaceId)
+                ->where('user_id', $userId)
+                ->first();
+
+            if ($currentMember !== null && in_array($currentMember->role, ['admin', 'owner'], true)) {
+                $otherAdminsCount = DB::table('workspace_members')
+                    ->where('workspace_id', $workspaceId)
+                    ->where('user_id', '!=', $userId)
+                    ->whereIn('role', ['admin', 'owner'])
+                    ->count();
+
+                if ($otherAdminsCount === 0) {
+                    throw ValidationException::withMessages([
+                        'role' => 'Cannot demote the last remaining admin or owner in the workspace.',
+                    ]);
+                }
+            }
+        }
 
         $updateData = [];
         if (isset($validated['role'])) {
