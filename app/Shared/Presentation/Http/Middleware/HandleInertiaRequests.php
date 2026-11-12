@@ -111,6 +111,8 @@ class HandleInertiaRequests extends Middleware
                 // '*' artinya memiliki semua hak akses
                 $permissions = ['*'];
             }
+
+            $user->unsetRelation('userRoles');
         }
 
         return [
