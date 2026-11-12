@@ -8,6 +8,7 @@ use App\Modules\Collaboration\Domain\Events\CommentAdded;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Notification\Domain\Events\NewNotification;
 use App\Modules\Notification\Infrastructure\Persistence\Eloquent\Models\NotificationModel;
+use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
 use App\Modules\Workload\Domain\Events\IssueAssigned;
 use App\Modules\Workload\Domain\Events\IssueTransitioned;
 use App\Modules\Workload\Domain\Events\SprintStateChanged;
@@ -43,7 +44,7 @@ final class NotificationEventSubscriber
 
     public function handleCommentAdded(CommentAdded $event): void
     {
-        $issue = IssueModel::select('reporter_id')->find($event->issueId);
+        $issue = IssueModel::select('reporter_id', 'project_id')->find($event->issueId);
 
         // 1. Notify reporter if different from author
         if ($issue !== null && $issue->reporter_id !== null && (string) $issue->reporter_id !== $event->authorId) {
@@ -71,7 +72,7 @@ final class NotificationEventSubscriber
 
             $mentionedUsers = UserModel::where(function ($query) use ($handles) {
                 foreach ($handles as $handle) {
-                    $query->orWhere('name', 'LIKE', "%{$handle}%")
+                    $query->orWhere('name', 'LIKE', "{$handle}%")
                         ->orWhere('email', 'LIKE', "{$handle}@%")
                         ->orWhere('email', '=', $handle)
                         ->orWhere('employee_id', '=', $handle);
@@ -90,6 +91,10 @@ final class NotificationEventSubscriber
                 }
                 // Avoid notifying reporter twice if already notified
                 if ($issue !== null && $issue->reporter_id !== null && (int) $issue->reporter_id === (int) $user->id) {
+                    continue;
+                }
+                // Avoid notifying user if they do not have access to the project
+                if ($issue !== null && ! WorkloadAccessChecker::canViewProject($user->id, (string) $issue->project_id)) {
                     continue;
                 }
 
