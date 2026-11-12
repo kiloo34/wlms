@@ -230,3 +230,10 @@ test('validation: missing required fields returns 422 Unprocessable Entity', fun
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['title', 'issue_type_id', 'priority_id']);
 });
+
+test('searching workspace issues by integer number works without casting failure', function () {
+    $this->actingAs($this->superAdmin);
+
+    $response = $this->getJson("/api/workspaces/{$this->workspaceId}/issues?search=1");
+    $response->assertStatus(200);
+});

@@ -127,10 +127,12 @@ test('ImportIssuesUseCase imports valid rows and records errors for invalid rows
     ]));
 
     $projectsTable = Mockery::mock();
-    $projectsTable->shouldReceive('whereIn')->once()->andReturnSelf();
-    $projectsTable->shouldReceive('pluck')->once()->with('id', 'name')->andReturn(collect([
+    $projectsTable->shouldReceive('whereIn')->andReturnSelf();
+    $projectsTable->shouldReceive('lockForUpdate')->andReturnSelf();
+    $projectsTable->shouldReceive('pluck')->with('id', 'name')->andReturn(collect([
         'Core Banking' => 'proj-1',
     ]));
+    $projectsTable->shouldReceive('pluck')->with('id')->andReturn(collect(['proj-1']));
 
     $usersTable = Mockery::mock();
     $usersTable->shouldReceive('orWhere')->andReturnSelf();
