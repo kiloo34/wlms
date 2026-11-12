@@ -11,10 +11,10 @@ export default function AppLogo() {
                 <AppLogoIcon className="size-4.5 fill-current text-white" />
             </div>
             <div className="grid flex-1 text-left text-sm leading-none">
-                <span className="font-bold tracking-tight text-foreground">
+                <span className="text-foreground font-bold tracking-tight">
                     {brandName}
                 </span>
-                <span className="mt-0.5 text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
+                <span className="text-muted-foreground mt-0.5 text-[10px] font-medium tracking-wider uppercase">
                     Workload System
                 </span>
             </div>

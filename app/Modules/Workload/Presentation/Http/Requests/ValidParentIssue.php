@@ -15,7 +15,7 @@ final class ValidParentIssue implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $parent = IssueModel::find($value);
+        $parent = is_string($value) ? IssueModel::find($value) : null;
 
         if (! $parent || (string) $parent->project_id !== $this->projectId) {
             $fail('Parent issue tidak ditemukan di project ini.');

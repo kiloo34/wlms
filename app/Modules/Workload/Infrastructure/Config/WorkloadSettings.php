@@ -51,9 +51,9 @@ final class WorkloadSettings
             ->where('group', 'workload')
             ->pluck('value', 'key');
 
-        $result = self::DEFAULTS;
-
-        foreach (self::DEFAULTS as $shortKey => $defaultValue) {
+        /** @var array<string, mixed> $stored */
+        $stored = [];
+        foreach (array_keys(self::DEFAULTS) as $shortKey) {
             $fullKey = "workload.{$shortKey}";
             if (! $rows->has($fullKey)) {
                 continue;
@@ -65,21 +65,80 @@ final class WorkloadSettings
                 continue;
             }
 
-            $result[$shortKey] = match ($shortKey) {
-                'sla_days_by_priority' => is_array($decoded) ? array_map('intval', $decoded) : $defaultValue,
-                'working_days' => is_array($decoded) ? array_values(array_map('intval', $decoded)) : $defaultValue,
-                'holidays' => is_array($decoded) ? array_values(array_map('strval', $decoded)) : $defaultValue,
-                'enable_sprints_default', 'worklog_allow_future_date' => (bool) $decoded,
-                'worklog_max_hours_per_day', 'similarity_threshold' => (float) $decoded,
-                'attachment_max_mb', 'sla_warning_days' => (int) $decoded,
-                // 'attachment_allowed_extensions' is the only remaining key
-                default => is_array($decoded)
-                    ? array_values(array_map(fn ($ext) => strtolower(trim((string) $ext, '. ')), $decoded))
-                    : $defaultValue,
-            };
+            $stored[$shortKey] = $decoded;
         }
 
-        return $result;
+        $defaults = self::DEFAULTS;
+
+        return [
+            'sla_days_by_priority' => self::intMap($stored['sla_days_by_priority'] ?? null, $defaults['sla_days_by_priority']),
+            'working_days' => self::intList($stored['working_days'] ?? null, $defaults['working_days']),
+            'holidays' => self::stringList($stored['holidays'] ?? null, $defaults['holidays']),
+            'enable_sprints_default' => array_key_exists('enable_sprints_default', $stored) ? (bool) $stored['enable_sprints_default'] : $defaults['enable_sprints_default'],
+            'worklog_max_hours_per_day' => array_key_exists('worklog_max_hours_per_day', $stored) ? (float) $stored['worklog_max_hours_per_day'] : $defaults['worklog_max_hours_per_day'],
+            'worklog_allow_future_date' => array_key_exists('worklog_allow_future_date', $stored) ? (bool) $stored['worklog_allow_future_date'] : $defaults['worklog_allow_future_date'],
+            'attachment_max_mb' => array_key_exists('attachment_max_mb', $stored) ? (int) $stored['attachment_max_mb'] : $defaults['attachment_max_mb'],
+            'attachment_allowed_extensions' => self::extensionList($stored['attachment_allowed_extensions'] ?? null, $defaults['attachment_allowed_extensions']),
+            'similarity_threshold' => array_key_exists('similarity_threshold', $stored) ? (float) $stored['similarity_threshold'] : $defaults['similarity_threshold'],
+            'sla_warning_days' => array_key_exists('sla_warning_days', $stored) ? (int) $stored['sla_warning_days'] : $defaults['sla_warning_days'],
+        ];
+    }
+
+    /**
+     * @param  array<string, int>  $default
+     * @return array<string, int>
+     */
+    private static function intMap(mixed $value, array $default): array
+    {
+        if (! is_array($value)) {
+            return $default;
+        }
+
+        $out = [];
+        foreach ($value as $key => $item) {
+            $out[(string) $key] = (int) $item;
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  list<int>  $default
+     * @return list<int>
+     */
+    private static function intList(mixed $value, array $default): array
+    {
+        if (! is_array($value)) {
+            return $default;
+        }
+
+        return array_values(array_map(fn ($item): int => (int) $item, $value));
+    }
+
+    /**
+     * @param  list<string>  $default
+     * @return list<string>
+     */
+    private static function stringList(mixed $value, array $default): array
+    {
+        if (! is_array($value)) {
+            return $default;
+        }
+
+        return array_values(array_map(fn ($item): string => (string) $item, $value));
+    }
+
+    /**
+     * @param  list<string>  $default
+     * @return list<string>
+     */
+    private static function extensionList(mixed $value, array $default): array
+    {
+        if (! is_array($value)) {
+            return $default;
+        }
+
+        return array_values(array_map(fn ($ext): string => strtolower(trim((string) $ext, '. ')), $value));
     }
 
     /**

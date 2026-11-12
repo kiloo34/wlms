@@ -15,12 +15,11 @@ export function ThemeToggle() {
     const { appearance, resolvedAppearance, updateAppearance } =
         useAppearance();
 
-    const options: { value: Appearance; label: string; icon: typeof Sun }[] =
-        [
-            { value: 'light', label: t('Light'), icon: Sun },
-            { value: 'dark', label: t('Dark'), icon: Moon },
-            { value: 'system', label: t('System'), icon: Monitor },
-        ];
+    const options: { value: Appearance; label: string; icon: typeof Sun }[] = [
+        { value: 'light', label: t('Light'), icon: Sun },
+        { value: 'dark', label: t('Dark'), icon: Moon },
+        { value: 'system', label: t('System'), icon: Monitor },
+    ];
 
     const CurrentIcon = resolvedAppearance === 'dark' ? Moon : Sun;
 

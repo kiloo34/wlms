@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Gate;
 class OrgUnitController extends Controller
 {
     public function __construct(
-        private readonly OrgUnitTreeService $treeService = new OrgUnitTreeService()
+        private readonly OrgUnitTreeService $treeService = new OrgUnitTreeService
     ) {}
 
     public function index(): JsonResponse

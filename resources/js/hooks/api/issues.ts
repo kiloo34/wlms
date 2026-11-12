@@ -164,7 +164,9 @@ export function useRemoveIssueLink() {
 export function useCreateIssue() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (payload: GlobalCreateIssuePayload | Record<string, unknown>) => {
+        mutationFn: async (
+            payload: GlobalCreateIssuePayload | Record<string, unknown>,
+        ) => {
             const { data } = await axios.post('/api/issues', payload);
             return data;
         },

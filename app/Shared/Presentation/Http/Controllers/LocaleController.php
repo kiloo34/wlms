@@ -20,4 +20,3 @@ class LocaleController
         return back();
     }
 }
-

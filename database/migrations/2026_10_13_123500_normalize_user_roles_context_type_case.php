@@ -57,4 +57,3 @@ return new class extends Migration
         // One-way data normalization to canonical uppercase context_type ('WORKSPACE', 'PROJECT', 'GLOBAL').
     }
 };
-

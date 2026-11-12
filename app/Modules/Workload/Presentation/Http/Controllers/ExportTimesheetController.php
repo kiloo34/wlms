@@ -71,14 +71,14 @@ final class ExportTimesheetController extends Controller
                 'statuses.name as status_name',
             ]);
 
-        if ($projectId !== null && $projectId !== '') {
+        if ($projectId !== null) {
             $query->where('issues.project_id', $projectId);
         }
 
         $month = $request->query('month') ? (string) $request->query('month') : null;
         if ($month !== null && preg_match('/^\d{4}-\d{2}$/', $month) === 1) {
             $monthStart = CarbonImmutable::createFromFormat('!Y-m', $month);
-            if ($monthStart !== false) {
+            if ($monthStart !== null) {
                 $query->whereBetween('worklogs.started_at', [
                     $monthStart->startOfMonth()->toDateTimeString(),
                     $monthStart->endOfMonth()->toDateTimeString(),
@@ -87,10 +87,10 @@ final class ExportTimesheetController extends Controller
         } else {
             $from = $request->query('from') ? (string) $request->query('from') : null;
             $to = $request->query('to') ? (string) $request->query('to') : null;
-            if ($from !== null && $from !== '') {
+            if ($from !== null) {
                 $query->where('worklogs.started_at', '>=', CarbonImmutable::parse($from)->startOfDay()->toDateTimeString());
             }
-            if ($to !== null && $to !== '') {
+            if ($to !== null) {
                 $query->where('worklogs.started_at', '<=', CarbonImmutable::parse($to)->endOfDay()->toDateTimeString());
             }
         }

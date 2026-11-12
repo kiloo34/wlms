@@ -9,11 +9,11 @@ use JsonSerializable;
 final class WorkspaceAnalyticsOutput implements JsonSerializable
 {
     /**
-     * @param array<string, mixed> $summary
-     * @param array<int, array<string, mixed>> $projects
-     * @param array<int, array<string, mixed>> $throughput
-     * @param array<int, array<string, mixed>> $memberWorkload
-     * @param array<string, string> $filters
+     * @param  array<string, mixed>  $summary
+     * @param  array<int, array<string, mixed>>  $projects
+     * @param  array<int, array<string, mixed>>  $throughput
+     * @param  array<int, array<string, mixed>>  $memberWorkload
+     * @param  array<string, string>  $filters
      */
     public function __construct(
         public readonly array $summary,
@@ -45,4 +45,3 @@ final class WorkspaceAnalyticsOutput implements JsonSerializable
         return $this->toArray();
     }
 }
-

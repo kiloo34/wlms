@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
-use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueTypeModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\PriorityModel;

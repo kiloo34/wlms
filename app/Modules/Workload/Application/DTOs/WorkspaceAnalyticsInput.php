@@ -13,4 +13,3 @@ final class WorkspaceAnalyticsInput
         public readonly ?string $to = null,
     ) {}
 }
-

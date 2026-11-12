@@ -223,9 +223,7 @@ export function ProjectAnalyticsDashboard({
                             }
                         >
                             <SelectTrigger className="h-8 w-44 text-xs">
-                                <SelectValue
-                                    placeholder={t('All Sprints')}
-                                />
+                                <SelectValue placeholder={t('All Sprints')} />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">

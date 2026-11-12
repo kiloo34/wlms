@@ -3,8 +3,10 @@
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
+use App\Modules\Workload\Application\Queries\GetWorkspacesByGroupQuery;
 use App\Modules\Workload\Application\UseCases\ImportIssuesUseCase;
 use App\Modules\Workload\Domain\Events\IssueAssigned;
+use App\Modules\Workload\Infrastructure\Auth\Policies\WorkspacePolicy;
 use App\Modules\Workload\Infrastructure\Mail\IssueAssignedMail;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\StatusModel;
@@ -660,7 +662,7 @@ it('matches PIC by employee_id and email during import and queues notification m
         issueNumber: 'MID-1',
         assigneeId: $userByNip->id,
         actorId: $reporter->id,
-        occurredAt: new DateTimeImmutable()
+        occurredAt: new DateTimeImmutable
     ));
 
     Mail::assertQueued(IssueAssignedMail::class, function (IssueAssignedMail $mail) use ($userByNip) {
@@ -851,7 +853,7 @@ it('supports hierarchical workspace visibility for parent (DTI) and child (DWH) 
         ['id' => $wsMiiId, 'owner_group_id' => $miiId, 'name' => 'MII ML Platform', 'status' => 'ACTIVE', 'created_at' => now(), 'updated_at' => now()],
     ]);
 
-    $query = app(\App\Modules\Workload\Application\Queries\GetWorkspacesByGroupQuery::class);
+    $query = app(GetWorkspacesByGroupQuery::class);
 
     // 1. Pimdiv DTI sees TMDP workspace (as descendant) but NOT MII
     $dtiWorkspaces = collect($query->execute($dtiId, 999))->pluck('id')->all();
@@ -972,7 +974,7 @@ it('allows parent unit (DTI) to pass WorkspacePolicy view for child unit (TMDP) 
         'status' => 'ACTIVE',
     ]);
 
-    $policy = app(\App\Modules\Workload\Infrastructure\Auth\Policies\WorkspacePolicy::class);
+    $policy = app(WorkspacePolicy::class);
 
     expect($policy->view($parentUser, $childWorkspace))->toBeTrue();
     expect($policy->update($parentUser, $childWorkspace))->toBeTrue();
@@ -1026,7 +1028,7 @@ it('blocks subordinate child unit (DWH) from updating or archiving parent (TMDP)
         ->assertStatus(403);
 
     // Policy check: child unit user cannot update/delete parent workspace
-    $policy = app(\App\Modules\Workload\Infrastructure\Auth\Policies\WorkspacePolicy::class);
+    $policy = app(WorkspacePolicy::class);
     expect($policy->update($childUser, $parentWorkspace))->toBeFalse();
     expect($policy->delete($childUser, $parentWorkspace))->toBeFalse();
 });
@@ -1174,7 +1176,3 @@ test('user with Workspace Owner role scoped as WORKSPACE can create workspace fo
         ->getJson("/api/workspaces/{$workspaceId}/projects")
         ->assertStatus(200);
 });
-
-
-
-

@@ -45,7 +45,10 @@ export const SimilarIssuesBox: React.FC<Props> = ({
                         <span className="text-muted-foreground shrink-0 font-medium">
                             {s.key}
                         </span>
-                        <span className="min-w-0 flex-1 truncate" title={s.title}>
+                        <span
+                            className="min-w-0 flex-1 truncate"
+                            title={s.title}
+                        >
                             {s.title}
                         </span>
                         <Badge

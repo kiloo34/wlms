@@ -214,6 +214,3 @@ test('admin can quick-toggle page publication status without sending content', f
     $updated = DocPageModel::find($this->page->id);
     $this->assertEquals(['ops' => [['insert' => 'Hello World\n']]], $updated->content);
 });
-
-
-

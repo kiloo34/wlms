@@ -128,4 +128,3 @@ test('self @mention does not notify author', function () {
 
     expect($notification)->toBeNull();
 });
-

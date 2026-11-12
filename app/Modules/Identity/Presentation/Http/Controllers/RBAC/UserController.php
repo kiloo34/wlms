@@ -171,6 +171,7 @@ class UserController extends Controller
                             'email' => $item['email'],
                             'reason' => 'Already exists in database',
                         ];
+
                         continue;
                     }
                 }
@@ -181,6 +182,7 @@ class UserController extends Controller
                             'email' => $item['email'],
                             'reason' => 'Duplicate in input batch',
                         ];
+
                         continue;
                     }
                 }

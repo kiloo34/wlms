@@ -75,4 +75,3 @@ final class ExportIssuesController extends Controller
         return $this->exportWorkspace($request, $workspaceId);
     }
 }
-

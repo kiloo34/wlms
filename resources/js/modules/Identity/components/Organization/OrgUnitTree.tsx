@@ -93,17 +93,18 @@ function OrgUnitTreeNode({
                             {unit.level.name}
                         </Badge>
                     )}
-                    {unit.max_workspaces !== undefined && unit.max_workspaces > 0 ? (
+                    {unit.max_workspaces !== undefined &&
+                    unit.max_workspaces > 0 ? (
                         <Badge
                             variant="secondary"
-                            className="h-5 px-1.5 text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium"
+                            className="h-5 bg-blue-500/10 px-1.5 text-[10px] font-medium text-blue-600 dark:text-blue-400"
                         >
                             {unit.max_workspaces} {t('Workspace')}
                         </Badge>
                     ) : (
                         <Badge
                             variant="outline"
-                            className="h-5 px-1.5 text-[10px] text-muted-foreground border-dashed font-normal"
+                            className="text-muted-foreground h-5 border-dashed px-1.5 text-[10px] font-normal"
                         >
                             0 {t('Workspace')}
                         </Badge>

@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
-use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;

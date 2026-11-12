@@ -436,7 +436,10 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                         value={priorityId}
                         onChange={(val) => {
                             setPriorityId(val);
-                            if (!isEdit && activeSettings?.sla_days_by_priority) {
+                            if (
+                                !isEdit &&
+                                activeSettings?.sla_days_by_priority
+                            ) {
                                 const computed = getAutoDueDate(val, startDate);
                                 if (computed) setDueDate(computed);
                             }

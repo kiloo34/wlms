@@ -23,7 +23,13 @@ import {
     CommandItem,
     CommandList,
 } from '@/components/ui/command';
-import { Check, ChevronsUpDown, Shield, ShieldCheck, Search } from 'lucide-react';
+import {
+    Check,
+    ChevronsUpDown,
+    Shield,
+    ShieldCheck,
+    Search,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Role, useSyncPermissions, useSyncMenus } from '../../hooks/use-roles';
@@ -68,8 +74,12 @@ export function ManageRoleAccessDialog({
     }, [role, open]);
 
     const isModuleManaged = (mod: string) => {
-        const managePerm = permissions?.find((item) => item.name === `${mod}:manage`);
-        return managePerm ? selectedPermissionIds.includes(managePerm.id) : false;
+        const managePerm = permissions?.find(
+            (item) => item.name === `${mod}:manage`,
+        );
+        return managePerm
+            ? selectedPermissionIds.includes(managePerm.id)
+            : false;
     };
 
     const togglePermission = (id: string) => {
@@ -86,7 +96,9 @@ export function ManageRoleAccessDialog({
         if (targetAction === 'manage') {
             if (selectedPermissionIds.includes(id)) {
                 // Matikan manage: hilangkan ID manage
-                setSelectedPermissionIds((prev) => prev.filter((pId) => pId !== id));
+                setSelectedPermissionIds((prev) =>
+                    prev.filter((pId) => pId !== id),
+                );
             } else {
                 // Aktifkan manage: tambahkan ID manage dan bersihkan ID sub-aksi modul ini
                 const subPermissionIds =
@@ -120,7 +132,9 @@ export function ManageRoleAccessDialog({
         const filtered = searchQuery.trim()
             ? permissions.filter(
                   (p) =>
-                      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      p.name
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase()) ||
                       (p.description &&
                           p.description
                               .toLowerCase()
@@ -215,7 +229,7 @@ export function ManageRoleAccessDialog({
             <DialogContent className="flex h-[650px] flex-col sm:max-w-[700px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Shield className="h-5 w-5 text-primary" />
+                        <Shield className="text-primary h-5 w-5" />
                         Manage Access: {role?.name}
                     </DialogTitle>
                 </DialogHeader>
@@ -238,130 +252,177 @@ export function ManageRoleAccessDialog({
                     >
                         <div className="flex items-center justify-between gap-2">
                             <div className="relative flex-1">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
                                 <Input
-                                    placeholder={t('Search permissions or modules...')}
+                                    placeholder={t(
+                                        'Search permissions or modules...',
+                                    )}
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-8 h-9"
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
+                                    className="h-9 pl-8"
                                 />
                             </div>
-                            <Badge variant="outline" className="text-xs shrink-0">
+                            <Badge
+                                variant="outline"
+                                className="shrink-0 text-xs"
+                            >
                                 {selectedPermissionIds.length} {t('selected')}
                             </Badge>
                         </div>
 
                         {/* GROUPED PERMISSIONS LIST */}
-                        <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
+                        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
                             {Object.keys(groupedPermissions).length === 0 ? (
-                                <div className="text-center py-8 text-muted-foreground text-sm">
+                                <div className="text-muted-foreground py-8 text-center text-sm">
                                     {t('No permissions found.')}
                                 </div>
                             ) : (
-                                Object.entries(groupedPermissions).map(([mod, items]) => {
-                                    const hasManage = isModuleManaged(mod);
-                                    const manageItem = items.find((p) => p.name.endsWith(':manage'));
-                                    const subItems = items.filter((p) => !p.name.endsWith(':manage'));
+                                Object.entries(groupedPermissions).map(
+                                    ([mod, items]) => {
+                                        const hasManage = isModuleManaged(mod);
+                                        const manageItem = items.find((p) =>
+                                            p.name.endsWith(':manage'),
+                                        );
+                                        const subItems = items.filter(
+                                            (p) => !p.name.endsWith(':manage'),
+                                        );
 
-                                    return (
-                                        <div
-                                            key={mod}
-                                            className="rounded-lg border bg-card p-3 shadow-xs space-y-2.5"
-                                        >
-                                            <div className="flex items-center justify-between border-b pb-2">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-semibold text-sm capitalize">
-                                                        {mod}
-                                                    </span>
-                                                    {hasManage && (
-                                                        <Badge
-                                                            variant="default"
-                                                            className="text-[10px] h-5 bg-emerald-600 hover:bg-emerald-700"
+                                        return (
+                                            <div
+                                                key={mod}
+                                                className="bg-card space-y-2.5 rounded-lg border p-3 shadow-xs"
+                                            >
+                                                <div className="flex items-center justify-between border-b pb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-semibold capitalize">
+                                                            {mod}
+                                                        </span>
+                                                        {hasManage && (
+                                                            <Badge
+                                                                variant="default"
+                                                                className="h-5 bg-emerald-600 text-[10px] hover:bg-emerald-700"
+                                                            >
+                                                                Full Access
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+
+                                                    {/* MANAGE CHECKBOX */}
+                                                    {manageItem && (
+                                                        <label
+                                                            className="text-primary flex cursor-pointer items-center gap-2 text-xs font-medium select-none hover:opacity-80"
+                                                            onClick={(e) =>
+                                                                e.stopPropagation()
+                                                            }
                                                         >
-                                                            Full Access
-                                                        </Badge>
+                                                            <Checkbox
+                                                                checked={selectedPermissionIds.includes(
+                                                                    manageItem.id,
+                                                                )}
+                                                                onCheckedChange={() =>
+                                                                    togglePermission(
+                                                                        manageItem.id,
+                                                                    )
+                                                                }
+                                                            />
+                                                            <span>
+                                                                {
+                                                                    manageItem.name
+                                                                }{' '}
+                                                                (Manage All)
+                                                            </span>
+                                                        </label>
                                                     )}
                                                 </div>
 
-                                                {/* MANAGE CHECKBOX */}
-                                                {manageItem && (
-                                                    <label
-                                                        className="flex items-center gap-2 cursor-pointer text-xs font-medium text-primary select-none hover:opacity-80"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    >
-                                                        <Checkbox
-                                                            checked={selectedPermissionIds.includes(manageItem.id)}
-                                                            onCheckedChange={() => togglePermission(manageItem.id)}
-                                                        />
-                                                        <span>{manageItem.name} (Manage All)</span>
-                                                    </label>
-                                                )}
-                                            </div>
+                                                {/* SUB ACTIONS (view, create, edit, assign, delete, etc.) */}
+                                                {subItems.length > 0 && (
+                                                    <div className="grid grid-cols-1 gap-2 pt-1 pl-1 sm:grid-cols-2">
+                                                        {subItems.map((p) => {
+                                                            const isChecked =
+                                                                hasManage ||
+                                                                selectedPermissionIds.includes(
+                                                                    p.id,
+                                                                );
+                                                            const isDisabled =
+                                                                hasManage;
 
-                                            {/* SUB ACTIONS (view, create, edit, assign, delete, etc.) */}
-                                            {subItems.length > 0 && (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 pl-1">
-                                                    {subItems.map((p) => {
-                                                        const isChecked =
-                                                            hasManage ||
-                                                            selectedPermissionIds.includes(p.id);
-                                                        const isDisabled = hasManage;
-
-                                                        return (
-                                                            <div
-                                                                key={p.id}
-                                                                onClick={() => {
-                                                                    if (!isDisabled) {
-                                                                        togglePermission(p.id);
-                                                                    }
-                                                                }}
-                                                                className={cn(
-                                                                    'flex items-start gap-2 p-2 rounded-md border text-xs transition-colors',
-                                                                    isDisabled
-                                                                        ? 'bg-muted/40 opacity-70 cursor-not-allowed border-dashed'
-                                                                        : 'cursor-pointer hover:bg-accent border-border',
-                                                                    isChecked && !isDisabled && 'bg-primary/5 border-primary/30',
-                                                                )}
-                                                            >
-                                                                <Checkbox
-                                                                    checked={isChecked}
-                                                                    disabled={isDisabled}
-                                                                    className="mt-0.5 shrink-0"
-                                                                    onCheckedChange={() => {
-                                                                        if (!isDisabled) {
-                                                                            togglePermission(p.id);
+                                                            return (
+                                                                <div
+                                                                    key={p.id}
+                                                                    onClick={() => {
+                                                                        if (
+                                                                            !isDisabled
+                                                                        ) {
+                                                                            togglePermission(
+                                                                                p.id,
+                                                                            );
                                                                         }
                                                                     }}
-                                                                />
-                                                                <div className="flex flex-col min-w-0 flex-1">
-                                                                    <div className="flex items-center justify-between gap-1">
-                                                                        <span className="font-mono text-[11px] font-medium truncate">
-                                                                            {p.name}
-                                                                        </span>
-                                                                        {hasManage && (
-                                                                            <span className="text-[10px] text-muted-foreground italic shrink-0">
-                                                                                (Tercakup)
+                                                                    className={cn(
+                                                                        'flex items-start gap-2 rounded-md border p-2 text-xs transition-colors',
+                                                                        isDisabled
+                                                                            ? 'bg-muted/40 cursor-not-allowed border-dashed opacity-70'
+                                                                            : 'hover:bg-accent border-border cursor-pointer',
+                                                                        isChecked &&
+                                                                            !isDisabled &&
+                                                                            'bg-primary/5 border-primary/30',
+                                                                    )}
+                                                                >
+                                                                    <Checkbox
+                                                                        checked={
+                                                                            isChecked
+                                                                        }
+                                                                        disabled={
+                                                                            isDisabled
+                                                                        }
+                                                                        className="mt-0.5 shrink-0"
+                                                                        onCheckedChange={() => {
+                                                                            if (
+                                                                                !isDisabled
+                                                                            ) {
+                                                                                togglePermission(
+                                                                                    p.id,
+                                                                                );
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                    <div className="flex min-w-0 flex-1 flex-col">
+                                                                        <div className="flex items-center justify-between gap-1">
+                                                                            <span className="truncate font-mono text-[11px] font-medium">
+                                                                                {
+                                                                                    p.name
+                                                                                }
+                                                                            </span>
+                                                                            {hasManage && (
+                                                                                <span className="text-muted-foreground shrink-0 text-[10px] italic">
+                                                                                    (Tercakup)
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        {p.description && (
+                                                                            <span className="text-muted-foreground line-clamp-1 text-[10px]">
+                                                                                {
+                                                                                    p.description
+                                                                                }
                                                                             </span>
                                                                         )}
                                                                     </div>
-                                                                    {p.description && (
-                                                                        <span className="text-muted-foreground text-[10px] line-clamp-1">
-                                                                            {p.description}
-                                                                        </span>
-                                                                    )}
                                                                 </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    },
+                                )
                             )}
                         </div>
 
-                        <div className="flex justify-end pt-2 border-t">
+                        <div className="flex justify-end border-t pt-2">
                             <Button
                                 onClick={handleSavePermissions}
                                 disabled={syncPermissions.isPending}

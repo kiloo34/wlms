@@ -14,4 +14,3 @@ final class ProjectAnalyticsInput
         public readonly ?string $sprintId = null,
     ) {}
 }
-

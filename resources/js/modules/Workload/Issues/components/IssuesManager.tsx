@@ -250,7 +250,9 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                     payload: payload as UpdateIssuePayload,
                 });
             } else {
-                const created = await createIssue(payload as CreateIssuePayload);
+                const created = await createIssue(
+                    payload as CreateIssuePayload,
+                );
                 handleCloseDialog();
                 return created;
             }
@@ -370,7 +372,9 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                         {canViewAnalytics && (
                             <Button
                                 variant={
-                                    viewMode === 'analytics' ? 'default' : 'ghost'
+                                    viewMode === 'analytics'
+                                        ? 'default'
+                                        : 'ghost'
                                 }
                                 size="sm"
                                 className={tabBtnClass}
@@ -412,7 +416,9 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
                 <IssueList
                     issues={filteredIssues}
                     isLoading={isLoading}
-                    onCreateClick={canCreateIssue ? handleCreateClick : undefined}
+                    onCreateClick={
+                        canCreateIssue ? handleCreateClick : undefined
+                    }
                     onEdit={handleEditClick}
                     onDelete={handleDelete}
                     onLogWork={handleLogWorkClick}

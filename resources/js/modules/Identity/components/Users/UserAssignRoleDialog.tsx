@@ -94,7 +94,9 @@ export function UserAssignRoleDialog({
                 role_id: selectedRole,
             };
             if (selectedScope === 'WORKSPACE') {
-                payload.context_type = selectedWorkspaceId ? 'WORKSPACE' : 'GLOBAL';
+                payload.context_type = selectedWorkspaceId
+                    ? 'WORKSPACE'
+                    : 'GLOBAL';
                 payload.context_id = selectedWorkspaceId || null;
             } else if (selectedScope === 'PROJECT') {
                 payload.context_type = 'PROJECT';
@@ -216,8 +218,12 @@ export function UserAssignRoleDialog({
                             >
                                 <option value="">
                                     {workspaces.length === 0
-                                        ? t('Global / Initial (No workspace yet)')
-                                        : t('Global / All Workspaces (or select below)')}
+                                        ? t(
+                                              'Global / Initial (No workspace yet)',
+                                          )
+                                        : t(
+                                              'Global / All Workspaces (or select below)',
+                                          )}
                                 </option>
                                 {workspaces.map((ws) => (
                                     <option key={ws.id} value={ws.id}>

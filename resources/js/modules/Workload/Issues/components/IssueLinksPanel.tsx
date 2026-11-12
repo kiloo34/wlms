@@ -115,7 +115,10 @@ export const IssueLinksPanel: React.FC<{
                 )}
                 {links.map((l) => (
                     <div key={l.id} className="flex items-center gap-2 text-sm">
-                        <Badge variant="outline" className="shrink-0 text-[10px]">
+                        <Badge
+                            variant="outline"
+                            className="shrink-0 text-[10px]"
+                        >
                             {t(linkLabel(l))}
                         </Badge>
                         <span className="text-muted-foreground shrink-0 text-xs font-medium">

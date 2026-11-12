@@ -116,7 +116,7 @@ export function WorkloadPoliciesManager() {
                 if (!mounted) return;
                 const loaded: WorkloadPolicySettings = {
                     ...DEFAULT_SETTINGS,
-                    ...(data?.data || {}),
+                    ...data?.data,
                 };
                 setSettings(loaded);
                 setExtensionsText(
@@ -208,9 +208,7 @@ export function WorkloadPoliciesManager() {
                     (data.data.attachment_allowed_extensions || []).join(', '),
                 );
             }
-            toast.success(
-                t('Pengaturan SLA & Kebijakan berhasil disimpan.'),
-            );
+            toast.success(t('Pengaturan SLA & Kebijakan berhasil disimpan.'));
         } catch (err: any) {
             toast.error(
                 err?.response?.data?.message ||
@@ -248,9 +246,7 @@ export function WorkloadPoliciesManager() {
                 <CardContent>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
                         {activePriorities.map((prio) => {
-                            const slug = (
-                                prio.slug || prio.name
-                            ).toLowerCase();
+                            const slug = (prio.slug || prio.name).toLowerCase();
                             const currentVal =
                                 settings.sla_days_by_priority?.[slug] ??
                                 DEFAULT_SETTINGS.sla_days_by_priority[slug] ??
@@ -262,7 +258,7 @@ export function WorkloadPoliciesManager() {
                                 >
                                     <Label
                                         htmlFor={`sla-${slug}`}
-                                        className="text-xs font-semibold uppercase tracking-wider"
+                                        className="text-xs font-semibold tracking-wider uppercase"
                                     >
                                         {prio.name}
                                     </Label>
@@ -449,16 +445,14 @@ export function WorkloadPoliciesManager() {
                                     onChange={(e) =>
                                         setSettings((prev) => ({
                                             ...prev,
-                                            worklog_max_hours_per_day:
-                                                Math.max(
-                                                    1,
-                                                    Math.min(
-                                                        24,
-                                                        Number(
-                                                            e.target.value,
-                                                        ) || 12,
-                                                    ),
+                                            worklog_max_hours_per_day: Math.max(
+                                                1,
+                                                Math.min(
+                                                    24,
+                                                    Number(e.target.value) ||
+                                                        12,
                                                 ),
+                                            ),
                                         }))
                                     }
                                     className="max-w-[140px]"
@@ -642,9 +636,7 @@ export function WorkloadPoliciesManager() {
             <div className="flex justify-end">
                 <Button type="submit" disabled={isSaving} className="gap-2">
                     <Save className="h-4 w-4" />
-                    {isSaving
-                        ? t('Menyimpan...')
-                        : t('Simpan Kebijakan & SLA')}
+                    {isSaving ? t('Menyimpan...') : t('Simpan Kebijakan & SLA')}
                 </Button>
             </div>
         </form>

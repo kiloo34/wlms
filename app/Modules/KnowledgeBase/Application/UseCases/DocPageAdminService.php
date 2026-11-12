@@ -172,4 +172,3 @@ class DocPageAdminService
         DocPageModel::findOrFail($id)->delete();
     }
 }
-

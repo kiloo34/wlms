@@ -34,10 +34,12 @@ final class IssueLinkController
 
         // shortcut: SQL LIKE candidate limit 200 + PHP Jaccard/similar_text in controller; extract to domain service + pg_trgm/FTS when project > 5,000 issues or reused outside IssueLinkController
         $key = (string) DB::table('projects')->where('id', $projectId)->value('key');
+        $excludeId = $request->query('exclude_id');
+        $excludeId = is_string($excludeId) && $excludeId !== '' ? $excludeId : null;
         $candidates = IssueModel::query()
             ->with('status:id,name,category')
             ->where('project_id', $projectId)
-            ->when($request->query('exclude_id'), fn ($q, $id) => $q->where('id', '!=', (string) $id))
+            ->when($excludeId !== null, fn ($q) => $q->where('id', '!=', $excludeId))
             ->where(function ($q) use ($tokens): void {
                 foreach ($tokens as $t) {
                     $q->orWhereRaw("LOWER(title) LIKE ? ESCAPE '\\'", ['%'.addcslashes($t, '%_\\').'%']);
@@ -88,7 +90,7 @@ final class IssueLinkController
             'link_type' => ['required', 'in:'.implode(',', self::TYPES)],
         ]);
 
-        $target = IssueModel::find($v['target_issue_id']);
+        $target = IssueModel::find((string) $v['target_issue_id']);
         if (! $target || (string) $target->project_id !== (string) $issue->project_id) {
             throw ValidationException::withMessages(['target_issue_id' => 'Target issue tidak valid atau beda project.']);
         }
@@ -166,7 +168,7 @@ final class IssueLinkController
 
     /**
      * @param  Collection<int, IssueLinkModel>  $links
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function linkItems($links, string $issueId): array
     {
@@ -190,7 +192,7 @@ final class IssueLinkController
     /** @return array<string, mixed> */
     private function issueSummary(IssueModel $i, ?IssueModel $ctx = null, ?string $key = null): array
     {
-        $key ??= (string) DB::table('projects')->where('id', $ctx?->project_id ?? $i->project_id)->value('key');
+        $key ??= (string) DB::table('projects')->where('id', $ctx->project_id ?? $i->project_id)->value('key');
 
         return [
             'id' => $i->id,
@@ -205,10 +207,10 @@ final class IssueLinkController
     {
         /** @var UserModel|null $user */
         $user = $request->user();
-        abort_unless($user, 401, 'Unauthenticated.');
+        abort_unless($user !== null, 401, 'Unauthenticated.');
 
         $project = DB::table('projects')->where('id', $projectId)->whereNull('deleted_at')->first(['workspace_id', 'lead_id']);
-        abort_unless($project, 404, 'Project not found.');
+        abort_unless($project !== null, 404, 'Project not found.');
 
         $workspaceId = (string) $project->workspace_id;
         $perms = $permission === 'issues:manage'

@@ -154,4 +154,3 @@ test('bulk create validates email format', function () {
     $response->assertStatus(422);
     $response->assertJsonValidationErrors(['users.0.email']);
 });
-

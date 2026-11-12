@@ -5,6 +5,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia;
+use ParagonIE\ConstantTime\Base64UrlSafe;
 
 uses(RefreshDatabase::class);
 
@@ -118,7 +119,7 @@ test('passkeys relationship correctly returns passkeys belonging to user', funct
     DB::table('passkeys')->insert([
         'user_id' => $user->id,
         'name' => 'MacBook Pro',
-        'credential_id' => \ParagonIE\ConstantTime\Base64UrlSafe::encodeUnpadded('dummy-credential-id'),
+        'credential_id' => Base64UrlSafe::encodeUnpadded('dummy-credential-id'),
         'credential' => json_encode(['aaguid' => '00000000-0000-0000-0000-000000000000']),
         'created_at' => now(),
         'updated_at' => now(),
@@ -130,5 +131,3 @@ test('passkeys relationship correctly returns passkeys belonging to user', funct
     $response = $this->actingAs($user)->getJson('/passkeys/confirm/options');
     $response->assertOk();
 });
-
-

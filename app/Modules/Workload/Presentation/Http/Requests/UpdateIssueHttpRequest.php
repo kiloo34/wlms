@@ -57,7 +57,7 @@ final class UpdateIssueHttpRequest extends FormRequest
             'remaining_estimate_seconds' => ['nullable', 'integer', 'min:0'],
             'start_date' => ['nullable', 'date'],
             'due_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-            'parent_id' => ['nullable', 'uuid', new ValidParentIssue((string) (IssueModel::find($this->route('id'))?->project_id), (string) $this->route('id'))],
+            'parent_id' => ['nullable', 'uuid', new ValidParentIssue((string) (IssueModel::find((string) $this->route('id'))?->project_id), (string) $this->route('id'))],
         ];
     }
 }

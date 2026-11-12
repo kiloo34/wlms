@@ -74,12 +74,13 @@ export function AppSidebar() {
     // 3. GABUNGKAN DENGAN MENCEGAH DUPLIKASI
     // Pastikan menu dinamis tidak me-render ulang menu default (misal: Dashboard).
     // Menu Pengaturan disembunyikan dari sidebar karena sudah tersedia di menu profil (NavUser).
-    const defaultHrefs = defaultNavItems.map((item) => item.href);
-    const filteredDynamicNavItems = dynamicNavItems.filter(
-        (item) =>
-            !defaultHrefs.includes(item.href) &&
-            !item.href.startsWith('/settings'),
-    );
+    const hrefToString = (href: NavItem['href']): string =>
+        typeof href === 'string' ? href : href.url;
+    const defaultHrefs = defaultNavItems.map((item) => hrefToString(item.href));
+    const filteredDynamicNavItems = dynamicNavItems.filter((item) => {
+        const href = hrefToString(item.href);
+        return !defaultHrefs.includes(href) && !href.startsWith('/settings');
+    });
 
     const mainNavItems: NavItem[] = [
         ...defaultNavItems,

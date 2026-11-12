@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+    type ReactNode,
+} from 'react';
 import { cn } from '@/lib/utils';
 
 interface StickyScrollXProps {
@@ -91,7 +97,7 @@ export function StickyScrollX({ children, className }: StickyScrollXProps) {
                 ref={contentRef}
                 onScroll={handleContentScroll}
                 className={cn(
-                    'overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                    '[scrollbar-width:none] overflow-x-auto [&::-webkit-scrollbar]:hidden',
                     className,
                 )}
             >

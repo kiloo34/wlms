@@ -1,6 +1,5 @@
 <?php
 
-use App\Shared\Presentation\Http\Controllers\LocaleController;
 use App\Modules\Identity\Presentation\Http\Controllers\OrgLevelController;
 use App\Modules\Identity\Presentation\Http\Controllers\OrgUnitController;
 use App\Modules\Identity\Presentation\Http\Controllers\RBAC\MenuController;
@@ -8,7 +7,6 @@ use App\Modules\Identity\Presentation\Http\Controllers\RBAC\PermissionController
 use App\Modules\Identity\Presentation\Http\Controllers\RBAC\RoleController;
 use App\Modules\Identity\Presentation\Http\Controllers\RBAC\UserController;
 use App\Modules\Identity\Presentation\Http\Controllers\RBAC\UserRoleController;
-use App\Modules\KnowledgeBase\Presentation\Http\Controllers\Admin\AdminDocPageController;
 use App\Modules\KnowledgeBase\Presentation\Http\Controllers\DocumentationController;
 use App\Modules\Workload\Presentation\Http\Controllers\DashboardPageController;
 use App\Modules\Workload\Presentation\Http\Controllers\GlobalIssuesPageController;
@@ -16,6 +14,7 @@ use App\Modules\Workload\Presentation\Http\Controllers\ImportWorkloadController;
 use App\Modules\Workload\Presentation\Http\Controllers\ProjectIndexPageController;
 use App\Modules\Workload\Presentation\Http\Controllers\ShowProjectPageController;
 use App\Modules\Workload\Presentation\Http\Controllers\WorkspaceIssuesPageController;
+use App\Shared\Presentation\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');

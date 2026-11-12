@@ -5,6 +5,8 @@ use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserRoleModel;
 use App\Modules\Workload\Application\Jobs\ImportIssuesJob;
 use App\Modules\Workload\Application\Jobs\ImportProjectsJob;
+use App\Modules\Workload\Application\UseCases\ImportIssuesUseCase;
+use App\Modules\Workload\Application\UseCases\ImportProjectsUseCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
@@ -190,7 +192,7 @@ test('ImportIssuesUseCase prioritizes exact PIC match over partial substring mat
         'updated_at' => now(),
     ]);
 
-    $useCase = app(\App\Modules\Workload\Application\UseCases\ImportIssuesUseCase::class);
+    $useCase = app(ImportIssuesUseCase::class);
     $useCase->execute(collect([
         [
             'project' => 'Import Project',
@@ -204,14 +206,14 @@ test('ImportIssuesUseCase prioritizes exact PIC match over partial substring mat
         ->and((int) $imported->assignee_id)->toBe((int) $ari->id)
         ->and((int) $imported->assignee_id)->not->toBe((int) $karina->id);
 
-    \Illuminate\Support\Facades\Storage::fake('local');
-    \Illuminate\Support\Facades\Storage::disk('local')->put('imports/temp-projects.csv', "Project Name,Project Status\nClean Project,ACTIVE\n");
-    expect(\Illuminate\Support\Facades\Storage::disk('local')->exists('imports/temp-projects.csv'))->toBeTrue();
+    Storage::fake('local');
+    Storage::disk('local')->put('imports/temp-projects.csv', "Project Name,Project Status\nClean Project,ACTIVE\n");
+    expect(Storage::disk('local')->exists('imports/temp-projects.csv'))->toBeTrue();
 
     $job = new ImportProjectsJob('imports/temp-projects.csv', $workspaceId);
-    $job->handle(app(\App\Modules\Workload\Application\UseCases\ImportProjectsUseCase::class));
+    $job->handle(app(ImportProjectsUseCase::class));
 
-    expect(\Illuminate\Support\Facades\Storage::disk('local')->exists('imports/temp-projects.csv'))->toBeFalse();
+    expect(Storage::disk('local')->exists('imports/temp-projects.csv'))->toBeFalse();
 });
 
 test('tracks import observability in import_logs table with counts and errors', function () {
@@ -248,7 +250,7 @@ test('tracks import observability in import_logs table with counts and errors', 
         ->and($log->status)->toBe('PENDING');
 
     // Simulate Job execution with valid and invalid rows
-    $useCase = app(\App\Modules\Workload\Application\UseCases\ImportProjectsUseCase::class);
+    $useCase = app(ImportProjectsUseCase::class);
     $result = $useCase->execute(collect([
         ['project_name' => 'Project Alpha', 'project_status' => 'ACTIVE'],
         ['project_name' => '', 'project_status' => 'ACTIVE'], // skipped
@@ -264,5 +266,3 @@ test('tracks import observability in import_logs table with counts and errors', 
     $indexResponse->assertStatus(200);
     $indexResponse->assertInertia(fn ($page) => $page->has('importLogs'));
 });
-
-

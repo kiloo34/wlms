@@ -174,8 +174,8 @@ export default function DocsIndex({ page, menu }: DocsProps) {
                         <p className="text-muted-foreground max-w-4xl text-lg">
                             Dokumen ini adalah panduan standar untuk seluruh
                             anggota tim, Project Manager (PM), dan Developer
-                            dalam menggunakan sistem WorkPulse (Workload Management
-                            System).
+                            dalam menggunakan sistem WorkPulse (Workload
+                            Management System).
                         </p>
                         <p className="text-muted-foreground mt-2 max-w-4xl text-lg">
                             Tujuan utama dari pedoman ini adalah agar skala
@@ -360,7 +360,6 @@ DocsIndex.layout = (page: React.ReactNode) => {
         </AppLayout>
     );
 };
-
 
 // Username : quinton.jaury@mii.co.id
 // Username : Mochammad.Suhendar@mii.co.id

@@ -9,15 +9,15 @@ use JsonSerializable;
 final class ProjectAnalyticsOutput implements JsonSerializable
 {
     /**
-     * @param array<string, mixed> $project
-     * @param array<string, mixed> $summary
-     * @param array<string, mixed> $leadTime
-     * @param array<string, mixed> $cycleTime
-     * @param array<int, array<string, mixed>> $cumulativeFlow
-     * @param array<int, array<string, mixed>> $issueTypes
-     * @param array<int, array<string, mixed>> $priorities
-     * @param array<string, mixed> $sprintMetrics
-     * @param array<string, mixed> $filters
+     * @param  array<string, mixed>  $project
+     * @param  array<string, mixed>  $summary
+     * @param  array<string, mixed>  $leadTime
+     * @param  array<string, mixed>  $cycleTime
+     * @param  array<int, array<string, mixed>>  $cumulativeFlow
+     * @param  array<int, array<string, mixed>>  $issueTypes
+     * @param  array<int, array<string, mixed>>  $priorities
+     * @param  array<string, mixed>  $sprintMetrics
+     * @param  array<string, mixed>  $filters
      */
     public function __construct(
         public readonly array $project,
@@ -57,4 +57,3 @@ final class ProjectAnalyticsOutput implements JsonSerializable
         return $this->toArray();
     }
 }
-

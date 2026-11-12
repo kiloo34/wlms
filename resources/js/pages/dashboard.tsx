@@ -383,8 +383,7 @@ export default function Dashboard() {
                                                               ' ',
                                                           )}
                                                 </span>
-                                                {act.old_label &&
-                                                act.new_label
+                                                {act.old_label && act.new_label
                                                     ? `: ${act.old_label} → ${act.new_label}`
                                                     : act.new_label
                                                       ? ` → ${act.new_label}`
