@@ -50,19 +50,25 @@ class HandleInertiaRequests extends Middleware
 
             foreach ($user->userRoles as $userRole) {
                 if ($userRole->role) {
-                    foreach ($userRole->role->permissions as $perm) {
-                        $permissions[] = $perm->name;
-                        // Implied permissions untuk frontend
-                        if (str_ends_with($perm->name, ':manage')) {
-                            $module = explode(':', $perm->name)[0];
-                            $permissions[] = "{$module}:view";
-                            $permissions[] = "{$module}:create";
-                            $permissions[] = "{$module}:edit";
-                            $permissions[] = "{$module}:assign";
-                            $permissions[] = "{$module}:delete";
+                    $isGlobal = $userRole->context_type === null
+                        || strtoupper((string) $userRole->context_type) === 'GLOBAL'
+                        || $userRole->context_id === null;
+
+                    if ($isGlobal) {
+                        foreach ($userRole->role->permissions as $perm) {
+                            $permissions[] = $perm->name;
+                            // Implied permissions untuk frontend
+                            if (str_ends_with($perm->name, ':manage')) {
+                                $module = explode(':', $perm->name)[0];
+                                $permissions[] = "{$module}:view";
+                                $permissions[] = "{$module}:create";
+                                $permissions[] = "{$module}:edit";
+                                $permissions[] = "{$module}:assign";
+                                $permissions[] = "{$module}:delete";
+                            }
                         }
+                        $roles[] = $userRole->role->name;
                     }
-                    $roles[] = $userRole->role->name;
                     foreach ($userRole->role->menus as $menu) {
                         // Hanya tampilkan Top-Level Menu di Sidebar Utama
                         if ($menu->parent_id === null) {
