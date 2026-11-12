@@ -34,6 +34,14 @@ jobs:
       - name: Install NPM Dependencies
         run: npm ci
 
+      # tsc membutuhkan file TypeScript hasil generate Wayfinder
+      # (resources/js/routes, resources/js/actions) yang tidak di-commit.
+      - name: Generate Wayfinder Types
+        run: |
+          php -r "file_exists('.env') || copy('.env.example', '.env');"
+          php artisan key:generate --ansi
+          php artisan wayfinder:generate --with-form
+
       - name: Run TypeScript Checker
         run: npm run types:check
 
