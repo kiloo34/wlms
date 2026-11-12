@@ -38,7 +38,7 @@ final class GetBacklogIssuesQuery
                 'due_date' => $issue->due_date ? Carbon::parse($issue->due_date)->format('Y-m-d') : null,
                 'is_overdue' => $issue->due_date !== null
                     && Carbon::parse($issue->due_date)->startOfDay()->lt(now()->startOfDay())
-                    && strtoupper((string) ($issue->status?->category ?? '')) !== 'DONE',
+                    && strtoupper((string) ($issue->status->category ?? '')) !== 'DONE',
             ])
             ->toArray();
     }

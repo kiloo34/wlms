@@ -83,7 +83,7 @@ final class GetProjectsUseCase
                 description: isset($row->description) && $row->description ? (string) $row->description : null,
                 startDate: isset($row->start_date) && $row->start_date ? substr((string) $row->start_date, 0, 10) : null,
                 endDate: isset($row->end_date) && $row->end_date ? substr((string) $row->end_date, 0, 10) : null,
-                leadId: isset($row->lead_id) && $row->lead_id !== null ? (string) $row->lead_id : null,
+                leadId: isset($row->lead_id) ? (string) $row->lead_id : null,
             );
         })->all();
     }

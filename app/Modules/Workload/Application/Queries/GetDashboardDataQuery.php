@@ -206,8 +206,8 @@ final class GetDashboardDataQuery
     {
         $idsByField = [];
         foreach ($rows as $row) {
-            $field = (string) $row->action_type;
-            foreach ([$row->old_value, $row->new_value] as $value) {
+            $field = (string) ($row->action_type ?? '');
+            foreach ([$row->old_value ?? null, $row->new_value ?? null] as $value) {
                 if ($value !== null && $value !== '') {
                     $idsByField[$field][(string) $value] = true;
                 }

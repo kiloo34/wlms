@@ -62,7 +62,7 @@ final class IssuesExport implements FromQuery, ShouldAutoSize, WithHeadings, Wit
 
         $slaStatus = '-';
         if ($issue->due_date) {
-            $isDone = strtoupper((string) ($issue->status?->category ?? '')) === 'DONE';
+            $isDone = strtoupper((string) ($issue->status->category ?? '')) === 'DONE';
             $isOverdue = ! $isDone && $issue->due_date->copy()->startOfDay()->lt(now()->startOfDay());
             $slaStatus = $isOverdue ? 'Overdue' : 'On Track';
         }

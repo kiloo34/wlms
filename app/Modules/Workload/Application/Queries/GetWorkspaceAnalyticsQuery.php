@@ -42,9 +42,12 @@ final class GetWorkspaceAnalyticsQuery
                 'projects.end_date',
                 DB::raw('COUNT(issues.id) as total_issues'),
                 DB::raw("SUM(CASE WHEN statuses.category = 'DONE' OR statuses.slug = 'done' THEN 1 ELSE 0 END) as completed_issues"),
-                DB::raw("SUM(CASE WHEN issues.due_date IS NOT NULL AND issues.due_date < '{$todayStr}' AND statuses.category != 'DONE' AND statuses.slug != 'done' THEN 1 ELSE 0 END) as overdue_issues"),
                 DB::raw('SUM(COALESCE(issues.original_estimate_seconds, 0)) as total_est_seconds'),
             ])
+            ->selectRaw(
+                "SUM(CASE WHEN issues.due_date IS NOT NULL AND issues.due_date < ? AND statuses.category != 'DONE' AND statuses.slug != 'done' THEN 1 ELSE 0 END) as overdue_issues",
+                [$todayStr]
+            )
             ->groupBy(
                 'projects.id',
                 'projects.key',

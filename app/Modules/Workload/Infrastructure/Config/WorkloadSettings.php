@@ -72,10 +72,10 @@ final class WorkloadSettings
                 'enable_sprints_default', 'worklog_allow_future_date' => (bool) $decoded,
                 'worklog_max_hours_per_day', 'similarity_threshold' => (float) $decoded,
                 'attachment_max_mb', 'sla_warning_days' => (int) $decoded,
-                'attachment_allowed_extensions' => is_array($decoded)
+                // 'attachment_allowed_extensions' is the only remaining key
+                default => is_array($decoded)
                     ? array_values(array_map(fn ($ext) => strtolower(trim((string) $ext, '. ')), $decoded))
                     : $defaultValue,
-                default => $decoded,
             };
         }
 

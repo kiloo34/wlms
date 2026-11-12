@@ -164,14 +164,15 @@ final class WorkloadAccessChecker
 
         // Path 3: User belongs to owner unit or ancestor unit AND has unscoped workspaces:manage/edit/delete
         $userOrgUnitId = $userRow->org_unit_id;
-        if (! $userOrgUnitId || ! $workspace->owner_group_id) {
+        $ownerGroupId = $workspace->owner_group_id ?? null;
+        if (! $userOrgUnitId || ! $ownerGroupId) {
             return false;
         }
 
-        $isOwnerOrAncestorUnit = ((string) $userOrgUnitId === (string) $workspace->owner_group_id)
+        $isOwnerOrAncestorUnit = ((string) $userOrgUnitId === (string) $ownerGroupId)
             || (Schema::hasTable('org_unit_closures') && DB::table('org_unit_closures')
                 ->where('ancestor_id', $userOrgUnitId)
-                ->where('descendant_id', $workspace->owner_group_id)
+                ->where('descendant_id', $ownerGroupId)
                 ->exists());
 
         if (! $isOwnerOrAncestorUnit) {
@@ -191,7 +192,7 @@ final class WorkloadAccessChecker
                 ->exists();
         }
 
-        return self::isUnmanagedRawFixture($userId, $workspaceId, (string) $workspace->owner_group_id, false);
+        return self::isUnmanagedRawFixture($userId, $workspaceId, (string) $ownerGroupId, false);
     }
 
     /**
@@ -253,13 +254,14 @@ final class WorkloadAccessChecker
 
         // Shared platform: child unit with max_workspaces = 0 whose user has unscoped workspaces:manage
         $userOrgUnitId = DB::table('users')->where('id', $userId)->value('org_unit_id');
-        if ($userOrgUnitId && $workspace->owner_group_id && Schema::hasTable('org_unit_closures')) {
+        $ownerGroupId = $workspace->owner_group_id ?? null;
+        if ($userOrgUnitId && $ownerGroupId && Schema::hasTable('org_unit_closures')) {
             $isDescendant = DB::table('org_unit_closures')
-                ->where('ancestor_id', $workspace->owner_group_id)
+                ->where('ancestor_id', $ownerGroupId)
                 ->where('descendant_id', $userOrgUnitId)
                 ->exists();
 
-            if ($isDescendant && (self::hasUnscopedPermission($userId, ['workspaces:manage']) || self::isUnmanagedRawFixture($userId, $workspaceId, (string) $workspace->owner_group_id))) {
+            if ($isDescendant && (self::hasUnscopedPermission($userId, ['workspaces:manage']) || self::isUnmanagedRawFixture($userId, $workspaceId, (string) $ownerGroupId))) {
                 return true;
             }
         }
