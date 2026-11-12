@@ -94,38 +94,42 @@ final class WorkspaceMemberController extends Controller
             'daily_capacity_hours' => ['sometimes', 'filled', 'integer', 'min:0', 'max:24'],
         ]);
 
-        if (isset($validated['role']) && ! in_array($validated['role'], ['admin', 'owner'], true)) {
-            $currentMember = DB::table('workspace_members')
-                ->where('workspace_id', $workspaceId)
-                ->where('user_id', $userId)
-                ->first();
-
-            if ($currentMember !== null && in_array($currentMember->role, ['admin', 'owner'], true)) {
-                $otherAdminsCount = DB::table('workspace_members')
+        DB::transaction(function () use ($validated, $workspace, $workspaceId, $userId) {
+            if (isset($validated['role']) && ! in_array($validated['role'], ['admin', 'owner'], true)) {
+                $currentMember = DB::table('workspace_members')
                     ->where('workspace_id', $workspaceId)
-                    ->where('user_id', '!=', $userId)
-                    ->whereIn('role', ['admin', 'owner'])
-                    ->count();
+                    ->where('user_id', $userId)
+                    ->lockForUpdate()
+                    ->first();
 
-                if ($otherAdminsCount === 0) {
-                    throw ValidationException::withMessages([
-                        'role' => 'Cannot demote the last remaining admin or owner in the workspace.',
-                    ]);
+                if ($currentMember !== null && in_array($currentMember->role, ['admin', 'owner'], true)) {
+                    $otherAdminsCount = DB::table('workspace_members')
+                        ->where('workspace_id', $workspaceId)
+                        ->where('user_id', '!=', $userId)
+                        ->whereIn('role', ['admin', 'owner'])
+                        ->lockForUpdate()
+                        ->count();
+
+                    if ($otherAdminsCount === 0) {
+                        throw ValidationException::withMessages([
+                            'role' => 'Cannot demote the last remaining admin or owner in the workspace.',
+                        ]);
+                    }
                 }
             }
-        }
 
-        $updateData = [];
-        if (isset($validated['role'])) {
-            $updateData['role'] = $validated['role'];
-        }
-        if (isset($validated['daily_capacity_hours'])) {
-            $updateData['daily_capacity_hours'] = $validated['daily_capacity_hours'];
-        }
+            $updateData = [];
+            if (isset($validated['role'])) {
+                $updateData['role'] = $validated['role'];
+            }
+            if (isset($validated['daily_capacity_hours'])) {
+                $updateData['daily_capacity_hours'] = $validated['daily_capacity_hours'];
+            }
 
-        if (! empty($updateData)) {
-            $workspace->members()->updateExistingPivot($userId, $updateData);
-        }
+            if (! empty($updateData)) {
+                $workspace->members()->updateExistingPivot($userId, $updateData);
+            }
+        });
 
         return response()->json(['message' => 'Member updated successfully']);
     }
