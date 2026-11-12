@@ -36,7 +36,10 @@ class LogWorkUseCase
             ]);
 
             // Decrement remaining_estimate_seconds
-            $issueRow = DB::table('issues')->where('id', $input->issueId)->first(['remaining_estimate_seconds']);
+            $issueRow = DB::table('issues')
+                ->where('id', $input->issueId)
+                ->lockForUpdate()
+                ->first(['remaining_estimate_seconds']);
             if ($issueRow && $issueRow->remaining_estimate_seconds !== null) {
                 $newRemaining = max(0, (int) $issueRow->remaining_estimate_seconds - $input->timeSpentSeconds);
                 DB::table('issues')->where('id', $input->issueId)->update([
