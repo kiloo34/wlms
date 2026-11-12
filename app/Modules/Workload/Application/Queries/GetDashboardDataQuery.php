@@ -65,27 +65,28 @@ final class GetDashboardDataQuery
             });
         }
 
+        $projects = $projectsQuery->get(['projects.id', 'projects.status']);
         /** @var array<int, string> $accessibleProjectIds */
-        $accessibleProjectIds = (clone $projectsQuery)->pluck('projects.id')->all();
+        $accessibleProjectIds = $projects->pluck('id')->map(fn ($id): string => (string) $id)->all();
+        $activeProjects = $projects->where('status', 'ACTIVE')->count();
 
-        $activeProjects = (clone $projectsQuery)->where('projects.status', 'ACTIVE')->count();
-        $totalIssues = IssueModel::whereIn('project_id', $accessibleProjectIds)->count();
-        $completedIssues = IssueModel::whereIn('project_id', $accessibleProjectIds)
-            ->whereHas('status', fn ($q) => $q->where('category', 'DONE'))
-            ->count();
+        $issueStats = $accessibleProjectIds === [] ? null : DB::table('issues')
+            ->leftJoin('statuses', 'issues.status_id', '=', 'statuses.id')
+            ->whereIn('issues.project_id', $accessibleProjectIds)
+            ->whereNull('issues.deleted_at')
+            ->selectRaw("
+                COUNT(*) as total_issues,
+                COALESCE(SUM(CASE WHEN statuses.category = 'DONE' THEN 1 ELSE 0 END), 0) as completed_issues,
+                COALESCE(SUM(CASE WHEN issues.assignee_id = ? AND statuses.category IS NOT NULL AND statuses.category != 'DONE' THEN 1 ELSE 0 END), 0) as my_open_tasks,
+                COALESCE(SUM(CASE WHEN issues.assignee_id = ? AND issues.due_date IS NOT NULL AND issues.due_date < ? AND statuses.category IS NOT NULL AND statuses.category != 'DONE' THEN 1 ELSE 0 END), 0) as overdue_tasks
+            ", [$userId, $userId, now()->toDateString()])
+            ->first();
+
+        $totalIssues = (int) ($issueStats->total_issues ?? 0);
+        $completedIssues = (int) ($issueStats->completed_issues ?? 0);
         $completionRate = $totalIssues > 0 ? (int) round(($completedIssues / $totalIssues) * 100) : 0;
-
-        $myOpenTasks = IssueModel::whereIn('project_id', $accessibleProjectIds)
-            ->where('assignee_id', $userId)
-            ->whereHas('status', fn ($q) => $q->where('category', '!=', 'DONE'))
-            ->count();
-
-        $overdueTasks = IssueModel::whereIn('project_id', $accessibleProjectIds)
-            ->where('assignee_id', $userId)
-            ->whereNotNull('due_date')
-            ->whereDate('due_date', '<', now()->toDateString())
-            ->whereHas('status', fn ($q) => $q->where('category', '!=', 'DONE'))
-            ->count();
+        $myOpenTasks = (int) ($issueStats->my_open_tasks ?? 0);
+        $overdueTasks = (int) ($issueStats->overdue_tasks ?? 0);
 
         $myTasksModels = IssueModel::with([
             'project:id,name,key,workspace_id',
