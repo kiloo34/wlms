@@ -43,9 +43,11 @@ class LogWorkController
         }
 
         $workDate = $startedAt->toDateString();
+        $nextDate = $startedAt->addDay()->toDateString();
         $existingSeconds = (int) DB::table('worklogs')
             ->where('author_id', (string) Auth::id())
-            ->whereRaw('SUBSTR(CAST(started_at AS TEXT), 1, 10) = ?', [$workDate])
+            ->where('started_at', '>=', $workDate)
+            ->where('started_at', '<', $nextDate)
             ->sum('time_spent_seconds');
 
         $newTotalSeconds = $existingSeconds + (int) $request->validated('time_spent_seconds');
