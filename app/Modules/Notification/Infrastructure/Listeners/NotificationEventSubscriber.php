@@ -155,9 +155,21 @@ final class NotificationEventSubscriber
         }
 
         $memberIds = $sprint->project->workspace->members->pluck('id');
+        $data = [
+            'sprint_id' => $event->sprintId,
+            'project_id' => $event->projectId,
+            'sprint_name' => $event->sprintName,
+            'new_state' => $event->newState,
+            'actor_id' => $event->actorId,
+        ];
+        $encodedData = (string) json_encode($data);
+        $now = now();
+        $isoNow = $now->toIso8601String();
+
+        $rows = [];
+        $broadcastEvents = [];
 
         foreach ($memberIds as $userId) {
-            // Don't notify the actor
             if ((string) $userId === $event->actorId) {
                 continue;
             }
@@ -167,17 +179,31 @@ final class NotificationEventSubscriber
                 continue;
             }
 
-            $this->createAndBroadcast(
+            $id = Str::uuid()->toString();
+            $rows[] = [
+                'id' => $id,
+                'user_id' => $resolvedUserId,
+                'type' => 'sprint.state_changed',
+                'data' => $encodedData,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+            $broadcastEvents[] = new NewNotification(
+                id: $id,
                 userId: $resolvedUserId,
                 type: 'sprint.state_changed',
-                data: [
-                    'sprint_id' => $event->sprintId,
-                    'project_id' => $event->projectId,
-                    'sprint_name' => $event->sprintName,
-                    'new_state' => $event->newState,
-                    'actor_id' => $event->actorId,
-                ]
+                data: $data,
+                createdAt: $isoNow,
             );
+        }
+
+        if ($rows !== []) {
+            DB::transaction(function () use ($rows, $broadcastEvents): void {
+                NotificationModel::insert($rows);
+                foreach ($broadcastEvents as $notificationEvent) {
+                    broadcast($notificationEvent);
+                }
+            });
         }
     }
 
