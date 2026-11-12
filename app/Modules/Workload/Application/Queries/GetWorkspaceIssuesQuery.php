@@ -18,7 +18,8 @@ final class GetWorkspaceIssuesQuery
      */
     public function buildQuery(string $workspaceId, array $filters = [], ?string $actorUserId = null): Builder
     {
-        $query = IssueModel::with(['project', 'assignee', 'reporter', 'status', 'type', 'priority', 'sprint'])
+        $query = IssueModel::withLinkStats()
+            ->with(['project', 'assignee', 'reporter', 'status', 'type', 'priority', 'sprint'])
             ->whereHas('project', function (Builder $q) use ($workspaceId) {
                 $q->where('workspace_id', $workspaceId)
                     ->whereExists(function ($sub) {
@@ -93,7 +94,7 @@ final class GetWorkspaceIssuesQuery
         if (! empty($filters['search'])) {
             $query->where(function (Builder $q) use ($filters) {
                 $q->where('title', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('number', 'like', '%'.$filters['search'].'%');
+                    ->orWhereRaw('CAST(number AS TEXT) LIKE ?', ['%'.$filters['search'].'%']);
             });
         }
 
