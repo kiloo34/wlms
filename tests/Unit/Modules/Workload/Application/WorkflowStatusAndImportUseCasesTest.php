@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Modules\Workload\Application\DTOs\StatusDTO;
 use App\Modules\Workload\Application\DTOs\WorkflowDTO;
+use App\Modules\Workload\Application\Jobs\ImportIssuesJob;
+use App\Modules\Workload\Application\Jobs\ImportProjectsJob;
 use App\Modules\Workload\Application\UseCases\ImportIssuesUseCase;
 use App\Modules\Workload\Application\UseCases\ManageStatusUseCase;
 use App\Modules\Workload\Application\UseCases\ManageWorkflowUseCase;
@@ -184,4 +186,12 @@ test('ImportIssuesUseCase imports valid rows and records errors for invalid rows
         ->and($result['success_count'])->toBe(1)
         ->and($result['skipped_count'])->toBe(3)
         ->and($result['errors'])->toHaveCount(3);
+});
+
+test('ImportProjectsJob and ImportIssuesJob store and use custom cloud disk without calling Storage::path', function () {
+    $projectsJob = new ImportProjectsJob('imports/p.csv', 'ws-1', 'log-1', 's3');
+    $issuesJob = new ImportIssuesJob('imports/i.csv', 'user-1', 'log-2', 's3');
+
+    expect($projectsJob->disk)->toBe('s3')
+        ->and($issuesJob->disk)->toBe('s3');
 });

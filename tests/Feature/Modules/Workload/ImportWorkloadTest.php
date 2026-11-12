@@ -266,3 +266,25 @@ test('tracks import observability in import_logs table with counts and errors', 
     $indexResponse->assertStatus(200);
     $indexResponse->assertInertia(fn ($page) => $page->has('importLogs'));
 });
+
+test('ImportProjectsJob and ImportIssuesJob execute and clean up files on custom s3 disk', function () {
+    Storage::fake('s3');
+    config(['filesystems.default' => 's3']);
+
+    $workspaceId = Str::uuid()->toString();
+    DB::table('workspaces')->insert([
+        'id' => $workspaceId,
+        'owner_group_id' => Str::uuid()->toString(),
+        'name' => 'S3 WS',
+        'status' => 'ACTIVE',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    Storage::disk('s3')->put('imports/s3-projects.csv', "project_name,project_status\nS3 Cloud Project,ACTIVE\n");
+    $job = new ImportProjectsJob('imports/s3-projects.csv', $workspaceId, null, 's3');
+    $job->handle(app(ImportProjectsUseCase::class));
+
+    expect(Storage::disk('s3')->exists('imports/s3-projects.csv'))->toBeFalse()
+        ->and(DB::table('projects')->where('name', 'S3 Cloud Project')->exists())->toBeTrue();
+});

@@ -25,7 +25,8 @@ final class ImportIssuesJob implements ShouldQueue
     public function __construct(
         public readonly string $filePath,
         public readonly string $reporterId,
-        public readonly ?string $importLogId = null
+        public readonly ?string $importLogId = null,
+        public readonly string $disk = 'local'
     ) {}
 
     public function handle(ImportIssuesUseCase $useCase): void
@@ -61,9 +62,9 @@ final class ImportIssuesJob implements ShouldQueue
             }
         };
 
-        if (Storage::disk('local')->exists($this->filePath)) {
+        if (Storage::disk($this->disk)->exists($this->filePath)) {
             try {
-                Excel::import($import, Storage::disk('local')->path($this->filePath));
+                Excel::import($import, $this->filePath, $this->disk);
             } catch (\Throwable $e) {
                 if ($this->importLogId) {
                     DB::table('import_logs')->where('id', $this->importLogId)->update([
@@ -74,7 +75,7 @@ final class ImportIssuesJob implements ShouldQueue
                 }
                 throw $e;
             } finally {
-                Storage::disk('local')->delete($this->filePath);
+                Storage::disk($this->disk)->delete($this->filePath);
             }
         } else {
             Log::warning("ImportIssuesJob: File not found {$this->filePath}");

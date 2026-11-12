@@ -67,7 +67,8 @@ final class ImportWorkloadController extends Controller
         }
 
         $originalFilename = $file->getClientOriginalName();
-        $filePath = $file->store('imports', 'local');
+        $disk = (string) config('filesystems.default', 'local');
+        $filePath = $file->store('imports', $disk);
         if (! is_string($filePath)) {
             throw new InvalidArgumentException('Failed to store file');
         }
@@ -88,9 +89,9 @@ final class ImportWorkloadController extends Controller
         ]);
 
         if ($validated['type'] === 'projects') {
-            ImportProjectsJob::dispatch($filePath, (string) $validated['workspace_id'], $importLogId);
+            ImportProjectsJob::dispatch($filePath, (string) $validated['workspace_id'], $importLogId, $disk);
         } elseif ($validated['type'] === 'issues') {
-            ImportIssuesJob::dispatch($filePath, (string) $request->user()?->id, $importLogId);
+            ImportIssuesJob::dispatch($filePath, (string) $request->user()?->id, $importLogId, $disk);
         }
 
         return back()->with('success', 'Import started successfully');
