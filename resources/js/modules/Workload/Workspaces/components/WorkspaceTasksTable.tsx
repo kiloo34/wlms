@@ -61,7 +61,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslate } from '@/hooks/useTranslate';
 import { usePermission } from '@/hooks/usePermission';
-import { useIconSize } from '@/hooks/use-appearance';
+import { useIconSize, IconSize } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
 import { Project } from '@/modules/Workload/Projects/types';
 import { Issue } from '@/types/issue';
@@ -96,7 +96,10 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
     const { t } = useTranslate();
     const { can } = usePermission();
     const canCreateTask = canManageIssues ?? can('issues:manage');
-    const { iconSize, updateIconSize } = useIconSize();
+    // Kerapatan S/M/L di sini hanya berlaku untuk tabel ini (state lokal),
+    // tidak mengubah preferensi global di Pengaturan > Tampilan.
+    const { iconSize: globalIconSize } = useIconSize();
+    const [iconSize, updateIconSize] = useState<IconSize>(globalIconSize);
     const queryClient = useQueryClient();
 
     // Filters State

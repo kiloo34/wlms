@@ -68,7 +68,26 @@ export function WorkspaceCard({
 
     return (
         <>
-            <Card className="hover:border-primary transition-colors">
+            <Card
+                role={onSelect ? 'link' : undefined}
+                tabIndex={onSelect ? 0 : undefined}
+                onClick={() => onSelect?.(workspace.id)}
+                onKeyDown={(e) => {
+                    if (
+                        onSelect &&
+                        e.target === e.currentTarget &&
+                        (e.key === 'Enter' || e.key === ' ')
+                    ) {
+                        e.preventDefault();
+                        onSelect(workspace.id);
+                    }
+                }}
+                className={
+                    onSelect
+                        ? 'hover:border-primary focus-visible:ring-ring cursor-pointer transition-colors hover:shadow-md focus-visible:ring-2 focus-visible:outline-none'
+                        : 'hover:border-primary transition-colors'
+                }
+            >
                 <CardHeader>
                     <div className="flex items-start justify-between">
                         <div className="flex flex-col gap-1">
@@ -92,6 +111,7 @@ export function WorkspaceCard({
                                     <Button
                                         variant="ghost"
                                         className="h-8 w-8 p-0"
+                                        onClick={(e) => e.stopPropagation()}
                                     >
                                         <span className="sr-only">
                                             {t('Open menu')}
@@ -99,7 +119,11 @@ export function WorkspaceCard({
                                         <MoreVertical className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
+                                {/* Menu di-portal, tapi event React tetap bubble ke Card — hentikan agar tidak ikut membuka ruang kerja. */}
+                                <DropdownMenuContent
+                                    align="end"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
                                     <DropdownMenuItem
                                         onClick={() => setMembersOpen(true)}
                                     >
@@ -143,7 +167,10 @@ export function WorkspaceCard({
                     <Button
                         variant="outline"
                         className="w-full"
-                        onClick={() => onSelect?.(workspace.id)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onSelect?.(workspace.id);
+                        }}
                     >
                         {t('View Workspace')}
                     </Button>

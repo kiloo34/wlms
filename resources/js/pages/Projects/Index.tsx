@@ -22,7 +22,9 @@ import {
     BarChart2,
     Layers,
     Briefcase,
+    ArrowLeft,
 } from 'lucide-react';
+import { useWorkspaceIssues } from '@/modules/Workload/Workspaces/hooks/useWorkspaceIssues';
 import { useEffect, useState } from 'react';
 import axios from '@/lib/axios';
 import { toast } from 'sonner';
@@ -57,6 +59,11 @@ export default function ProjectsIndex() {
 
     const { data: workspaces = [], isLoading } = useGetWorkspaces();
     const { data: projects = [] } = useGetProjects(workspaceId || undefined);
+    // Query yang sama dengan WorkspaceTasksTable (cache dipakai bersama) —
+    // untuk menampilkan total tugas di tab "Semua Tugas".
+    const { data: workspaceIssues = [] } = useWorkspaceIssues(
+        workspaceId || undefined,
+    );
 
     const { auth, lookups } = props;
     const priorities = lookups?.priorities || [];
@@ -158,6 +165,18 @@ export default function ProjectsIndex() {
             <Head title={t('Projects')} />
 
             <div className="flex h-full w-full flex-col gap-6 p-6">
+                <div className="-mb-4">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.visit(workspacesIndex().url)}
+                        className="text-muted-foreground -ml-2"
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        {t('Back to Workspaces')}
+                    </Button>
+                </div>
+
                 <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">
@@ -281,6 +300,9 @@ export default function ProjectsIndex() {
                             >
                                 <CheckSquare className="h-4 w-4" />
                                 <span>{t('All Tasks')}</span>
+                                <span className="py-0.2 bg-background/20 ml-1 rounded-full px-1.5 font-mono text-[10px]">
+                                    {workspaceIssues.length}
+                                </span>
                             </Button>
 
                             {canViewAnalytics && (

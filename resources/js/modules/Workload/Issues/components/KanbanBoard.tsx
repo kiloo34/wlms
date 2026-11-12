@@ -27,6 +27,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Calendar, AlertCircle } from 'lucide-react';
 import { useTranslate } from '@/hooks/useTranslate';
 import { useIconSize } from '@/hooks/use-appearance';
+import { StickyScrollX } from '@/components/sticky-scroll-x';
 
 interface KanbanBoardProps {
     issues: Issue[];
@@ -428,7 +429,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     };
 
     return (
-        <div className="flex gap-4 overflow-x-auto px-1 pt-2 pb-4">
+        <StickyScrollX className="flex gap-4 px-1 pt-2 pb-4">
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}
@@ -459,6 +460,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     ) : null}
                 </DragOverlay>
             </DndContext>
-        </div>
+        </StickyScrollX>
     );
 };
