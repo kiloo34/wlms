@@ -131,7 +131,7 @@ export function DashboardFormDialog({
                                 value={data.name}
                                 autoFocus
                                 required
-                                placeholder={t('e.g. Dashboard Kredit Cabang')}
+                                placeholder={t('e.g. Branch Loan Dashboard')}
                                 onChange={(e) =>
                                     setData('name', e.target.value)
                                 }
@@ -188,7 +188,7 @@ export function DashboardFormDialog({
                             rows={2}
                             value={data.definition}
                             placeholder={t(
-                                'What the dashboard is about, e.g. Monitoring DPK valuta asing.',
+                                'What the dashboard is about, e.g. foreign currency deposit monitoring.',
                             )}
                             onChange={(e) =>
                                 setData('definition', e.target.value)
@@ -204,7 +204,7 @@ export function DashboardFormDialog({
                             rows={3}
                             value={data.contents}
                             placeholder={t(
-                                'Data shown on the dashboard, e.g. posisi DPK valas per wilayah dan cabang.',
+                                'Data shown on the dashboard, e.g. foreign currency deposit positions by region and branch.',
                             )}
                             onChange={(e) =>
                                 setData('contents', e.target.value)

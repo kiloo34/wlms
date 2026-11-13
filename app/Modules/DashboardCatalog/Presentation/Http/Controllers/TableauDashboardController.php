@@ -34,20 +34,20 @@ final class TableauDashboardController
     {
         $dashboard = $this->service->create($request->validated());
 
-        return back()->with('success', "Dashboard \"{$dashboard->name}\" berhasil dicatat.");
+        return back()->with('success', __('Dashboard ":name" has been added to the catalog.', ['name' => $dashboard->name]));
     }
 
     public function update(TableauDashboardRequest $request, string $id): RedirectResponse
     {
         $dashboard = $this->service->update($id, $request->validated());
 
-        return back()->with('success', "Dashboard \"{$dashboard->name}\" berhasil diperbarui.");
+        return back()->with('success', __('Dashboard ":name" has been updated.', ['name' => $dashboard->name]));
     }
 
     public function destroy(string $id): RedirectResponse
     {
         $this->service->delete($id);
 
-        return back()->with('success', 'Dashboard berhasil dihapus dari katalog.');
+        return back()->with('success', __('Dashboard removed from the catalog.'));
     }
 }

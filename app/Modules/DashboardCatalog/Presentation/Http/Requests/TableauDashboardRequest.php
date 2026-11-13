@@ -40,17 +40,17 @@ class TableauDashboardRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'number' => 'nomor',
-            'name' => 'nama dashboard',
-            'definition' => 'definisi',
-            'contents' => 'isi',
-            'purpose' => 'tujuan',
-            'tableau_project' => 'project Tableau',
-            'mapping' => 'mapping',
-            'user_permission' => 'user permission',
-            'user_mapping' => 'user mapping',
-            'owner' => 'owner',
-            'notes' => 'catatan',
+            'number' => __('number'),
+            'name' => __('dashboard name'),
+            'definition' => __('definition'),
+            'contents' => __('contents'),
+            'purpose' => __('purpose'),
+            'tableau_project' => __('Tableau project'),
+            'mapping' => __('mapping'),
+            'user_permission' => __('user permission'),
+            'user_mapping' => __('user mapping'),
+            'owner' => __('owner'),
+            'notes' => __('notes'),
         ];
     }
 }

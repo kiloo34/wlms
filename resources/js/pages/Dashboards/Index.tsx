@@ -357,22 +357,26 @@ export default function DashboardCatalogIndex({
 
                 {/* Table */}
                 <div className="bg-card overflow-hidden rounded-xl border">
-                    <div className="overflow-x-auto">
-                        <Table>
+                    <div>
+                        <Table className="table-fixed">
                             <TableHeader>
                                 <TableRow className="bg-muted/40">
-                                    <TableHead className="w-14 text-center">
+                                    <TableHead className="w-12 text-center">
                                         {t('No')}
                                     </TableHead>
-                                    <TableHead className="min-w-[260px]">
-                                        {t('Dashboard Name')}
-                                    </TableHead>
-                                    <TableHead>
+                                    <TableHead>{t('Dashboard Name')}</TableHead>
+                                    <TableHead className="w-[16%]">
                                         {t('Tableau Project')}
                                     </TableHead>
-                                    <TableHead>{t('Mapping')}</TableHead>
-                                    <TableHead>{t('User Mapping')}</TableHead>
-                                    <TableHead>{t('Owner')}</TableHead>
+                                    <TableHead className="w-[15%]">
+                                        {t('Mapping')}
+                                    </TableHead>
+                                    <TableHead className="hidden w-[12%] md:table-cell">
+                                        {t('User Mapping')}
+                                    </TableHead>
+                                    <TableHead className="hidden w-[13%] md:table-cell">
+                                        {t('Owner')}
+                                    </TableHead>
                                     <TableHead className="w-28 text-right">
                                         {t('Actions')}
                                     </TableHead>
@@ -401,25 +405,25 @@ export default function DashboardCatalogIndex({
                                                 {item.number ?? '-'}
                                             </TableCell>
                                             <TableCell>
-                                                <p className="font-medium">
+                                                <p className="font-medium break-words">
                                                     {item.name}
                                                 </p>
                                                 {item.definition && (
-                                                    <p className="text-muted-foreground mt-0.5 line-clamp-1 max-w-md text-xs">
+                                                    <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs">
                                                         {item.definition}
                                                     </p>
                                                 )}
                                             </TableCell>
-                                            <TableCell className="whitespace-nowrap">
+                                            <TableCell className="break-words">
                                                 {item.tableau_project ?? '-'}
                                             </TableCell>
                                             <TableCell>
                                                 {mappingBadge(item.mapping)}
                                             </TableCell>
-                                            <TableCell className="whitespace-nowrap">
+                                            <TableCell className="hidden break-words md:table-cell">
                                                 {item.user_mapping ?? '-'}
                                             </TableCell>
-                                            <TableCell className="max-w-[200px] truncate">
+                                            <TableCell className="hidden break-words md:table-cell">
                                                 {item.owner ?? '-'}
                                             </TableCell>
                                             <TableCell
@@ -542,7 +546,7 @@ export default function DashboardCatalogIndex({
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             {t(
-                                'This entry will be removed from the catalog. The record is kept in the database (soft delete).',
+                                'This entry will be removed from the catalog. The record is kept in the database.',
                             )}
                             {deleting && (
                                 <span className="text-foreground mt-2 block font-medium">
