@@ -33,7 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/users', fn () => redirect('/settings/rbac'))->name('users.index');
 
     // Modul Katalog Dashboard Tableau (pencatatan dashboard existing & baru)
-    Route::get('/dashboards', [TableauDashboardController::class, 'index'])->middleware('can:dashboards.view')->name('dashboards.index');
+    Route::get('/dashboards', [TableauDashboardController::class, 'index'])->name('dashboards.index');
     Route::post('/dashboards', [TableauDashboardController::class, 'store'])->middleware('can:dashboards.create')->name('dashboards.store');
     Route::put('/dashboards/{id}', [TableauDashboardController::class, 'update'])->middleware('can:dashboards.edit')->name('dashboards.update');
     Route::delete('/dashboards/{id}', [TableauDashboardController::class, 'destroy'])->middleware('can:dashboards.delete')->name('dashboards.destroy');

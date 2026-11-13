@@ -64,11 +64,17 @@ export function AppSidebar() {
     const { t } = useTranslate();
 
     // 1. DEFAULT MENU (Selalu ada untuk semua user)
+    // Katalog Dashboard terbuka untuk semua user login, jadi selalu tampil.
     const defaultNavItems: NavItem[] = [
         {
             title: t('Dashboard'),
             href: dashboardUrl,
             icon: LayoutGrid,
+        },
+        {
+            title: t('Dashboard Catalog'),
+            href: '/dashboards',
+            icon: Gauge,
         },
     ];
 

@@ -258,7 +258,7 @@ export default function DashboardCatalogIndex({
                                     : 'border-border hover:border-blue-500/40'
                             }`}
                         >
-                            <p className="text-muted-foreground truncate text-[11px] font-medium uppercase">
+                            <p className="text-muted-foreground text-[11px] font-medium uppercase">
                                 {key}
                             </p>
                             <p className="mt-1 text-2xl font-bold tabular-nums">
@@ -373,7 +373,6 @@ export default function DashboardCatalogIndex({
                                     <TableHead>{t('Mapping')}</TableHead>
                                     <TableHead>{t('User Mapping')}</TableHead>
                                     <TableHead>{t('Owner')}</TableHead>
-                                    <TableHead>{t('Purpose')}</TableHead>
                                     <TableHead className="w-28 text-right">
                                         {t('Actions')}
                                     </TableHead>
@@ -383,7 +382,7 @@ export default function DashboardCatalogIndex({
                                 {pageItems.length === 0 ? (
                                     <TableRow>
                                         <TableCell
-                                            colSpan={8}
+                                            colSpan={7}
                                             className="text-muted-foreground h-32 text-center"
                                         >
                                             {t(
@@ -422,9 +421,6 @@ export default function DashboardCatalogIndex({
                                             </TableCell>
                                             <TableCell className="max-w-[200px] truncate">
                                                 {item.owner ?? '-'}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground whitespace-nowrap">
-                                                {item.purpose ?? '-'}
                                             </TableCell>
                                             <TableCell
                                                 className="text-right"

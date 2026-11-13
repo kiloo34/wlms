@@ -87,10 +87,31 @@ test('user with dashboards:view can only read the catalog', function () {
         ->assertForbidden();
 });
 
-test('user without any dashboard permission is forbidden', function () {
+test('user without any dashboard permission can read the catalog but cannot write', function () {
     $outsider = UserModel::factory()->create();
 
-    $this->actingAs($outsider)->get('/dashboards')->assertForbidden();
+    $this->actingAs($outsider)
+        ->get('/dashboards')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Dashboards/Index')
+            ->has('dashboards', 1)
+            ->where('can.create', false)
+            ->where('can.edit', false)
+            ->where('can.delete', false)
+        );
+
+    $this->actingAs($outsider)
+        ->post('/dashboards', ['name' => 'Dashboard Baru'])
+        ->assertForbidden();
+
+    $this->actingAs($outsider)
+        ->put("/dashboards/{$this->dashboard->id}", ['name' => 'Ubah'])
+        ->assertForbidden();
+
+    $this->actingAs($outsider)
+        ->delete("/dashboards/{$this->dashboard->id}")
+        ->assertForbidden();
 });
 
 test('dashboards:manage grants full access through the gates', function () {
