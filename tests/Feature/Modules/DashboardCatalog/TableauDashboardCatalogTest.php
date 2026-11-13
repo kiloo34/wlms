@@ -212,3 +212,31 @@ test('catalog seeder loads the 159 dashboards from the sheet and is idempotent',
         'mapping' => 'Risk',
     ]);
 });
+
+test('permission from a project-scoped role assignment also grants catalog access', function () {
+    $user = UserModel::factory()->create();
+    $role = RoleModel::create(['id' => Str::uuid(), 'name' => 'Dev '.Str::random(6), 'scope' => 'PROJECT']);
+    $permission = PermissionModel::firstOrCreate(['name' => 'dashboards:edit'], ['id' => Str::uuid()]);
+    $role->permissions()->attach($permission->id);
+    UserRoleModel::create([
+        'id' => Str::uuid(),
+        'user_id' => $user->id,
+        'role_id' => $role->id,
+        'context_type' => 'PROJECT',
+        'context_id' => Str::uuid()->toString(),
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboards')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('can.edit', true)
+            ->where('can.delete', false)
+        );
+
+    $this->actingAs($user)
+        ->put("/dashboards/{$this->dashboard->id}", ['name' => 'Dash DPK Diperbarui'])
+        ->assertRedirect();
+
+    expect(TableauDashboardModel::find($this->dashboard->id)?->name)->toBe('Dash DPK Diperbarui');
+});

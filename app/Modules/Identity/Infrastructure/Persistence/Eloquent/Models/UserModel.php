@@ -112,6 +112,41 @@ class UserModel extends Authenticatable implements PasskeyUser
         return false;
     }
 
+    /**
+     * Cek permission dari SEMUA role user tanpa memandang context (workspace/project).
+     * Dipakai modul global seperti Katalog Dashboard, yang tidak terikat ke workspace/project tertentu,
+     * sehingga izin dari role yang dipasang pada project/workspace tetap dihitung.
+     */
+    public function hasPermissionInAnyContext(string $permissionName): bool
+    {
+        if ($this->email === 'superadmin@wlms.com') {
+            return true;
+        }
+
+        $this->loadMissing('userRoles.role.permissions');
+        foreach ($this->userRoles as $userRole) {
+            if (! $userRole->role) {
+                continue;
+            }
+            if (strtolower($userRole->role->name) === 'superadmin') {
+                return true;
+            }
+            foreach ($userRole->role->permissions as $perm) {
+                if ($perm->name === $permissionName) {
+                    return true;
+                }
+                if (str_ends_with($perm->name, ':manage')) {
+                    $module = explode(':', $perm->name)[0];
+                    if (str_starts_with($permissionName, $module.':')) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     public function hasPermission(string $permissionName, ?string $contextType = null, ?string $contextId = null): bool
     {
         if ($this->email === 'superadmin@wlms.com') {

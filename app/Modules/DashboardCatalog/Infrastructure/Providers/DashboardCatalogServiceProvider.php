@@ -30,8 +30,9 @@ class DashboardCatalogServiceProvider extends ServiceProvider
                     return true;
                 }
 
-                return method_exists($user, 'hasPermission')
-                    && $user->hasPermission("dashboards:{$action}");
+                // Katalog bersifat global: izin dari role yang terikat workspace/project ikut dihitung
+                return method_exists($user, 'hasPermissionInAnyContext')
+                    && $user->hasPermissionInAnyContext("dashboards:{$action}");
             });
         }
     }
