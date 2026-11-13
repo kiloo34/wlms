@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\DashboardCatalog\Presentation\Http\Controllers\TableauDashboardController;
 use App\Modules\Identity\Presentation\Http\Controllers\OrgLevelController;
 use App\Modules\Identity\Presentation\Http\Controllers\OrgUnitController;
 use App\Modules\Identity\Presentation\Http\Controllers\RBAC\MenuController;
@@ -17,7 +18,8 @@ use App\Modules\Workload\Presentation\Http\Controllers\WorkspaceIssuesPageContro
 use App\Shared\Presentation\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+// Landing page baru. Halaman lama (resources/js/pages/welcome.tsx) hanya disembunyikan, tidak dihapus.
+Route::inertia('/', 'landing')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', DashboardPageController::class)->name('dashboard');
@@ -29,6 +31,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/projects/{project}', ShowProjectPageController::class)->name('projects.show');
     Route::get('/issues', GlobalIssuesPageController::class)->name('issues.index');
     Route::get('/users', fn () => redirect('/settings/rbac'))->name('users.index');
+
+    // Modul Katalog Dashboard Tableau (pencatatan dashboard existing & baru)
+    Route::get('/dashboards', [TableauDashboardController::class, 'index'])->middleware('can:dashboards.view')->name('dashboards.index');
+    Route::post('/dashboards', [TableauDashboardController::class, 'store'])->middleware('can:dashboards.create')->name('dashboards.store');
+    Route::put('/dashboards/{id}', [TableauDashboardController::class, 'update'])->middleware('can:dashboards.edit')->name('dashboards.update');
+    Route::delete('/dashboards/{id}', [TableauDashboardController::class, 'destroy'])->middleware('can:dashboards.delete')->name('dashboards.destroy');
 
     // Modul RBAC (Khusus Superadmin)
     Route::middleware('can:manage-rbac')->prefix('api/rbac')->group(function () {

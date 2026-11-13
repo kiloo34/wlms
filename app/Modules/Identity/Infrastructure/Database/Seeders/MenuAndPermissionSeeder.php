@@ -56,6 +56,13 @@ class MenuAndPermissionSeeder extends Seeder
 
             // Analytics
             ['name' => 'analytics:view', 'description' => 'View workload analytics and metrics'],
+
+            // Dashboard Catalog (Katalog Dashboard Tableau)
+            ['name' => 'dashboards:view', 'description' => 'View Tableau dashboard catalog'],
+            ['name' => 'dashboards:create', 'description' => 'Register new Tableau dashboards'],
+            ['name' => 'dashboards:edit', 'description' => 'Edit Tableau dashboard catalog entries'],
+            ['name' => 'dashboards:delete', 'description' => 'Delete Tableau dashboard catalog entries'],
+            ['name' => 'dashboards:manage', 'description' => 'Full access to manage Tableau dashboard catalog'],
         ];
 
         $permissionIds = [];
@@ -110,6 +117,14 @@ class MenuAndPermissionSeeder extends Seeder
                 'route' => '/issues',
                 'icon' => 'ticket',
                 'sort_order' => 40,
+                'children' => [],
+            ],
+            [
+                'label' => 'Dashboard Catalog',
+                'key' => 'dashboards',
+                'route' => '/dashboards',
+                'icon' => 'gauge',
+                'sort_order' => 50,
                 'children' => [],
             ],
             [

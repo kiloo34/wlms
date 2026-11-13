@@ -6,7 +6,13 @@ import {
     CheckSquare,
     Users,
     Folder,
+    FolderKanban,
+    Gauge,
+    KeyRound,
     Settings,
+    Shield,
+    Ticket,
+    User,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -34,11 +40,20 @@ type DBMenuItem = {
 // Icon Dictionary to map string from DB to React Component
 const ICON_MAP: Record<string, LucideIcon> = {
     dashboard: LayoutGrid,
+    'layout-dashboard': LayoutGrid,
     workspaces: Briefcase,
+    briefcase: Briefcase,
     issues: CheckSquare,
+    ticket: Ticket,
     users: Users,
+    user: User,
     folder: Folder,
+    'folder-kanban': FolderKanban,
+    dashboards: Gauge,
+    gauge: Gauge,
     settings: Settings,
+    key: KeyRound,
+    shield: Shield,
 };
 
 export function AppSidebar() {

@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             MenuAndPermissionSeeder::class,
             WorkloadLookupSeeder::class,
             KnowledgeBaseSeeder::class,
+            TableauDashboardSeeder::class,
         ]);
     }
 }

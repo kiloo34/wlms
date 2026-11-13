@@ -53,3 +53,7 @@ test('shared namespace does not depend on specific modules')
         'App\Modules\KnowledgeBase',
         'App\Modules\Notification',
     ]);
+
+test('DashboardCatalog presentation does not bypass application layer')
+    ->expect('App\Modules\DashboardCatalog\Presentation')
+    ->not->toUse('App\Modules\DashboardCatalog\Infrastructure');

@@ -28,6 +28,8 @@ void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
+            // Halaman publik tanpa sidebar: landing baru & welcome lama (disembunyikan)
+            case name === 'landing':
             case name === 'welcome':
                 return null;
             case name === 'auth/confirm-password':
