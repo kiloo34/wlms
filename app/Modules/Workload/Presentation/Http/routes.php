@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Workload\Application\Queries\ReferenceDirectoryQuery;
 use App\Modules\Workload\Presentation\Http\Controllers\ArchiveProjectController;
 use App\Modules\Workload\Presentation\Http\Controllers\ArchiveWorkspaceController;
 use App\Modules\Workload\Presentation\Http\Controllers\AssignIssueController;
@@ -32,6 +33,7 @@ use App\Modules\Workload\Presentation\Http\Controllers\LogWorkController;
 use App\Modules\Workload\Presentation\Http\Controllers\PeopleDirectoryController;
 use App\Modules\Workload\Presentation\Http\Controllers\ProjectActivityController;
 use App\Modules\Workload\Presentation\Http\Controllers\ProjectReportController;
+use App\Modules\Workload\Presentation\Http\Controllers\ReferenceController;
 use App\Modules\Workload\Presentation\Http\Controllers\ReminderSettingsController;
 use App\Modules\Workload\Presentation\Http\Controllers\StartSprintController;
 use App\Modules\Workload\Presentation\Http\Controllers\StatusController;
@@ -59,6 +61,10 @@ Route::middleware(['auth:sanctum'])->prefix('settings')->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/search', GlobalSearchController::class);
     Route::get('/people', PeopleDirectoryController::class);
+    Route::get('/references', [ReferenceController::class, 'index']);
+    Route::get('/references/{type}/{id}', [ReferenceController::class, 'show'])
+        ->whereIn('type', ReferenceDirectoryQuery::TYPES)
+        ->whereUuid('id');
     Route::get('/reports/projects', [ProjectReportController::class, 'index']);
     Route::get('/reports/owners/{ownerId}', [ProjectReportController::class, 'owner'])->whereNumber('ownerId');
 });

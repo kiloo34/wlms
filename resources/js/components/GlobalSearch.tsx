@@ -3,6 +3,7 @@ import { router } from '@inertiajs/react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
     FolderKanban,
+    Gauge,
     Loader2,
     MessageSquare,
     Search,
@@ -30,6 +31,17 @@ import { WorkTypeBadge } from '@/modules/Workload/shared/WorkTypeBadge';
 interface SearchResults {
     query: string;
     total: number;
+    references_only: boolean;
+    dashboards: {
+        id: string;
+        number: number | null;
+        name: string;
+        tableau_project: string | null;
+        mapping: string | null;
+        owner: string | null;
+        matched_in: string | null;
+        snippet: string | null;
+    }[];
     projects: {
         id: string;
         key: string;
@@ -129,7 +141,10 @@ export function GlobalSearch() {
         return () => window.clearTimeout(handle);
     }, [input]);
 
-    const enabled = open && term.length >= MIN_LENGTH;
+    // Awalan "@" = mode rujukan: jelajahi/cari project & dashboard katalog (kamusnya).
+    const referenceMode = term.startsWith('@');
+    const highlightTerm = referenceMode ? term.slice(1).trim() : term;
+    const enabled = open && (referenceMode || term.length >= MIN_LENGTH);
     const { data, isFetching } = useQuery<SearchResults>({
         queryKey: ['global-search', term],
         queryFn: async () => {
@@ -185,9 +200,18 @@ export function GlobalSearch() {
                             )}
                         />
                         <CommandList className="max-h-[420px]">
-                            {term.length < MIN_LENGTH ? (
-                                <div className="text-muted-foreground p-6 text-center text-sm">
-                                    {t('Type at least 2 characters to search.')}
+                            {!enabled ? (
+                                <div className="text-muted-foreground space-y-1 p-6 text-center text-sm">
+                                    <p>
+                                        {t(
+                                            'Type at least 2 characters to search.',
+                                        )}
+                                    </p>
+                                    <p className="text-xs">
+                                        {t(
+                                            'Start with @ to browse projects and catalog dashboards with their dictionary.',
+                                        )}
+                                    </p>
                                 </div>
                             ) : isFetching && !results ? (
                                 <div className="text-muted-foreground flex items-center justify-center gap-2 p-6 text-sm">
@@ -221,14 +245,18 @@ export function GlobalSearch() {
                                                                     text={
                                                                         project.key
                                                                     }
-                                                                    term={term}
+                                                                    term={
+                                                                        highlightTerm
+                                                                    }
                                                                 />
                                                             </span>
                                                             <Highlight
                                                                 text={
                                                                     project.name
                                                                 }
-                                                                term={term}
+                                                                term={
+                                                                    highlightTerm
+                                                                }
                                                             />
                                                         </p>
                                                         <p className="text-muted-foreground text-xs">
@@ -247,7 +275,9 @@ export function GlobalSearch() {
                                                                     text={
                                                                         project.snippet
                                                                     }
-                                                                    term={term}
+                                                                    term={
+                                                                        highlightTerm
+                                                                    }
                                                                 />
                                                             </p>
                                                         )}
@@ -256,6 +286,78 @@ export function GlobalSearch() {
                                             ))}
                                         </CommandGroup>
                                     )}
+
+                                    {results &&
+                                        results.dashboards.length > 0 && (
+                                            <CommandGroup
+                                                heading={t(
+                                                    'Dashboards (catalog)',
+                                                )}
+                                            >
+                                                {results.dashboards.map(
+                                                    (dashboard) => (
+                                                        <CommandItem
+                                                            key={`d-${dashboard.id}`}
+                                                            value={`d-${dashboard.id}`}
+                                                            onSelect={() =>
+                                                                go(
+                                                                    `/dashboards?dashboard=${dashboard.id}`,
+                                                                )
+                                                            }
+                                                            className="items-start gap-3"
+                                                        >
+                                                            <Gauge className="mt-0.5 h-4 w-4 shrink-0" />
+                                                            <div className="min-w-0">
+                                                                <p className="truncate text-sm font-medium">
+                                                                    {dashboard.number !==
+                                                                        null && (
+                                                                        <span className="text-muted-foreground mr-1.5 font-mono text-[11px]">
+                                                                            #
+                                                                            {
+                                                                                dashboard.number
+                                                                            }
+                                                                        </span>
+                                                                    )}
+                                                                    <Highlight
+                                                                        text={
+                                                                            dashboard.name
+                                                                        }
+                                                                        term={
+                                                                            highlightTerm
+                                                                        }
+                                                                    />
+                                                                </p>
+                                                                <p className="text-muted-foreground text-xs">
+                                                                    {[
+                                                                        dashboard.tableau_project,
+                                                                        dashboard.mapping,
+                                                                        dashboard.owner,
+                                                                    ]
+                                                                        .filter(
+                                                                            Boolean,
+                                                                        )
+                                                                        .join(
+                                                                            ' · ',
+                                                                        )}
+                                                                </p>
+                                                                {dashboard.snippet && (
+                                                                    <p className="text-muted-foreground line-clamp-2 text-xs">
+                                                                        <Highlight
+                                                                            text={
+                                                                                dashboard.snippet
+                                                                            }
+                                                                            term={
+                                                                                highlightTerm
+                                                                            }
+                                                                        />
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </CommandItem>
+                                                    ),
+                                                )}
+                                            </CommandGroup>
+                                        )}
 
                                     {results && results.issues.length > 0 && (
                                         <CommandGroup heading={t('Tasks')}>
@@ -288,7 +390,9 @@ export function GlobalSearch() {
                                                                     text={
                                                                         issue.title
                                                                     }
-                                                                    term={term}
+                                                                    term={
+                                                                        highlightTerm
+                                                                    }
                                                                 />
                                                             </p>
                                                             <WorkTypeBadge
@@ -314,7 +418,9 @@ export function GlobalSearch() {
                                                                     text={
                                                                         issue.snippet
                                                                     }
-                                                                    term={term}
+                                                                    term={
+                                                                        highlightTerm
+                                                                    }
                                                                 />
                                                             </p>
                                                         )}
@@ -363,7 +469,9 @@ export function GlobalSearch() {
                                                                     text={
                                                                         comment.snippet
                                                                     }
-                                                                    term={term}
+                                                                    term={
+                                                                        highlightTerm
+                                                                    }
                                                                 />
                                                             </p>
                                                         )}

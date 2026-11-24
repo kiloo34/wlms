@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { RemainingDaysBadge } from '../../shared/RemainingDaysBadge';
 import { remainingDays } from '../../shared/schedule';
+import { ReferenceText } from '../../shared/ReferenceText';
+import { referencesToPlainText } from '../../shared/references';
 import { Project } from '../types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -380,9 +382,13 @@ export function ProjectList({
                                         {project.description && (
                                             <p
                                                 className={`text-muted-foreground ${iconSize === 'sm' ? 'line-clamp-1 text-xs' : iconSize === 'lg' ? 'line-clamp-3 text-sm' : 'line-clamp-2 text-sm'}`}
-                                                title={project.description}
+                                                title={referencesToPlainText(
+                                                    project.description,
+                                                )}
                                             >
-                                                {project.description}
+                                                <ReferenceText
+                                                    text={project.description}
+                                                />
                                             </p>
                                         )}
                                         <div
@@ -536,9 +542,9 @@ export function ProjectList({
                                                     </span>
                                                     {project.description && (
                                                         <p className="text-muted-foreground line-clamp-1 text-xs">
-                                                            {
-                                                                project.description
-                                                            }
+                                                            {referencesToPlainText(
+                                                                project.description,
+                                                            )}
                                                         </p>
                                                     )}
                                                 </div>

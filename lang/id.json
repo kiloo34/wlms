@@ -904,5 +904,21 @@
     "Who owns the projects and tasks, and how much time is left. Click for details.": "Siapa saja owner project dan tugas, serta sisa waktunya. Klik untuk melihat detail.",
     "Work Type": "Tipe Pekerjaan",
     "Work reminders": "Pengingat pekerjaan",
-    "Your reminder schedule has been saved.": "Jadwal pengingat Anda berhasil disimpan."
+    "Your reminder schedule has been saved.": "Jadwal pengingat Anda berhasil disimpan.",
+    "Add a comment... Type @ to mention a team member, project, or dashboard": "Tulis komentar... Ketik @ untuk menyebut anggota tim, project, atau dashboard",
+    "Business Mapping": "Mapping Bisnis",
+    "Contents / Data": "Isi / Data",
+    "Dashboards (catalog)": "Dashboard (katalog)",
+    "Describe the purpose of this project... Type @ to refer to a project or dashboard": "Jelaskan tujuan project ini... Ketik @ untuk merujuk project atau dashboard",
+    "Description... Type @ to refer to a project or dashboard": "Deskripsi... Ketik @ untuk merujuk project atau dashboard",
+    "No.": "No.",
+    "Refer to a project or dashboard": "Rujuk project atau dashboard",
+    "Start with @ to browse projects and catalog dashboards with their dictionary.": "Awali dengan @ untuk menjelajahi project dan dashboard katalog beserta kamusnya.",
+    "Team members": "Anggota tim",
+    "This reference is not available or you do not have access to it.": "Rujukan ini tidak tersedia atau Anda tidak punya akses.",
+    "Tip: @ mentions colleagues, projects, and catalog dashboards": "Tips: @ untuk menyebut rekan kerja, project, dan dashboard katalog",
+    "Dashboard reference": "Rujukan dashboard",
+    "Project reference": "Rujukan project",
+    "Open in Dashboard Catalog": "Buka di Katalog Dashboard",
+    "Open project": "Buka project"
 }

@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { ReferenceTextarea } from '../../shared/ReferenceTextarea';
 import { Label } from '@/components/ui/label';
 import { Combobox } from '@/components/ui/combobox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -430,11 +430,13 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
 
             <div className="space-y-2">
                 <Label htmlFor="description">{t('Description & notes')}</Label>
-                <Textarea
+                <ReferenceTextarea
                     id="description"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder={t('Description...')}
+                    onChange={setDescription}
+                    placeholder={t(
+                        'Description... Type @ to refer to a project or dashboard',
+                    )}
                     rows={4}
                 />
                 {!isEdit && (

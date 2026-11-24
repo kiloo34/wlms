@@ -21,6 +21,8 @@ import { Badge } from '@/components/ui/badge';
 import { useTranslate } from '@/hooks/useTranslate';
 import { useIconSize } from '@/hooks/use-appearance';
 import { WorkTypeBadge } from '../../shared/WorkTypeBadge';
+import { ReferenceText } from '../../shared/ReferenceText';
+import { referencesToPlainText } from '../../shared/references';
 
 interface IssueListProps {
     issues: Issue[];
@@ -186,11 +188,15 @@ export const IssueList: React.FC<IssueListProps> = ({
                                         </td>
                                         <td
                                             className={`${cellPaddingClass} text-muted-foreground max-w-[280px] min-w-[180px] text-xs`}
-                                            title={issue.description ?? ''}
+                                            title={referencesToPlainText(
+                                                issue.description ?? '',
+                                            )}
                                         >
                                             {issue.description ? (
                                                 <p className="line-clamp-2 whitespace-pre-line">
-                                                    {issue.description}
+                                                    <ReferenceText
+                                                        text={issue.description}
+                                                    />
                                                 </p>
                                             ) : (
                                                 '-'

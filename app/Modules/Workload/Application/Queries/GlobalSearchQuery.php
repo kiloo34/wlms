@@ -25,8 +25,15 @@ final class GlobalSearchQuery
         $term = trim(preg_replace('/\s+/u', ' ', $term) ?? '');
         $limit = max(1, min(50, $limit));
 
-        if (mb_strlen($term) < self::MIN_LENGTH) {
-            return ['query' => $term, 'projects' => [], 'issues' => [], 'comments' => [], 'total' => 0];
+        // Awalan "@" = hanya cari rujukan (project & dashboard katalog), boleh tanpa kata kunci.
+        $referencesOnly = str_starts_with($term, '@');
+        if ($referencesOnly) {
+            $term = trim(mb_substr($term, 1));
+        }
+
+        $empty = ['query' => $term, 'references_only' => $referencesOnly, 'projects' => [], 'dashboards' => [], 'issues' => [], 'comments' => [], 'total' => 0];
+        if (! $referencesOnly && mb_strlen($term) < self::MIN_LENGTH) {
+            return $empty;
         }
 
         $pattern = '%'.addcslashes(mb_strtolower($term), '\\%_').'%';
@@ -107,6 +114,17 @@ final class GlobalSearchQuery
             ->values()
             ->all();
 
+        $dashboards = $this->dashboards($term, $pattern, $limit);
+
+        if ($referencesOnly) {
+            return [
+                ...$empty,
+                'projects' => $projects,
+                'dashboards' => $dashboards,
+                'total' => count($projects) + count($dashboards),
+            ];
+        }
+
         $comments = DB::table('comments')
             ->join('issues', 'issues.id', '=', 'comments.issue_id')
             ->join('projects', 'projects.id', '=', 'issues.project_id')
@@ -137,12 +155,71 @@ final class GlobalSearchQuery
             ->all();
 
         return [
-            'query' => $term,
+            ...$empty,
             'projects' => $projects,
+            'dashboards' => $dashboards,
             'issues' => $issues,
             'comments' => $comments,
-            'total' => count($projects) + count($issues) + count($comments),
+            'total' => count($projects) + count($dashboards) + count($issues) + count($comments),
         ];
+    }
+
+    /**
+     * Dashboard di Katalog Dashboard, dicocokkan dengan nama dan seluruh isi kamusnya.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function dashboards(string $term, string $pattern, int $limit): array
+    {
+        $query = DB::table('tableau_dashboards')
+            ->whereNull('deleted_at')
+            ->orderByRaw('CASE WHEN number IS NULL THEN 1 ELSE 0 END, number ASC')
+            ->orderBy('name')
+            ->limit($limit);
+
+        if ($term !== '') {
+            $query->where(function (Builder $q) use ($pattern): void {
+                self::orLike($q, 'name', $pattern);
+                self::orLike($q, 'tableau_project', $pattern);
+                self::orLike($q, 'mapping', $pattern);
+                self::orLike($q, 'definition', $pattern);
+                self::orLike($q, 'contents', $pattern);
+                self::orLike($q, 'purpose', $pattern);
+                self::orLike($q, 'owner', $pattern);
+                self::orLike($q, 'notes', $pattern);
+            });
+        }
+
+        return $query
+            ->get(['id', 'number', 'name', 'definition', 'contents', 'purpose', 'tableau_project', 'mapping', 'owner', 'notes'])
+            ->map(function ($row) use ($term): array {
+                $matched = $term !== '' ? $this->matchedField($term, [
+                    'name' => $row->name,
+                    'tableau_project' => $row->tableau_project,
+                    'mapping' => $row->mapping,
+                    'definition' => $row->definition,
+                    'contents' => $row->contents,
+                    'purpose' => $row->purpose,
+                    'owner' => $row->owner,
+                    'notes' => $row->notes,
+                ]) : null;
+                $snippetSource = in_array($matched, ['definition', 'contents', 'notes'], true)
+                    ? (string) $row->{$matched}
+                    : (string) ($row->contents ?? $row->definition ?? '');
+
+                return [
+                    'id' => (string) $row->id,
+                    'number' => $row->number !== null ? (int) $row->number : null,
+                    'name' => (string) $row->name,
+                    'tableau_project' => $row->tableau_project,
+                    'mapping' => $row->mapping,
+                    'owner' => $row->owner,
+                    'matched_in' => $matched,
+                    'snippet' => self::snippet($snippetSource, $term),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**
@@ -160,12 +237,13 @@ final class GlobalSearchQuery
      */
     public static function snippet(string $text, string $term, int $radius = 60): ?string
     {
-        $plain = trim(preg_replace('/\s+/u', ' ', strip_tags($text)) ?? '');
+        // Token rujukan "@[Nama](tipe:id)" ditampilkan sebagai "@Nama".
+        $plain = trim(preg_replace('/\s+/u', ' ', ReferenceDirectoryQuery::toPlainText(strip_tags($text))) ?? '');
         if ($plain === '') {
             return null;
         }
 
-        $pos = mb_stripos($plain, $term);
+        $pos = $term === '' ? false : mb_stripos($plain, $term);
         if ($pos === false) {
             return mb_strlen($plain) > $radius * 2 ? mb_substr($plain, 0, $radius * 2).'…' : $plain;
         }

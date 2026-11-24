@@ -68,6 +68,8 @@ import { Issue } from '@/types/issue';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useBulkUpdateIssues } from '@/modules/Workload/Issues/hooks/useIssues';
 import { WorkTypeBadge } from '@/modules/Workload/shared/WorkTypeBadge';
+import { ReferenceText } from '@/modules/Workload/shared/ReferenceText';
+import { referencesToPlainText } from '@/modules/Workload/shared/references';
 
 interface WorkspaceTasksLookups {
     users?: SelectOption[];
@@ -692,11 +694,15 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
 
                                         <TableCell
                                             className="text-muted-foreground max-w-[240px] text-xs"
-                                            title={issue.description ?? ''}
+                                            title={referencesToPlainText(
+                                                issue.description ?? '',
+                                            )}
                                         >
                                             {issue.description ? (
                                                 <p className="line-clamp-2 whitespace-pre-line">
-                                                    {issue.description}
+                                                    <ReferenceText
+                                                        text={issue.description}
+                                                    />
                                                 </p>
                                             ) : (
                                                 <span className="text-muted-foreground/60">

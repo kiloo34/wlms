@@ -44,6 +44,8 @@ import { useGetWorkspaces } from '@/modules/Workload/Workspaces/hooks/useWorkspa
 import { RemainingDaysBadge } from '@/modules/Workload/shared/RemainingDaysBadge';
 import { WorkTypeBadge } from '@/modules/Workload/shared/WorkTypeBadge';
 import { formatDisplayDate } from '@/modules/Workload/shared/schedule';
+import { ReferenceText } from '@/modules/Workload/shared/ReferenceText';
+import { referencesToPlainText } from '@/modules/Workload/shared/references';
 
 type Health =
     | 'on_track'
@@ -612,13 +614,15 @@ export default function ProjectReport() {
                                                             {project.description && (
                                                                 <p
                                                                     className="text-muted-foreground mt-1 line-clamp-2 text-xs"
-                                                                    title={
-                                                                        project.description
-                                                                    }
+                                                                    title={referencesToPlainText(
+                                                                        project.description,
+                                                                    )}
                                                                 >
-                                                                    {
-                                                                        project.description
-                                                                    }
+                                                                    <ReferenceText
+                                                                        text={
+                                                                            project.description
+                                                                        }
+                                                                    />
                                                                 </p>
                                                             )}
                                                             {Object.keys(
@@ -1111,7 +1115,9 @@ function OwnerDetailSheet({
                                         </div>
                                         {project.description && (
                                             <p className="text-muted-foreground line-clamp-3 text-xs whitespace-pre-line">
-                                                {project.description}
+                                                <ReferenceText
+                                                    text={project.description}
+                                                />
                                             </p>
                                         )}
                                     </button>
@@ -1175,7 +1181,9 @@ function OwnerDetailSheet({
                                         </div>
                                         {task.description && (
                                             <p className="text-muted-foreground line-clamp-3 text-xs whitespace-pre-line">
-                                                {task.description}
+                                                <ReferenceText
+                                                    text={task.description}
+                                                />
                                             </p>
                                         )}
                                     </button>

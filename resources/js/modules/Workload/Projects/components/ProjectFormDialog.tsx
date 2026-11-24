@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { ReferenceTextarea } from '../../shared/ReferenceTextarea';
 import { Combobox } from '@/components/ui/combobox';
 import { useWorkflows } from '../../Workflows/hooks/useWorkflows';
 import { useTranslate } from '@/hooks/useTranslate';
@@ -208,12 +208,12 @@ export function ProjectFormDialog({
                             <Label htmlFor="description">
                                 {t('Description & notes')}
                             </Label>
-                            <Textarea
+                            <ReferenceTextarea
                                 id="description"
                                 value={description}
-                                onChange={(e) => setDescription(e.target.value)}
+                                onChange={setDescription}
                                 placeholder={t(
-                                    'Describe the purpose of this project...',
+                                    'Describe the purpose of this project... Type @ to refer to a project or dashboard',
                                 )}
                                 rows={4}
                                 disabled={isPending}

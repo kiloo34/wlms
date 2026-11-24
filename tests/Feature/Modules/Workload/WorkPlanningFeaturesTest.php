@@ -361,3 +361,98 @@ test('direktori orang hanya berisi user aktif', function () {
     $names = collect($this->getJson('/api/people')->assertOk()->json('data'))->pluck('name');
     expect($names)->toContain('Budi Owner', 'Orang Luar')->not->toContain('Nonaktif');
 });
+
+/**
+ * Rujukan "@": project WLMS dan dashboard katalog beserta kamusnya.
+ */
+function insertDashboard(array $attrs = []): string
+{
+    $id = Str::uuid()->toString();
+    DB::table('tableau_dashboards')->insert(array_merge([
+        'id' => $id,
+        'number' => 1,
+        'name' => 'Dashboard DPK Harian',
+        'definition' => 'Monitoring dana pihak ketiga',
+        'contents' => 'Saldo giro, tabungan, deposito per cabang',
+        'purpose' => 'Monitoring',
+        'tableau_project' => 'Dashboard DPK',
+        'mapping' => 'Business Funding',
+        'owner' => 'Divisi Dana',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ], $attrs));
+
+    return $id;
+}
+
+test('saran @ berisi project yang bisa diakses dan dashboard yang cocok dengan kamusnya', function () {
+    $projectId = ($this->makeProject)(['name' => 'Migrasi Deposito', 'key' => 'DEP']);
+    $dashboardId = insertDashboard();
+    insertDashboard(['name' => 'Dashboard Kredit', 'contents' => 'Outstanding kredit', 'tableau_project' => 'Lending', 'mapping' => 'Risk']);
+
+    $this->actingAs($this->admin);
+    $res = $this->getJson('/api/references?q=deposito')->assertOk();
+
+    expect(collect($res->json('data.projects'))->pluck('id')->all())->toBe([$projectId])
+        ->and(collect($res->json('data.dashboards'))->pluck('id')->all())->toBe([$dashboardId])
+        ->and($res->json('data.dashboards.0.subtitle'))->toBe('Dashboard DPK · Business Funding');
+
+    // Katalog dashboard terbuka untuk semua user, project tetap dibatasi akses.
+    $this->actingAs($this->outsider);
+    $res = $this->getJson('/api/references?q=deposito')->assertOk();
+    expect($res->json('data.projects'))->toBe([])
+        ->and($res->json('data.dashboards'))->toHaveCount(1);
+
+    $this->getJson('/api/references?types[]=dashboard&types[]=user')->assertStatus(422);
+});
+
+test('detail rujukan menampilkan kamus dashboard dan menolak project tanpa akses', function () {
+    $dashboardId = insertDashboard();
+    $projectId = ($this->makeProject)(['name' => 'Rahasia', 'lead_id' => $this->owner->id]);
+
+    $this->actingAs($this->outsider);
+
+    $dictionary = collect($this->getJson("/api/references/dashboard/{$dashboardId}")
+        ->assertOk()
+        ->assertJsonPath('data.url', "/dashboards?dashboard={$dashboardId}")
+        ->json('data.dictionary'))->pluck('value', 'key');
+
+    expect($dictionary['contents'])->toBe('Saldo giro, tabungan, deposito per cabang')
+        ->and($dictionary['tableau_project'])->toBe('Dashboard DPK')
+        ->and($dictionary['owner'])->toBe('Divisi Dana');
+
+    $this->getJson("/api/references/project/{$projectId}")->assertNotFound();
+
+    $this->actingAs($this->owner);
+    $this->getJson("/api/references/project/{$projectId}")
+        ->assertOk()
+        ->assertJsonPath('data.label', 'Rahasia');
+});
+
+test('pencarian global dengan awalan @ hanya mencari rujukan dan token tampil sebagai teks', function () {
+    $dashboardId = insertDashboard();
+    $projectId = ($this->makeProject)(['name' => 'Laporan Dana', 'key' => 'DANA']);
+    ($this->makeIssue)($projectId, [
+        'title' => 'Update dashboard',
+        'description' => "Sumber data dari @[Dashboard DPK Harian](dashboard:{$dashboardId}) untuk rapat.",
+    ]);
+
+    $this->actingAs($this->admin);
+
+    $res = $this->getJson('/api/search?q='.urlencode('@tabungan'))->assertOk();
+    expect($res->json('data.references_only'))->toBeTrue()
+        ->and($res->json('data.dashboards.0.id'))->toBe($dashboardId)
+        ->and($res->json('data.dashboards.0.matched_in'))->toBe('contents')
+        ->and($res->json('data.issues'))->toBe([]);
+
+    // "@" saja menampilkan daftar rujukan untuk dijelajahi.
+    $res = $this->getJson('/api/search?q=@')->assertOk();
+    expect($res->json('data.dashboards'))->toHaveCount(1)
+        ->and(collect($res->json('data.projects'))->pluck('id'))->toContain($projectId);
+
+    // Pencarian biasa menemukan tugas yang merujuk dashboard, tanpa token mentah di snippet.
+    $res = $this->getJson('/api/search?q=DPK Harian')->assertOk();
+    expect($res->json('data.issues.0.snippet'))->toContain('@Dashboard DPK Harian')
+        ->not->toContain('dashboard:')
+        ->and($res->json('data.dashboards.0.name'))->toBe('Dashboard DPK Harian');
+});

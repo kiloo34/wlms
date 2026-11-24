@@ -80,7 +80,12 @@ export default function DashboardCatalogIndex({
 
     const [formOpen, setFormOpen] = useState(false);
     const [editing, setEditing] = useState<TableauDashboard | null>(null);
-    const [viewing, setViewing] = useState<TableauDashboard | null>(null);
+    // Deep link dari rujukan "@" / pencarian: /dashboards?dashboard={id} membuka detailnya.
+    const [viewing, setViewing] = useState<TableauDashboard | null>(() => {
+        if (typeof window === 'undefined') return null;
+        const id = new URLSearchParams(window.location.search).get('dashboard');
+        return id ? (dashboards.find((item) => item.id === id) ?? null) : null;
+    });
     const [deleting, setDeleting] = useState<TableauDashboard | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
