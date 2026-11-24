@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\DB;
  * @property string|null $parent_id
  * @property Carbon|null $start_date
  * @property Carbon|null $due_date
+ * @property string $work_type
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -47,7 +48,7 @@ final class IssueModel extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['id', 'project_id', 'sprint_id', 'status_id', 'parent_id', 'number', 'title', 'description', 'issue_type_id', 'priority_id', 'story_points', 'original_estimate_seconds', 'remaining_estimate_seconds', 'reporter_id', 'assignee_id', 'custom_fields', 'start_date', 'due_date'];
+    protected $fillable = ['id', 'project_id', 'sprint_id', 'status_id', 'parent_id', 'number', 'title', 'description', 'issue_type_id', 'priority_id', 'story_points', 'original_estimate_seconds', 'remaining_estimate_seconds', 'reporter_id', 'assignee_id', 'custom_fields', 'start_date', 'due_date', 'work_type'];
 
     protected $casts = ['number' => 'integer', 'story_points' => 'integer', 'original_estimate_seconds' => 'integer', 'custom_fields' => 'array', 'start_date' => 'date:Y-m-d', 'due_date' => 'date:Y-m-d'];
 

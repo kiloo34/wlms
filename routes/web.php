@@ -30,6 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/projects', ProjectIndexPageController::class)->name('projects.index');
     Route::get('/projects/{project}', ShowProjectPageController::class)->name('projects.show');
     Route::get('/issues', GlobalIssuesPageController::class)->name('issues.index');
+    // Laporan seluruh project (1 layar, bisa diekspor gambar) + rekap owner.
+    Route::inertia('/reports/projects', 'Reports/Projects')->name('reports.projects');
     Route::get('/users', fn () => redirect('/settings/rbac'))->name('users.index');
 
     // Modul Katalog Dashboard Tableau (pencatatan dashboard existing & baru)

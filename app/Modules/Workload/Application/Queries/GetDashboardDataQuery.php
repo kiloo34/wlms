@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Application\Queries;
 
-use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
-use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\ProjectModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -17,53 +15,7 @@ final class GetDashboardDataQuery
      */
     public function execute(int|string $userId, ?string $orgUnitId = null): array
     {
-        $isSuperAdmin = WorkloadAccessChecker::isSuperAdmin($userId);
-
-        $projectsQuery = ProjectModel::query()->whereNull('projects.deleted_at');
-
-        if (! $isSuperAdmin) {
-            $projectsQuery->where(function ($q) use ($userId, $orgUnitId): void {
-                $q->whereExists(function ($ws) use ($userId, $orgUnitId): void {
-                    $ws->select(DB::raw(1))
-                        ->from('workspaces')
-                        ->whereColumn('workspaces.id', 'projects.workspace_id')
-                        ->whereNull('workspaces.deleted_at')
-                        ->where(function ($wsAccess) use ($userId, $orgUnitId): void {
-                            if ($orgUnitId !== null && $orgUnitId !== '') {
-                                $wsAccess->where('workspaces.owner_group_id', $orgUnitId)
-                                    ->orWhereExists(function ($wm) use ($userId): void {
-                                        $wm->select(DB::raw(1))
-                                            ->from('workspace_members')
-                                            ->whereColumn('workspace_members.workspace_id', 'workspaces.id')
-                                            ->where('workspace_members.user_id', $userId);
-                                    });
-                            } else {
-                                $wsAccess->whereExists(function ($wm) use ($userId): void {
-                                    $wm->select(DB::raw(1))
-                                        ->from('workspace_members')
-                                        ->whereColumn('workspace_members.workspace_id', 'workspaces.id')
-                                        ->where('workspace_members.user_id', $userId);
-                                });
-                            }
-                        });
-                })
-                    ->orWhere('projects.lead_id', $userId)
-                    ->orWhereExists(function ($ur) use ($userId): void {
-                        $ur->select(DB::raw(1))
-                            ->from('user_roles')
-                            ->whereColumn('user_roles.context_id', 'projects.id')
-                            ->where('user_roles.context_type', 'PROJECT')
-                            ->where('user_roles.user_id', $userId);
-                    })
-                    ->orWhereExists(function ($iss) use ($userId): void {
-                        $iss->select(DB::raw(1))
-                            ->from('issues')
-                            ->whereColumn('issues.project_id', 'projects.id')
-                            ->whereNull('issues.deleted_at')
-                            ->where('issues.assignee_id', $userId);
-                    });
-            });
-        }
+        $projectsQuery = AccessibleProjectsQuery::for($userId, $orgUnitId);
 
         /** @var array<int, string> $accessibleProjectIds */
         $accessibleProjectIds = (clone $projectsQuery)->pluck('projects.id')->all();

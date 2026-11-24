@@ -59,6 +59,9 @@ final class ProjectMapper
             $propertyPriorityId->setValue($project, null);
         }
 
+        $reflection->getProperty('startDate')->setValue($project, $model->start_date?->format('Y-m-d'));
+        $reflection->getProperty('endDate')->setValue($project, $model->end_date?->format('Y-m-d'));
+
         return $project;
     }
 
@@ -77,6 +80,8 @@ final class ProjectMapper
             'lead_id' => $project->getLeadId(),
             'workflow_id' => $project->getWorkflowId()?->value,
             'priority_id' => $project->getPriorityId()?->value,
+            'start_date' => $project->getStartDate(),
+            'end_date' => $project->getEndDate(),
         ];
     }
 }

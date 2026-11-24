@@ -6,9 +6,11 @@ namespace App\Modules\Workload\Presentation\Http\Requests;
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
+use App\Modules\Workload\Domain\Enums\WorkType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 final class CreateIssueHttpRequest extends FormRequest
 {
@@ -53,6 +55,10 @@ final class CreateIssueHttpRequest extends FormRequest
             'original_estimate_seconds' => ['nullable', 'integer', 'min:0'],
             'start_date' => ['nullable', 'date'],
             'due_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            // Durasi (hari kalender, inklusif). Bila diisi bersama start_date dan
+            // due_date kosong, tanggal selesai dihitung otomatis.
+            'duration_days' => ['nullable', 'integer', 'min:1', 'max:3650'],
+            'work_type' => ['nullable', 'string', Rule::in(WorkType::values())],
             'parent_id' => ['nullable', 'uuid', new ValidParentIssue((string) ($this->route('project_id') ?? $this->input('project_id')), null)],
         ];
     }

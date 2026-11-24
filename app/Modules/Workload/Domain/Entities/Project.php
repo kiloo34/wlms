@@ -27,7 +27,9 @@ final class Project
         private ?string $leadId,
         private readonly DateTimeImmutable $createdAt,
         private ?WorkflowId $workflowId = null,
-        private ?PriorityId $priorityId = null
+        private ?PriorityId $priorityId = null,
+        private ?string $startDate = null,
+        private ?string $endDate = null,
     ) {}
 
     public static function create(
@@ -38,7 +40,9 @@ final class Project
         ?string $description,
         ?string $leadId,
         string $actorId,
-        ?PriorityId $priorityId = null
+        ?PriorityId $priorityId = null,
+        ?string $startDate = null,
+        ?string $endDate = null,
     ): self {
         $project = new self(
             $id,
@@ -50,7 +54,9 @@ final class Project
             $leadId,
             new DateTimeImmutable,
             null,
-            $priorityId
+            $priorityId,
+            $startDate,
+            $endDate,
         );
 
         $project->recordEvent(new ProjectCreated(
@@ -79,6 +85,15 @@ final class Project
         if ($workflowId !== null) {
             $this->workflowId = $workflowId;
         }
+    }
+
+    /**
+     * Jadwal project: tanggal mulai & selesai (Y-m-d). Durasi diturunkan dari keduanya.
+     */
+    public function reschedule(?string $startDate, ?string $endDate): void
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
     }
 
     // Getters
@@ -125,6 +140,16 @@ final class Project
     public function getPriorityId(): ?PriorityId
     {
         return $this->priorityId;
+    }
+
+    public function getStartDate(): ?string
+    {
+        return $this->startDate;
+    }
+
+    public function getEndDate(): ?string
+    {
+        return $this->endDate;
     }
 
     public function getCreatedAt(): DateTimeImmutable

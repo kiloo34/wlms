@@ -19,6 +19,7 @@ import {
     Settings as SettingsIcon,
     Database,
     BookOpen,
+    BellRing,
 } from 'lucide-react';
 import type { NavItem } from '@/types';
 import { Card, CardTitle } from '@/components/ui/card';
@@ -37,6 +38,11 @@ const getSidebarNavGroups = (isSuperAdmin: boolean): NavGroup[] => {
                     title: 'Appearance',
                     href: editAppearance(),
                     icon: ShieldCheck,
+                },
+                {
+                    title: 'Reminders',
+                    href: '/settings/reminders',
+                    icon: BellRing,
                 },
             ],
         },

@@ -31,11 +31,15 @@ final class UpdateProjectUseCase
             $project->update(
                 $input->name,
                 $input->description,
-                $input->leadId,
+                $input->leadProvided ? $input->leadId : $project->getLeadId(),
                 $input->workflowId ? new WorkflowId($input->workflowId) : null,
                 $input->actorUserId,
                 $input->priorityId ? new PriorityId($input->priorityId) : null
             );
+
+            if ($input->scheduleProvided) {
+                $project->reschedule($input->startDate, $input->endDate);
+            }
 
             $this->repository->save($project);
         });

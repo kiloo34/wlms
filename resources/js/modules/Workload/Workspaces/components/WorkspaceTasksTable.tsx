@@ -67,6 +67,7 @@ import { Project } from '@/modules/Workload/Projects/types';
 import { Issue } from '@/types/issue';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useBulkUpdateIssues } from '@/modules/Workload/Issues/hooks/useIssues';
+import { WorkTypeBadge } from '@/modules/Workload/shared/WorkTypeBadge';
 
 interface WorkspaceTasksLookups {
     users?: SelectOption[];
@@ -227,7 +228,10 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                 const query = searchQuery.toLowerCase();
                 const titleMatch = issue.title?.toLowerCase().includes(query);
                 const idMatch = issue.id?.toLowerCase().includes(query);
-                if (!titleMatch && !idMatch) return false;
+                const descriptionMatch = issue.description
+                    ?.toLowerCase()
+                    .includes(query);
+                if (!titleMatch && !idMatch && !descriptionMatch) return false;
             }
 
             return true;
@@ -558,6 +562,9 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                                 {t('Project')}
                             </TableHead>
                             <TableHead>{t('Task Title')}</TableHead>
+                            <TableHead className="w-[240px]">
+                                {t('Description')}
+                            </TableHead>
                             <TableHead className="w-[150px]">
                                 {t('Status')}
                             </TableHead>
@@ -565,7 +572,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                                 {t('Priority')}
                             </TableHead>
                             <TableHead className="w-[160px]">
-                                {t('Assignee')}
+                                {t('Task Owner (PIC)')}
                             </TableHead>
                             <TableHead className="w-[150px]">
                                 {t('Due Date')}
@@ -579,7 +586,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                         {isLoading ? (
                             <TableRow>
                                 <TableCell
-                                    colSpan={8}
+                                    colSpan={9}
                                     className="text-muted-foreground py-12 text-center text-sm"
                                 >
                                     {t('Loading tasks...')}
@@ -588,7 +595,7 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                         ) : paginatedIssues.length === 0 ? (
                             <TableRow>
                                 <TableCell
-                                    colSpan={8}
+                                    colSpan={9}
                                     className="text-muted-foreground py-12 text-center text-sm"
                                 >
                                     {t(
@@ -671,9 +678,29 @@ export const WorkspaceTasksTable: React.FC<WorkspaceTasksTableProps> = ({
                                             >
                                                 {issue.title}
                                             </div>
-                                            {issue.id && (
-                                                <span className="text-muted-foreground font-mono text-[11px]">
-                                                    {issue.id.slice(0, 8)}
+                                            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                                                {issue.id && (
+                                                    <span className="text-muted-foreground font-mono text-[11px]">
+                                                        {issue.id.slice(0, 8)}
+                                                    </span>
+                                                )}
+                                                <WorkTypeBadge
+                                                    value={issue.work_type}
+                                                />
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell
+                                            className="text-muted-foreground max-w-[240px] text-xs"
+                                            title={issue.description ?? ''}
+                                        >
+                                            {issue.description ? (
+                                                <p className="line-clamp-2 whitespace-pre-line">
+                                                    {issue.description}
+                                                </p>
+                                            ) : (
+                                                <span className="text-muted-foreground/60">
+                                                    -
                                                 </span>
                                             )}
                                         </TableCell>

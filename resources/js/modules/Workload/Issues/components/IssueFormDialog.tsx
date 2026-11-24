@@ -27,6 +27,9 @@ import { useTranslate } from '@/hooks/useTranslate';
 import { usePermission } from '@/hooks/usePermission';
 import { toast } from 'sonner';
 import { useAddIssueLink, useProjectLookups } from '@/hooks/api/issues';
+import { personLabel, usePeople } from '@/hooks/usePeople';
+import { ScheduleFields } from '../../shared/ScheduleFields';
+import { DEFAULT_WORK_TYPE, WORK_TYPES } from '../../shared/workTypes';
 
 export interface SelectOption {
     id: string;
@@ -123,6 +126,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
     const [startDate, setStartDate] = useState<string>('');
     const [dueDate, setDueDate] = useState<string>('');
     const [parentId, setParentId] = useState<string>('');
+    const [workType, setWorkType] = useState<string>(DEFAULT_WORK_TYPE);
     const [linkAfterCreate, setLinkAfterCreate] =
         useState<LinkAfterCreate | null>(null);
 
@@ -156,6 +160,38 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
     const activeAssignees = dynamicLookups?.users || assignees;
     const activeSettings: IssueWorkloadSettings | undefined =
         dynamicLookups?.settings || settings;
+
+    // Owner tugas dipilih dari seluruh user aktif; anggota workspace tetap di atas.
+    const { data: people = [] } = usePeople(isOpen);
+    const ownerOptions = (() => {
+        const seen = new Set<string>();
+        const options: { value: string; label: string }[] = [
+            { value: 'unassigned', label: t('Unassigned') },
+        ];
+        (activeAssignees || []).forEach((a: SelectOption) => {
+            const id = String(a.id);
+            if (seen.has(id)) return;
+            seen.add(id);
+            options.push({ value: id, label: a.name });
+        });
+        people.forEach((person) => {
+            const id = String(person.id);
+            if (seen.has(id)) return;
+            seen.add(id);
+            options.push({ value: id, label: personLabel(person) });
+        });
+        if (
+            assigneeId &&
+            assigneeId !== 'unassigned' &&
+            !seen.has(assigneeId)
+        ) {
+            options.push({
+                value: assigneeId,
+                label: issue?.assignee?.name ?? `#${assigneeId}`,
+            });
+        }
+        return options;
+    })();
 
     const getAutoDueDate = (prioId: string, baseStart?: string): string => {
         if (!activeSettings?.sla_days_by_priority) return '';
@@ -236,6 +272,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                 );
                 setDueDate(issue.due_date ? issue.due_date.slice(0, 10) : '');
                 setParentId(issue.parent_id ? String(issue.parent_id) : '');
+                setWorkType(issue.work_type || DEFAULT_WORK_TYPE);
             } else {
                 // Recover draft from Local Storage for new issues
                 setTitle(localStorage.getItem('wlms_draft_issue_title') || '');
@@ -250,6 +287,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                 setStartDate('');
                 setDueDate('');
                 setParentId('');
+                setWorkType(DEFAULT_WORK_TYPE);
                 setLinkAfterCreate(null);
             }
         }
@@ -297,6 +335,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
             start_date: startDate || null,
             due_date: dueDate || null,
             parent_id: parentId || null,
+            work_type: workType,
         };
 
         if (isEdit) {
@@ -390,7 +429,7 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="description">{t('Description')}</Label>
+                <Label htmlFor="description">{t('Description & notes')}</Label>
                 <Textarea
                     id="description"
                     value={description}
@@ -471,49 +510,51 @@ export const IssueFormDialog: React.FC<IssueFormDialogProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="assignee">{t('Assignee')}</Label>
+                    <Label htmlFor="assignee">{t('Task Owner (PIC)')}</Label>
                     <Combobox
                         id="assignee"
-                        options={[
-                            { value: 'unassigned', label: 'Unassigned' },
-                            ...(activeAssignees || []).map(
-                                (a: SelectOption) => ({
-                                    value: String(a.id),
-                                    label: a.name,
-                                }),
-                            ),
-                        ]}
+                        options={ownerOptions}
                         value={assigneeId}
                         onChange={setAssigneeId}
-                        placeholder={t('Search assignee...')}
-                        emptyText="No user found."
+                        placeholder={t('Search person...')}
+                        emptyText={t('No user found.')}
                     />
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="start_date">{t('Start Date')}</Label>
-                    <Input
-                        id="start_date"
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="due_date">{t('Due Date')}</Label>
-                    <Input
-                        id="due_date"
-                        type="date"
-                        value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
-                    />
-                </div>
-            </div>
+            <ScheduleFields
+                idPrefix="issue"
+                startDate={startDate}
+                endDate={dueDate}
+                endLabel={t('Due Date')}
+                onChange={(next) => {
+                    setStartDate(next.startDate);
+                    setDueDate(next.endDate);
+                }}
+            />
 
             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="work_type">{t('Work Type')}</Label>
+                    <Combobox
+                        id="work_type"
+                        options={WORK_TYPES.map((type) => ({
+                            value: type.value,
+                            label: t(type.label),
+                        }))}
+                        value={workType}
+                        onChange={(val) =>
+                            setWorkType(val || DEFAULT_WORK_TYPE)
+                        }
+                        placeholder={t('Select work type...')}
+                    />
+                    <p className="text-muted-foreground text-xs">
+                        {t(
+                            WORK_TYPES.find((type) => type.value === workType)
+                                ?.hint ?? '',
+                        )}
+                    </p>
+                </div>
                 <div className="space-y-2">
                     <Label htmlFor="original_estimate">
                         Original Estimate (Hours)

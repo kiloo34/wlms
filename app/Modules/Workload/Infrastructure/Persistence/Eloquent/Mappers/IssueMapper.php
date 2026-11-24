@@ -45,6 +45,7 @@ final class IssueMapper
         $set('startDate', $model->start_date?->format('Y-m-d'));
         $set('dueDate', $model->due_date?->format('Y-m-d'));
         $set('parentId', $model->parent_id);
+        $set('workType', (string) ($model->work_type ?: 'project'));
 
         return $issue;
     }
@@ -72,6 +73,7 @@ final class IssueMapper
             'assignee_id' => $issue->getAssigneeId()?->value,
             'start_date' => $issue->getStartDate(),
             'due_date' => $issue->getDueDate(),
+            'work_type' => $issue->getWorkType(),
         ];
     }
 }

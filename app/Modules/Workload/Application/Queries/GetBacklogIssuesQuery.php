@@ -34,6 +34,7 @@ final class GetBacklogIssuesQuery
                 'status_id' => $issue->status_id,
                 'priority_id' => $issue->priority_id,
                 'issue_type_id' => $issue->issue_type_id,
+                'work_type' => $issue->work_type ?: 'project',
                 'start_date' => $issue->start_date ? Carbon::parse($issue->start_date)->format('Y-m-d') : null,
                 'due_date' => $issue->due_date ? Carbon::parse($issue->due_date)->format('Y-m-d') : null,
                 'is_overdue' => $issue->due_date !== null

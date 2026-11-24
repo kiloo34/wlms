@@ -9,6 +9,7 @@ import {
     FolderKanban,
     Gauge,
     KeyRound,
+    PieChart,
     Settings,
     Shield,
     Ticket,
@@ -54,6 +55,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
     settings: Settings,
     key: KeyRound,
     shield: Shield,
+    reports: PieChart,
+    'pie-chart': PieChart,
 };
 
 export function AppSidebar() {
@@ -75,6 +78,12 @@ export function AppSidebar() {
             title: t('Dashboard Catalog'),
             href: '/dashboards',
             icon: Gauge,
+        },
+        // Laporan seluruh project + rekap owner; data otomatis dibatasi sesuai akses user.
+        {
+            title: t('Project Report'),
+            href: '/reports/projects',
+            icon: PieChart,
         },
     ];
 

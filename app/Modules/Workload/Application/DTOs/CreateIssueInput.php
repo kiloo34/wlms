@@ -20,5 +20,6 @@ final class CreateIssueInput
         public readonly ?string $startDate = null,
         public readonly ?string $dueDate = null,
         public readonly ?string $parentId = null,
+        public readonly string $workType = 'project',
     ) {}
 }

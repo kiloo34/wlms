@@ -15,5 +15,7 @@ final class CreateProjectInput
         public readonly ?string $leadId,
         public readonly string $actorUserId,
         public readonly ?string $priorityId = null,
+        public readonly ?string $startDate = null,
+        public readonly ?string $endDate = null,
     ) {}
 }

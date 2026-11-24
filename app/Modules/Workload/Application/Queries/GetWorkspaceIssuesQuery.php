@@ -93,7 +93,8 @@ final class GetWorkspaceIssuesQuery
         if (! empty($filters['search'])) {
             $query->where(function (Builder $q) use ($filters) {
                 $q->where('title', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('number', 'like', '%'.$filters['search'].'%');
+                    ->orWhere('number', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('description', 'like', '%'.$filters['search'].'%');
             });
         }
 

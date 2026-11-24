@@ -25,10 +25,14 @@ use App\Modules\Workload\Presentation\Http\Controllers\GetWorkspaceAnalyticsCont
 use App\Modules\Workload\Presentation\Http\Controllers\GetWorkspaceAvailabilityController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetWorkspaceIssuesController;
 use App\Modules\Workload\Presentation\Http\Controllers\GetWorkspacesController;
+use App\Modules\Workload\Presentation\Http\Controllers\GlobalSearchController;
 use App\Modules\Workload\Presentation\Http\Controllers\IssueController;
 use App\Modules\Workload\Presentation\Http\Controllers\IssueLinkController;
 use App\Modules\Workload\Presentation\Http\Controllers\LogWorkController;
+use App\Modules\Workload\Presentation\Http\Controllers\PeopleDirectoryController;
 use App\Modules\Workload\Presentation\Http\Controllers\ProjectActivityController;
+use App\Modules\Workload\Presentation\Http\Controllers\ProjectReportController;
+use App\Modules\Workload\Presentation\Http\Controllers\ReminderSettingsController;
 use App\Modules\Workload\Presentation\Http\Controllers\StartSprintController;
 use App\Modules\Workload\Presentation\Http\Controllers\StatusController;
 use App\Modules\Workload\Presentation\Http\Controllers\TransitionIssueController;
@@ -44,6 +48,19 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum'])->prefix('settings')->group(function () {
     Route::get('/workload', [WorkloadSettingsController::class, 'index']);
     Route::put('/workload', [WorkloadSettingsController::class, 'update']);
+
+    // Jadwal pengingat per tipe pekerjaan: milik user & default organisasi.
+    Route::get('/reminders', [ReminderSettingsController::class, 'show']);
+    Route::put('/reminders', [ReminderSettingsController::class, 'update']);
+    Route::delete('/reminders', [ReminderSettingsController::class, 'reset']);
+    Route::put('/reminders/default', [ReminderSettingsController::class, 'updateDefault']);
+});
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/search', GlobalSearchController::class);
+    Route::get('/people', PeopleDirectoryController::class);
+    Route::get('/reports/projects', [ProjectReportController::class, 'index']);
+    Route::get('/reports/owners/{ownerId}', [ProjectReportController::class, 'owner'])->whereNumber('ownerId');
 });
 
 Route::middleware(['auth:sanctum'])->prefix('workspaces')->group(function () {

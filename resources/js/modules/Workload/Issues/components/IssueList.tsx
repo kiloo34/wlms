@@ -20,6 +20,7 @@ import { PriorityBadge } from '@/components/PriorityBadge';
 import { Badge } from '@/components/ui/badge';
 import { useTranslate } from '@/hooks/useTranslate';
 import { useIconSize } from '@/hooks/use-appearance';
+import { WorkTypeBadge } from '../../shared/WorkTypeBadge';
 
 interface IssueListProps {
     issues: Issue[];
@@ -121,6 +122,11 @@ export const IssueList: React.FC<IssueListProps> = ({
                                 <th
                                     className={`${headerPaddingClass} text-muted-foreground text-left font-medium tracking-wider uppercase`}
                                 >
+                                    {t('Description')}
+                                </th>
+                                <th
+                                    className={`${headerPaddingClass} text-muted-foreground text-left font-medium tracking-wider uppercase`}
+                                >
                                     {t('Type')}
                                 </th>
                                 <th
@@ -136,7 +142,7 @@ export const IssueList: React.FC<IssueListProps> = ({
                                 <th
                                     className={`${headerPaddingClass} text-muted-foreground text-left font-medium tracking-wider uppercase`}
                                 >
-                                    {t('Assignee')}
+                                    {t('Task Owner (PIC)')}
                                 </th>
                                 <th
                                     className={`${headerPaddingClass} text-muted-foreground text-left font-medium tracking-wider uppercase`}
@@ -172,6 +178,23 @@ export const IssueList: React.FC<IssueListProps> = ({
                                             <span className="ml-2 inline-flex items-center gap-1 align-middle">
                                                 <IssueFlags issue={issue} />
                                             </span>
+                                            <div className="mt-1">
+                                                <WorkTypeBadge
+                                                    value={issue.work_type}
+                                                />
+                                            </div>
+                                        </td>
+                                        <td
+                                            className={`${cellPaddingClass} text-muted-foreground max-w-[280px] min-w-[180px] text-xs`}
+                                            title={issue.description ?? ''}
+                                        >
+                                            {issue.description ? (
+                                                <p className="line-clamp-2 whitespace-pre-line">
+                                                    {issue.description}
+                                                </p>
+                                            ) : (
+                                                '-'
+                                            )}
                                         </td>
                                         <td
                                             className={`${cellPaddingClass} text-muted-foreground whitespace-nowrap`}
@@ -228,10 +251,11 @@ export const IssueList: React.FC<IssueListProps> = ({
                                         <td
                                             className={`${cellPaddingClass} text-muted-foreground whitespace-nowrap`}
                                         >
-                                            {getName(
-                                                assignees,
-                                                issue.assignee_id,
-                                            )}
+                                            {issue.assignee?.name ||
+                                                getName(
+                                                    assignees,
+                                                    issue.assignee_id,
+                                                )}
                                         </td>
                                         <td
                                             className={`${cellPaddingClass} whitespace-nowrap`}

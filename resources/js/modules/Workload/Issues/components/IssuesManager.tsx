@@ -78,6 +78,25 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+
+    // Deep link dari pencarian global / laporan: /projects/{id}?issue={issueId}
+    const [deepLinkIssueId, setDeepLinkIssueId] = useState<string | null>(() =>
+        typeof window !== 'undefined'
+            ? new URLSearchParams(window.location.search).get('issue')
+            : null,
+    );
+    React.useEffect(() => {
+        if (!deepLinkIssueId || isLoading) return;
+        const target = issues.find((i) => String(i.id) === deepLinkIssueId);
+        if (target) {
+            setSelectedIssue(target);
+            setIsDialogOpen(true);
+        }
+        setDeepLinkIssueId(null);
+        const url = new URL(window.location.href);
+        url.searchParams.delete('issue');
+        window.history.replaceState(window.history.state, '', url.toString());
+    }, [deepLinkIssueId, isLoading, issues]);
     const { url, props } = usePage<any>();
     const activeProject = props.project;
     const [viewMode, setViewModeState] = useState<
@@ -150,10 +169,12 @@ export const IssuesManager: React.FC<IssuesManagerProps> = ({
     });
 
     const filteredIssues = issues.filter((issue) => {
-        const matchesSearch = issue.title
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase());
-        return matchesSearch;
+        // Cari di judul, kode, dan deskripsi/catatan tugas.
+        const query = searchQuery.trim().toLowerCase();
+        if (query === '') return true;
+        return [issue.title, issue.key, issue.description]
+            .filter(Boolean)
+            .some((text) => String(text).toLowerCase().includes(query));
     });
 
     // Board-specific filtering (assignee + priority + type on top of search)

@@ -70,7 +70,13 @@ final class GetProjectsUseCase
 
         $results = $query->get();
 
-        return $results->map(function ($row) {
+        // Nama owner (lead) diambil sekali untuk semua project di halaman ini.
+        $leadIds = $results->pluck('lead_id')->filter()->unique()->values()->all();
+        $leadNames = $leadIds !== []
+            ? DB::table('users')->whereIn('id', $leadIds)->pluck('name', 'id')->all()
+            : [];
+
+        return $results->map(function ($row) use ($leadNames) {
             return new ProjectOutput(
                 id: (string) $row->id,
                 workspaceId: (string) $row->workspace_id,
@@ -84,6 +90,7 @@ final class GetProjectsUseCase
                 startDate: isset($row->start_date) && $row->start_date ? substr((string) $row->start_date, 0, 10) : null,
                 endDate: isset($row->end_date) && $row->end_date ? substr((string) $row->end_date, 0, 10) : null,
                 leadId: isset($row->lead_id) ? (string) $row->lead_id : null,
+                leadName: isset($row->lead_id) && isset($leadNames[$row->lead_id]) ? (string) $leadNames[$row->lead_id] : null,
             );
         })->all();
     }

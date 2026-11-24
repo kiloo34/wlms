@@ -6,9 +6,11 @@ namespace App\Modules\Workload\Presentation\Http\Requests;
 
 use App\Modules\Identity\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Modules\Workload\Application\Services\WorkloadAccessChecker;
+use App\Modules\Workload\Domain\Enums\WorkType;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 final class UpdateIssueHttpRequest extends FormRequest
 {
@@ -57,6 +59,8 @@ final class UpdateIssueHttpRequest extends FormRequest
             'remaining_estimate_seconds' => ['nullable', 'integer', 'min:0'],
             'start_date' => ['nullable', 'date'],
             'due_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'duration_days' => ['nullable', 'integer', 'min:1', 'max:3650'],
+            'work_type' => ['sometimes', 'nullable', 'string', Rule::in(WorkType::values())],
             'parent_id' => ['nullable', 'uuid', new ValidParentIssue((string) (IssueModel::find((string) $this->route('id'))?->project_id), (string) $this->route('id'))],
         ];
     }

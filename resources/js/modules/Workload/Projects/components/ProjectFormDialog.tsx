@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import { Project, CreateProjectPayload, UpdateProjectPayload } from '../types';
 import {
     Dialog,
@@ -15,6 +16,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Combobox } from '@/components/ui/combobox';
 import { useWorkflows } from '../../Workflows/hooks/useWorkflows';
 import { useTranslate } from '@/hooks/useTranslate';
+import { personLabel, usePeople } from '@/hooks/usePeople';
+import { ScheduleFields } from '../../shared/ScheduleFields';
 
 interface ProjectFormDialogProps {
     open: boolean;
@@ -37,15 +40,23 @@ export function ProjectFormDialog({
 }: ProjectFormDialogProps) {
     const { t } = useTranslate();
     const isEditing = !!project;
+    const { auth } = usePage().props as unknown as {
+        auth?: { user?: { id?: number | string } };
+    };
+    const currentUserId = auth?.user?.id;
 
     const [key, setKey] = useState('');
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [workflowId, setWorkflowId] = useState<string>('none');
     const [priorityId, setPriorityId] = useState<string>('none');
+    const [leadId, setLeadId] = useState<string>('none');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     const { data: workflows = [], isLoading: isLoadingWorkflows } =
         useWorkflows();
+    const { data: people = [], isLoading: isLoadingPeople } = usePeople(open);
 
     useEffect(() => {
         if (open) {
@@ -54,8 +65,17 @@ export function ProjectFormDialog({
             setDescription(project?.description || '');
             setWorkflowId(project?.workflow_id || 'none');
             setPriorityId(project?.priority_id || 'none');
+            // Project baru: owner default = pembuat project (sama seperti backend).
+            const initialLead = project ? project.lead_id : currentUserId;
+            setLeadId(
+                initialLead !== undefined && initialLead !== null
+                    ? String(initialLead)
+                    : 'none',
+            );
+            setStartDate(project?.start_date?.slice(0, 10) || '');
+            setEndDate(project?.end_date?.slice(0, 10) || '');
         }
-    }, [open, project]);
+    }, [open, project, currentUserId]);
 
     const workflowOptions = [
         { value: 'none', label: 'Default Workflow' },
@@ -65,6 +85,23 @@ export function ProjectFormDialog({
         { value: 'none', label: 'No Priority' },
         ...priorities.map((p) => ({ value: p.id, label: p.name })),
     ];
+    const ownerOptions = [
+        { value: 'none', label: t('No owner') },
+        ...people.map((person) => ({
+            value: String(person.id),
+            label: personLabel(person),
+        })),
+    ];
+    // Owner lama yang sudah nonaktif tetap tampil agar tidak hilang diam-diam.
+    if (
+        leadId !== 'none' &&
+        !ownerOptions.some((option) => option.value === leadId)
+    ) {
+        ownerOptions.push({
+            value: leadId,
+            label: project?.lead?.name ?? `#${leadId}`,
+        });
+    }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,29 +110,26 @@ export function ProjectFormDialog({
             workflowId === 'none' ? undefined : workflowId;
         const payloadPriorityId =
             priorityId === 'none' ? undefined : priorityId;
+        const shared = {
+            name,
+            description,
+            workflow_id: payloadWorkflowId,
+            priority_id: payloadPriorityId,
+            lead_id: leadId === 'none' ? null : leadId,
+            start_date: startDate || null,
+            end_date: endDate || null,
+        };
 
         if (isEditing) {
-            onSubmit({
-                name,
-                description,
-                workflow_id: payloadWorkflowId,
-                priority_id: payloadPriorityId,
-            });
+            onSubmit(shared);
         } else {
-            onSubmit({
-                workspace_id: workspaceId,
-                key,
-                name,
-                description,
-                workflow_id: payloadWorkflowId,
-                priority_id: payloadPriorityId,
-            });
+            onSubmit({ ...shared, workspace_id: workspaceId, key });
         }
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[560px]">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>
@@ -142,8 +176,37 @@ export function ProjectFormDialog({
                             />
                         </div>
                         <div className="grid gap-2">
+                            <Label htmlFor="project_owner">
+                                {t('Project Owner')}
+                            </Label>
+                            <Combobox
+                                id="project_owner"
+                                options={ownerOptions}
+                                value={leadId}
+                                onChange={setLeadId}
+                                disabled={isPending || isLoadingPeople}
+                                placeholder={t('Search person...')}
+                                emptyText={t('No user found.')}
+                            />
+                            <p className="text-muted-foreground text-[0.8rem]">
+                                {t(
+                                    'The person responsible for this project, chosen from registered users.',
+                                )}
+                            </p>
+                        </div>
+                        <ScheduleFields
+                            idPrefix="project"
+                            startDate={startDate}
+                            endDate={endDate}
+                            onChange={(next) => {
+                                setStartDate(next.startDate);
+                                setEndDate(next.endDate);
+                            }}
+                            disabled={isPending}
+                        />
+                        <div className="grid gap-2">
                             <Label htmlFor="description">
-                                Description (Optional)
+                                {t('Description & notes')}
                             </Label>
                             <Textarea
                                 id="description"
@@ -152,6 +215,7 @@ export function ProjectFormDialog({
                                 placeholder={t(
                                     'Describe the purpose of this project...',
                                 )}
+                                rows={4}
                                 disabled={isPending}
                             />
                         </div>

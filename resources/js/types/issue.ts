@@ -23,6 +23,11 @@ export interface Issue {
     start_date?: string | null;
     due_date?: string | null;
     is_overdue?: boolean;
+    duration_days?: number | null;
+    remaining_days?: number | null;
+    /** Tipe pekerjaan: daily | weekly | monthly | annually | incidental | project */
+    work_type?: string | null;
+    work_type_label?: string | null;
     key?: string;
     parent_id?: string | null;
     subtasks_count?: number;

@@ -42,6 +42,7 @@ final class Issue
         private ?string $startDate = null,
         private ?string $dueDate = null,
         private ?string $parentId = null,
+        private string $workType = 'project',
     ) {}
 
     public static function create(
@@ -59,6 +60,7 @@ final class Issue
         ?string $startDate = null,
         ?string $dueDate = null,
         ?string $parentId = null,
+        string $workType = 'project',
     ): self {
         $issue = new self(
             $id,
@@ -79,6 +81,7 @@ final class Issue
             $startDate,
             $dueDate,
             $parentId,
+            $workType,
         );
 
         $issue->recordEvent(new IssueCreated(
@@ -231,5 +234,10 @@ final class Issue
     public function getParentId(): ?string
     {
         return $this->parentId;
+    }
+
+    public function getWorkType(): string
+    {
+        return $this->workType;
     }
 }

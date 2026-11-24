@@ -35,6 +35,10 @@ final class UpdateProjectHttpRequest extends FormRequest
             'lead_id' => ['nullable', 'exists:users,id'],
             'workflow_id' => ['nullable', 'uuid'],
             'priority_id' => ['nullable', 'uuid', 'exists:priorities,id'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            // Durasi (hari kalender, inklusif). Dipakai bila end_date kosong.
+            'duration_days' => ['nullable', 'integer', 'min:1', 'max:3650'],
         ];
     }
 

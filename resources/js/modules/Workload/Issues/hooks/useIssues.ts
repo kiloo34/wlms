@@ -15,6 +15,7 @@ export interface CreateIssuePayload {
     start_date?: string | null;
     due_date?: string | null;
     parent_id?: string | null;
+    work_type?: string | null;
 }
 
 export interface UpdateIssuePayload extends Partial<CreateIssuePayload> {

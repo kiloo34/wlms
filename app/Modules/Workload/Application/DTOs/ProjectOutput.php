@@ -21,6 +21,7 @@ final class ProjectOutput
         public readonly ?string $startDate = null,
         public readonly ?string $endDate = null,
         public readonly ?string $leadId = null,
+        public readonly ?string $leadName = null,
     ) {}
 
     public static function fromDomain(Project $project): self
@@ -35,8 +36,8 @@ final class ProjectOutput
             0,
             0,
             $project->getDescription(),
-            null,
-            null,
+            $project->getStartDate(),
+            $project->getEndDate(),
             $project->getLeadId(),
         );
     }

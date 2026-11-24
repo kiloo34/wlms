@@ -26,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
 
+    // Jadwal pengingat pekerjaan (per user; admin juga bisa mengubah default organisasi).
+    Route::inertia('settings/reminders', 'settings/reminders')->name('reminders.edit');
+
     // RBAC Frontend UI (Khusus Superadmin)
     Route::get('settings/rbac', fn () => inertia('settings/rbac'))->middleware('can:manage-rbac')->name('rbac.index');
 

@@ -8,9 +8,11 @@ import {
     AlertTriangle,
     Clock,
     AtSign,
+    BellRing,
 } from 'lucide-react';
+import { getWorkType } from '@/modules/Workload/shared/workTypes';
 import { useNotifications, Notification } from '@/hooks/useNotifications';
-import { usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useTranslate } from '@/hooks/useTranslate';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +39,8 @@ export const NotificationBell = () => {
     };
 
     const getIcon = (type: string) => {
+        if (type.startsWith('reminder.'))
+            return <BellRing className="h-4 w-4 text-amber-500" />;
         if (type === 'issue.overdue')
             return <AlertTriangle className="text-destructive h-4 w-4" />;
         if (type === 'issue.due_soon')
@@ -56,6 +60,40 @@ export const NotificationBell = () => {
 
     const getMessage = (notification: Notification) => {
         const { type, data } = notification;
+        const typeLabel = t(getWorkType(data?.work_type).label);
+        if (type === 'reminder.work_type')
+            return t('Reminder (:type): you have :count open tasks', {
+                type: typeLabel,
+                count: data?.count ?? 0,
+            });
+        if (type === 'reminder.deadline')
+            return Number(data?.days_left) === 0
+                ? t('Reminder (:type): [:number] :title is due today', {
+                      type: typeLabel,
+                      number: data?.issue_number,
+                      title: data?.title ?? '',
+                  })
+                : t('Reminder (:type): [:number] :title is due in :days days', {
+                      type: typeLabel,
+                      number: data?.issue_number,
+                      title: data?.title ?? '',
+                      days: data?.days_left ?? '',
+                  });
+        if (type === 'reminder.start')
+            return t('Reminder (:type): [:number] :title starts today', {
+                type: typeLabel,
+                number: data?.issue_number,
+                title: data?.title ?? '',
+            });
+        if (type === 'reminder.project_deadline')
+            return Number(data?.days_left) === 0
+                ? t('Project :name ends today', {
+                      name: data?.project_name ?? '',
+                  })
+                : t('Project :name ends in :days days', {
+                      name: data?.project_name ?? '',
+                      days: data?.days_left ?? '',
+                  });
         if (type === 'issue.overdue')
             return `Overdue: [${data?.issue_number}] ${data?.title || ''} (Due: ${data?.due_date})`;
         if (type === 'issue.due_soon')
@@ -75,6 +113,19 @@ export const NotificationBell = () => {
                 state: data?.new_state,
             });
         return t('New notification');
+    };
+
+    // Notifikasi yang terkait project/tugas bisa diklik untuk langsung membukanya.
+    const openTarget = (notification: Notification) => {
+        const projectId = notification.data?.project_id;
+        if (!projectId) return;
+        const issueId = notification.data?.issue_id;
+        setOpen(false);
+        router.visit(
+            issueId
+                ? `/projects/${projectId}?issue=${issueId}`
+                : `/projects/${projectId}`,
+        );
     };
 
     return (
@@ -135,7 +186,22 @@ export const NotificationBell = () => {
                             {notifications.map((notification) => (
                                 <div
                                     key={notification.id}
-                                    className={`hover:bg-muted/50 flex gap-3 p-4 transition-colors ${!notification.read_at ? 'bg-muted/20' : ''}`}
+                                    role={
+                                        notification.data?.project_id
+                                            ? 'button'
+                                            : undefined
+                                    }
+                                    tabIndex={
+                                        notification.data?.project_id
+                                            ? 0
+                                            : undefined
+                                    }
+                                    onClick={() => openTarget(notification)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter')
+                                            openTarget(notification);
+                                    }}
+                                    className={`hover:bg-muted/50 flex gap-3 p-4 transition-colors ${!notification.read_at ? 'bg-muted/20' : ''} ${notification.data?.project_id ? 'cursor-pointer' : ''}`}
                                 >
                                     <div className="mt-0.5">
                                         {getIcon(notification.type)}

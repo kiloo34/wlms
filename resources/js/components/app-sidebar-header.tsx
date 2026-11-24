@@ -4,6 +4,7 @@ import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import { NotificationBell } from '@/components/NotificationBell';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { GlobalSearch } from '@/components/GlobalSearch';
 import { useTranslate } from '@/hooks/useTranslate';
 import { useChangeLocale } from '@/hooks/useChangeLocale';
 
@@ -22,6 +23,7 @@ export function AppSidebarHeader({
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
             <div className="flex items-center">
+                <GlobalSearch />
                 <LanguageSwitcher locale={locale} onChange={changeLocale} />
                 <ThemeToggle />
                 <NotificationBell />

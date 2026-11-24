@@ -28,6 +28,9 @@ export const useNotifications = (userId?: string) => {
             return data;
         },
         enabled: !!userId,
+        // Pengingat terjadwal (mis. jam 08:00) juga dievaluasi saat endpoint ini
+        // dipanggil, jadi cek berkala agar tetap muncul walau tab dibiarkan terbuka.
+        refetchInterval: 5 * 60 * 1000,
     });
 
     const markAllReadMutation = useMutation({
@@ -69,6 +72,11 @@ export const useNotifications = (userId?: string) => {
                 );
             } else if (type === 'issue.transitioned') {
                 toast(`Issue status changed`);
+            } else if (type?.startsWith('reminder.')) {
+                toast('New work reminder', {
+                    description:
+                        payloadData?.title || payloadData?.project_name,
+                });
             } else if (type === 'sprint.state_changed') {
                 toast(
                     `Sprint ${payloadData?.sprint_name} is now ${payloadData?.new_state}`,

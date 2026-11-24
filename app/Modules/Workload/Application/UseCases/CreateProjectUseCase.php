@@ -41,6 +41,8 @@ final class CreateProjectUseCase
             $input->leadId,
             $input->actorUserId,
             $input->priorityId ? new PriorityId($input->priorityId) : null,
+            $input->startDate,
+            $input->endDate,
         );
 
         $this->repository->save($project);

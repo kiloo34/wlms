@@ -7,11 +7,14 @@ namespace App\Modules\Notification\Presentation\Http\Controllers;
 use App\Modules\Notification\Infrastructure\Persistence\Eloquent\Models\NotificationModel;
 use App\Modules\Workload\Infrastructure\Config\WorkloadSettings;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
+use App\Modules\Workload\Infrastructure\Reminders\WorkReminderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 final class GetNotificationsController
 {
@@ -20,6 +23,7 @@ final class GetNotificationsController
         $userId = (int) $request->user()->id;
 
         $this->triggerLazySlaNotifications($userId);
+        $this->triggerLazyWorkReminders($userId);
 
         /** @var LengthAwarePaginator<int, NotificationModel> $paginator */
         $paginator = NotificationModel::where('user_id', $userId)
@@ -40,6 +44,24 @@ final class GetNotificationsController
             ],
             'unread_count' => $unreadCount,
         ]);
+    }
+
+    /**
+     * Pengingat per tipe pekerjaan (harian/mingguan/...). Scheduler `workload:send-reminders`
+     * adalah jalur utama; ini cadangan agar pengingat tetap muncul walau cron tidak berjalan.
+     * Aman dipanggil berulang karena setiap pengingat dicatat di work_reminder_logs.
+     */
+    private function triggerLazyWorkReminders(int $userId): void
+    {
+        if (! Cache::add("work_reminders_lazy:{$userId}", true, now()->addMinutes(10))) {
+            return;
+        }
+
+        try {
+            app(WorkReminderService::class)->runForUser($userId);
+        } catch (Throwable $e) {
+            Log::warning('Lazy work reminder failed', ['user_id' => $userId, 'error' => $e->getMessage()]);
+        }
     }
 
     /**

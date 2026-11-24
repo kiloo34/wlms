@@ -8,7 +8,10 @@ import {
     LayoutGrid,
     List,
     Calendar,
+    UserCircle2,
 } from 'lucide-react';
+import { RemainingDaysBadge } from '../../shared/RemainingDaysBadge';
+import { remainingDays } from '../../shared/schedule';
 import { Project } from '../types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -133,10 +136,14 @@ export function ProjectList({
     };
 
     const filteredProjects = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
         return projects.filter((p) => {
+            // Cari di nama, kode, deskripsi/catatan, dan nama owner.
             const matchesSearch =
-                p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                p.key.toLowerCase().includes(searchQuery.toLowerCase());
+                q === '' ||
+                [p.name, p.key, p.description, p.lead?.name]
+                    .filter(Boolean)
+                    .some((text) => String(text).toLowerCase().includes(q));
             const matchesPriority =
                 priorityFilter === 'all' ||
                 p.priority_id === priorityFilter ||
@@ -378,10 +385,24 @@ export function ProjectList({
                                                 {project.description}
                                             </p>
                                         )}
+                                        <div
+                                            className={`text-muted-foreground flex items-center gap-1.5 ${iconSize === 'sm' ? 'mt-1.5 text-[11px]' : 'mt-2.5 text-xs'}`}
+                                        >
+                                            <UserCircle2
+                                                className={`${iconSize === 'sm' ? 'h-3 w-3' : 'h-3.5 w-3.5'}`}
+                                            />
+                                            <span className="truncate">
+                                                {t('Owner')}:{' '}
+                                                <span className="text-foreground font-medium">
+                                                    {project.lead?.name ||
+                                                        t('No owner')}
+                                                </span>
+                                            </span>
+                                        </div>
                                         {(project.start_date ||
                                             project.end_date) && (
                                             <div
-                                                className={`text-muted-foreground flex items-center gap-1.5 ${iconSize === 'sm' ? 'mt-1.5 text-[11px]' : 'mt-2.5 text-xs'}`}
+                                                className={`text-muted-foreground flex flex-wrap items-center gap-1.5 ${iconSize === 'sm' ? 'mt-1 text-[11px]' : 'mt-1.5 text-xs'}`}
                                             >
                                                 <Calendar
                                                     className={`${iconSize === 'sm' ? 'h-3 w-3' : 'h-3.5 w-3.5'}`}
@@ -391,7 +412,21 @@ export function ProjectList({
                                                         '...'}{' '}
                                                     →{' '}
                                                     {project.end_date || '...'}
+                                                    {project.duration_days
+                                                        ? ` (${t(':days days', { days: project.duration_days })})`
+                                                        : ''}
                                                 </span>
+                                                {project.end_date && (
+                                                    <RemainingDaysBadge
+                                                        days={remainingDays(
+                                                            project.end_date,
+                                                        )}
+                                                        done={
+                                                            total > 0 &&
+                                                            completed === total
+                                                        }
+                                                    />
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -434,13 +469,16 @@ export function ProjectList({
                                 <TableHead className="w-[100px]">
                                     {t('Key')}
                                 </TableHead>
+                                <TableHead className="w-[160px]">
+                                    {t('Owner')}
+                                </TableHead>
                                 <TableHead className="w-[140px]">
                                     {t('Priority')}
                                 </TableHead>
                                 <TableHead className="w-[200px]">
                                     {t('Progress')}
                                 </TableHead>
-                                <TableHead className="w-[180px]">
+                                <TableHead className="w-[220px]">
                                     {t('Timeline')}
                                 </TableHead>
                                 {hasAnyRowAction && (
@@ -509,6 +547,13 @@ export function ProjectList({
                                         <TableCell className="font-mono text-xs font-semibold">
                                             {project.key}
                                         </TableCell>
+                                        <TableCell className="text-xs">
+                                            {project.lead?.name || (
+                                                <span className="text-muted-foreground">
+                                                    {t('No owner')}
+                                                </span>
+                                            )}
+                                        </TableCell>
                                         <TableCell>
                                             {project.priority_id && priority ? (
                                                 <PriorityBadge
@@ -541,12 +586,29 @@ export function ProjectList({
                                         <TableCell className="text-muted-foreground text-xs">
                                             {project.start_date ||
                                             project.end_date ? (
-                                                <span>
-                                                    {project.start_date ||
-                                                        '...'}{' '}
-                                                    →{' '}
-                                                    {project.end_date || '...'}
-                                                </span>
+                                                <div className="space-y-1">
+                                                    <span>
+                                                        {project.start_date ||
+                                                            '...'}{' '}
+                                                        →{' '}
+                                                        {project.end_date ||
+                                                            '...'}
+                                                    </span>
+                                                    {project.end_date && (
+                                                        <div>
+                                                            <RemainingDaysBadge
+                                                                days={remainingDays(
+                                                                    project.end_date,
+                                                                )}
+                                                                done={
+                                                                    total > 0 &&
+                                                                    completed ===
+                                                                        total
+                                                                }
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
                                             ) : (
                                                 <span className="text-muted-foreground/60">
                                                     -

@@ -64,6 +64,7 @@ final class CreateIssueUseCase
                 $input->startDate,
                 $input->dueDate,
                 $input->parentId,
+                $input->workType,
             );
 
             if ($input->assigneeId !== null && $input->assigneeId !== '') {

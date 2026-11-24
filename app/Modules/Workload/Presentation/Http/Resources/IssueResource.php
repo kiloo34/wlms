@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Workload\Presentation\Http\Resources;
 
+use App\Modules\Workload\Application\Services\WorkSchedule;
+use App\Modules\Workload\Domain\Enums\WorkType;
+use App\Modules\Workload\Infrastructure\Config\ReminderSettings;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\IssueModel;
 use App\Modules\Workload\Infrastructure\Persistence\Eloquent\Models\StatusModel;
 use Illuminate\Http\Request;
@@ -47,6 +50,10 @@ class IssueResource extends JsonResource
             'start_date' => $this->start_date ? Carbon::parse($this->start_date)->format('Y-m-d') : null,
             'due_date' => $this->due_date ? Carbon::parse($this->due_date)->format('Y-m-d') : null,
             'is_overdue' => $isOverdue,
+            'duration_days' => WorkSchedule::durationDays($this->start_date, $this->due_date),
+            'remaining_days' => WorkSchedule::remainingDays($this->due_date, ReminderSettings::today()),
+            'work_type' => $this->work_type ?: WorkType::DEFAULT->value,
+            'work_type_label' => WorkType::labelFor($this->work_type),
             'created_at' => $this->created_at,
 
             'assignee' => $this->whenLoaded('assignee', function () {

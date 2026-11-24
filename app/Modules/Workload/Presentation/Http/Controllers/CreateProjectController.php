@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Workload\Presentation\Http\Controllers;
 
 use App\Modules\Workload\Application\DTOs\CreateProjectInput;
+use App\Modules\Workload\Application\Services\WorkSchedule;
 use App\Modules\Workload\Application\UseCases\CreateProjectUseCase;
 use App\Modules\Workload\Presentation\Http\Requests\CreateProjectHttpRequest;
 use Illuminate\Http\JsonResponse;
@@ -23,6 +24,10 @@ final class CreateProjectController
             ? (string) $validated['lead_id']
             : $request->getActorId();
 
+        $startDate = WorkSchedule::toDateString($validated['start_date'] ?? null);
+        $endDate = WorkSchedule::toDateString($validated['end_date'] ?? null)
+            ?? WorkSchedule::endDateFromDuration($startDate, isset($validated['duration_days']) ? (int) $validated['duration_days'] : null);
+
         $input = new CreateProjectInput(
             projectId: $request->getIdempotencyKey(),
             workspaceId: $validated['workspace_id'],
@@ -31,7 +36,9 @@ final class CreateProjectController
             description: $validated['description'] ?? null,
             leadId: $leadId,
             actorUserId: $request->getActorId(),
-            priorityId: $validated['priority_id'] ?? null
+            priorityId: $validated['priority_id'] ?? null,
+            startDate: $startDate,
+            endDate: $endDate,
         );
 
         $output = $this->useCase->execute($input);
@@ -45,6 +52,10 @@ final class CreateProjectController
                 'status' => $output->status,
                 'lead_id' => $output->leadId !== null ? (is_numeric($output->leadId) ? (int) $output->leadId : $output->leadId) : null,
                 'priority_id' => $output->priorityId,
+                'description' => $output->description,
+                'start_date' => $output->startDate,
+                'end_date' => $output->endDate,
+                'duration_days' => WorkSchedule::durationDays($output->startDate, $output->endDate),
             ],
         ], 201);
     }

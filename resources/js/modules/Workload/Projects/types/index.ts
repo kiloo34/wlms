@@ -3,6 +3,8 @@ export interface Project {
     workspace_id: string;
     workflow_id?: string | null;
     lead_id?: number | string | null;
+    /** Owner project (diambil dari lead_id). */
+    lead?: { id: number | string; name: string | null } | null;
     key: string;
     name: string;
     description: string | null;
@@ -11,6 +13,8 @@ export interface Project {
     completed_issues_count?: number;
     start_date?: string | null;
     end_date?: string | null;
+    duration_days?: number | null;
+    remaining_days?: number | null;
     settings?: {
         enable_sprints?: boolean;
         [key: string]: unknown;
@@ -26,6 +30,9 @@ export interface CreateProjectPayload {
     key: string;
     name: string;
     description?: string;
+    lead_id?: number | string | null;
+    start_date?: string | null;
+    end_date?: string | null;
 }
 
 export interface UpdateProjectPayload {
@@ -33,6 +40,9 @@ export interface UpdateProjectPayload {
     priority_id?: string;
     name?: string;
     description?: string;
+    lead_id?: number | string | null;
+    start_date?: string | null;
+    end_date?: string | null;
 }
 
 export interface ProjectResource {
