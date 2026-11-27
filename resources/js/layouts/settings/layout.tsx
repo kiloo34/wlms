@@ -22,7 +22,7 @@ import {
     BellRing,
 } from 'lucide-react';
 import type { NavItem } from '@/types';
-import { Card, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 // ─── Sidebar Nav Groups ────────────────────────────────────────────────────────
 type NavGroup = { title: string; items: NavItem[] };
@@ -97,58 +97,65 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 
     return (
         <div className="min-h-screen pb-12">
-            <div className="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
                 {/* Page header */}
-                <div className="space-y-0.5">
-                    <Card className="p-6">
-                        <h2 className="text-foreground text-2xl font-bold tracking-tight">
-                            Settings
-                        </h2>
-                        <p className="text-muted-foreground">
-                            Manage your account settings and set e-mail
-                            preferences.
-                        </p>
-                    </Card>
-                </div>
+                <Card className="gap-1 p-5 sm:p-6">
+                    <h2 className="text-foreground text-2xl font-bold tracking-tight">
+                        Settings
+                    </h2>
+                    <p className="text-muted-foreground text-sm sm:text-base">
+                        Manage your account settings and set e-mail preferences.
+                    </p>
+                </Card>
 
-                <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-16">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
                     {/* ── Sidebar ── */}
-                    <aside className="mx-4 overflow-x-auto pb-2 lg:mx-0 lg:w-64 lg:shrink-0 lg:pr-6 lg:pb-0">
-                        <nav className="flex flex-row space-x-4 px-4 lg:flex-col lg:space-y-1 lg:space-x-0 lg:px-0">
-                            <Card className="p-6">
+                    <aside className="w-full lg:w-64 lg:shrink-0">
+                        <Card className="p-5">
+                            <nav
+                                aria-label="Settings navigation"
+                                className="flex flex-col gap-4"
+                            >
                                 {navGroups.map((group, groupIdx) => (
                                     <div
-                                        key={groupIdx}
-                                        className="flex flex-shrink-0 flex-row space-x-2 lg:flex-col lg:space-x-0"
+                                        key={group.title}
+                                        className="space-y-2"
                                     >
-                                        <h4 className="text-foreground mb-1 hidden rounded-md px-2 py-1 text-sm font-semibold lg:block">
+                                        {groupIdx > 0 && (
+                                            <Separator className="mb-4" />
+                                        )}
+                                        <h4 className="text-muted-foreground px-2 text-xs font-semibold tracking-wider uppercase">
                                             {group.title}
                                         </h4>
-                                        {group.items.map((item, index) => {
-                                            const isActive =
-                                                isCurrentOrParentUrl(item.href);
-                                            return (
-                                                <Link
-                                                    key={`${toUrl(item.href)}-${index}`}
-                                                    href={item.href}
-                                                    className={cn(
-                                                        'hover:bg-muted hover:text-foreground flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors',
-                                                        isActive
-                                                            ? 'bg-muted text-foreground'
-                                                            : 'text-muted-foreground',
-                                                    )}
-                                                >
-                                                    {item.icon && (
-                                                        <item.icon className="h-4 w-4 shrink-0" />
-                                                    )}
-                                                    {item.title}
-                                                </Link>
-                                            );
-                                        })}
+                                        <div className="-mx-1 flex [scrollbar-width:thin] flex-nowrap gap-2 overflow-x-auto px-1 pt-1 pb-3 lg:mx-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:p-0">
+                                            {group.items.map((item, index) => {
+                                                const isActive =
+                                                    isCurrentOrParentUrl(
+                                                        item.href,
+                                                    );
+                                                return (
+                                                    <Link
+                                                        key={`${toUrl(item.href)}-${index}`}
+                                                        href={item.href}
+                                                        className={cn(
+                                                            'hover:bg-muted hover:text-foreground flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors',
+                                                            isActive
+                                                                ? 'bg-muted text-foreground'
+                                                                : 'text-muted-foreground',
+                                                        )}
+                                                    >
+                                                        {item.icon && (
+                                                            <item.icon className="h-4 w-4 shrink-0" />
+                                                        )}
+                                                        {item.title}
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 ))}
-                            </Card>
-                        </nav>
+                            </nav>
+                        </Card>
                     </aside>
 
                     {/* ── Main content ── */}
